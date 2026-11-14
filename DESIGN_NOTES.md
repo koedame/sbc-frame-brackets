@@ -80,10 +80,15 @@ A standard was designed with a frame-side part A (fixed shape) and a device-side
 The same front plate as the frame version, with a grip for DIN rail.
 
 - **The frame grip cannot be reused**: the rail lips are thin and shallow (1 mm), so arms coming straight off the back plate cannot get enough flex length (the strain is far too high).
-- **Leaf springs**: the hooks sit at the tips of cantilevered leaf springs that run along the rail (the print height direction). The leaf springs are separated from the back plate by a 0.5 mm gap and joined only by the 3 mm on the build plate side. They flex vertically (x), so they print in the same orientation.
+- **Leaf springs**: the hooks sit at the tips of cantilevered leaf springs that run along the rail (the print height direction). The leaf springs are cut free from the back plate by a gap on each side (0.5 mm inside, 2.0 mm outside) and joined only by the 3 mm on the build plate side. The band of back plate in front of each spring is cut free with it and moves with it. They flex vertically (x), so they print in the same orientation.
 - **Centre key**: sits in the rail channel (between the side walls) and takes the vertical load rigidly. Same idea as the key in the front slot of the frame version. The leaf springs only keep the bracket from coming off.
 - **How this differs from the "spring structure with a gap" avoided earlier**: what was avoided was a gap between the back plate and the frame, which caused play. The back plate of the DIN version sits directly on the rail front; the only gaps are beside the leaf springs.
-- A rough beam calculation gives about 1.7% strain in the leaf springs and about 4.8 N push-on force each.
+- **Outer gap 2.0 mm (2026-11-15).** The outer gap used to be 0.5 mm, but the barb tip has to move 0.75 mm (`DIN_HOOK` − `DIN_FIT`) to clear the lip edge. The band in front of the spring would have hit the back plate with the barb still 0.25 mm on the lip, so the bracket could neither be pushed on nor levered off (moving the spring and band 0.75 mm outwards overlapped the back plate by 9.75 mm3; the overlap starts at 0.5 mm).
+  - The spring bends rather than moving as a whole. The lip edge pushes it at the lowest point of the barb tip (z ≈ 1.8 mm, where the 45-degree underside ends), 6.8 mm above its root at the top of the front plate, and the spring stays straight above that point, so its top end (z = 8 mm) moves further than the barb tip: 1.77 mm by beam theory, 1.63 mm at the band and 1.75 mm at the spring behind it (where nothing is in the way) by a linear FEA of the spring and band. Hence 2.0 mm rather than 1.0 mm.
+  - The back plate beyond the outer gap stops the spring a little after the barb clears, so it cannot be bent much further than pushing on needs. The inner gap stays 0.5 mm: the spring moves away from it.
+  - `--check` now moves each spring, its barb and its band outwards by the beam estimate (`din_spring_travel()`) and reports the overlap with the rest of the bracket, which must be 0. This is on the safe side: the real spring moves less near its root.
+- **Strain and force (re-estimated 2026-11-15).** About 2.9% bending strain at the root of each leaf spring (cantilever 6.8 mm long to the lowest point of the barb tip, 1.2 mm thick, 0.75 mm deflection; the FEA gives 2.85%), about 13.5 N per spring to bend it that far (E = 2550 MPa) and about 11 N of push per spring before friction (the lead-in face of the barb is about 40 degrees from the push direction). The earlier estimate (1.7%, 4.8 N) took the load at the middle of the barb.
+  - The spring runs along the print height, so it bends across the layers. Bambu Lab's PETG Basic data sheet (V3.0) gives 2550 MPa and 35 MPa across the layers (Z), so it starts to yield at roughly 35 / 2550 ≈ 1.4%. At about twice that, the roots may whiten or take a set when the bracket is pushed on (section 9).
 
 ### History 5: shorter print time (version 1 → 2)
 
@@ -137,6 +142,7 @@ See the constants in `sbc_brackets.py` for the details.
 | Front plate and back plate thickness | 3 mm | `T` |
 | DIN: hook engagement / leaf spring thickness / clearance | 0.8 mm / 1.2 mm / 0.05 mm | `DIN_HOOK`, `DIN_LEAF_T`, `DIN_FIT` |
 | DIN: centre key half width / depth | 12.2 mm / 2.0 mm | `DIN_KEY_HALF`, `DIN_KEY_D` |
+| DIN: gap beside the leaf spring, inside / outside | 0.5 mm / 2.0 mm | `DIN_SLIT_IN`, `DIN_SLIT_OUT` |
 | Back plate to the rear edge of the board | 4 mm | `BOARD_Y0` |
 
 ## 6. Checks and caveats
@@ -145,6 +151,7 @@ See the constants in `sbc_brackets.py` for the details.
 - **Interference**: measure the volume of the intersection between the bracket and the frame, and between the bracket and the board. Use the board's official 3D model when there is one.
 - **Retention**: move the bracket 0.3 mm forward, up and down, and confirm it then overlaps the frame (i.e. it is hooked on).
 - **Upside down**: confirm zero interference in the flipped position too.
+- **DIN leaf spring travel**: `--check` moves each leaf spring outwards by as much as pushing on needs at its top end and reports the overlap with the rest of the bracket. It must be 0; otherwise the spring is stopped before the barb clears the lip (history 4).
 - **Print time**: `checks_time.py` is a home-made estimate, not a slicer measurement. Use it only to compare shapes. No slicer measurements have been taken yet.
 - **Regression check**: after changing the script, confirm the models you did not mean to change still have the same volume.
 
@@ -199,7 +206,8 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Reduce the `PiB` board holes from two sets (8 holes) to one set? Flipping the whole bracket upside down already lets one set face the ports either way
 - [ ] Make the VIM1S screw holes smaller for M2 (about 2.4 mm)? Currently 3 mm, which is loose for M2
 - [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2) on real parts
-- [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width)
+- [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width, and whether the roots of the leaf springs whiten or crack)
+- [ ] Lower the strain at the roots of the DIN leaf springs (about 2.9%, section 4 history 4)? Each way trades against how firmly the barbs hold: a shorter barb kept at the tip end of the spring, a shallower barb, or a thinner spring
 - [ ] Print `PiA`, and try `PiB` with a B-size board other than the Pi 4
 - [ ] Print `ROCK5B` and try it with a ROCK 5B / 5B+: an SSD in the M.2 slots under the board (not in the official models), and taking the ROCK 5B's microSD card in and out while mounted
 - [ ] ROCK 3C and ROCK64: check against their components if an official 3D model is published (only the outline, holes and microSD position were compared on the drawings)
@@ -229,8 +237,8 @@ The material used for the prints and which direction was loose (front-back, up-d
 
 | Model | DIN35 | DIN35 spacer |
 |---|---|---|
-| PiB | 12.783 | 13.316 |
-| PiA | 10.742 | 11.275 |
-| PiZero | 8.509 | 8.846 |
-| VIM1S | 12.916 | 13.322 |
-| ROCK5B | 18.194 | 18.850 |
+| PiB | 12.714 | 13.247 |
+| PiA | 10.673 | 11.207 |
+| PiZero | 8.440 | 8.777 |
+| VIM1S | 12.847 | 13.253 |
+| ROCK5B | 18.126 | 18.781 |

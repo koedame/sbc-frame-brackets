@@ -2,7 +2,8 @@
 
 Usage:
   python build_all.py                          # write every model as 3MF, STL and STEP, and viewer.html, to models/
-  python build_all.py --check                  # also report interference with the frame and board, unsupported areas and print time estimates
+  python build_all.py --check                  # also report interference with the frame and board, unsupported areas and print time estimates,
+                                               # and for DIN rail whether the leaf springs can bend far enough to push on
   python build_all.py --check --board-step vim1s-pcba-3d-v11.stp --board-step ROCK5B_v1.42_3D.step
                                                # check against the boards' official 3D models (not put in viewer.html)
   python build_all.py --coupons                # also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm)
@@ -111,6 +112,8 @@ def main():
                     unsup = cp.unsupported(s)[0]
                     m["min"] = ct.estimate(s)["min"]
                     line += f"  frame overlap {hit_frame:.2f}  {hit_board}  unsupported {unsup} mm2  ~{m['min']} min"
+                    if series == "DIN":
+                        line += f"  leaf spring travel {sb.din_spring_travel():.2f} mm overlap {sb.din_spring_hit(s):.2f} mm3"
                 print(line)
                 if not a.no_viewer:
                     m["mesh"] = mesh(s)

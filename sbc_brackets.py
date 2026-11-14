@@ -119,7 +119,10 @@ DIN_FIT = 0.05           # clearance to the lip edge (per side)
 DIN_HOOK = 0.8           # how far the hook reaches behind the lip
 DIN_LEAF_T = 1.2         # leaf spring thickness
 DIN_LEAF_BACK = 2.6      # how deep the leaf spring reaches behind the lip
-DIN_SLIT = 0.5           # gap that separates the leaf spring from the back plate
+DIN_SLIT_IN = 0.5        # gap on the inner side of the leaf spring (towards the key). Only separates it from the back plate
+DIN_SLIT_OUT = 2.0       # gap on the outer side. The band of back plate in front of the leaf spring moves outwards with it, and its top end
+                         # moves further than the barb tip (din_spring_travel()). The back plate beyond this gap stops the spring a little
+                         # after the barb clears the lip, so it cannot be bent much further than pushing on needs
 DIN_NOSE_H = 7.0         # length of the hook (barb) along the rail. Only on the tip side of the leaf spring
 DIN_KEY_HALF = 12.2      # half width of the key that sits in the centre channel (between the side walls, about 25 mm wide)
 DIN_KEY_D = 2.0
@@ -133,7 +136,7 @@ def grip_din(h=W):
     """Grip for DIN rail. Identical top and bottom.
     - The centre key sits in the hat's channel (between the side walls) and takes the vertical load
     - Leaf springs on both sides pass outside the lip edges, and the hooks at their tips catch behind the lips. Each leaf spring is a cantilever
-      running along the rail (the print height direction) and flexes vertically (x). It is separated from the back plate by DIN_SLIT and joined only by T on the build plate side"""
+      running along the rail (the print height direction) and flexes vertically (x). It is separated from the back plate by DIN_SLIT_IN and DIN_SLIT_OUT and joined only by T on the build plate side"""
     xl = din_leaf_x(); g = None
     k = DIN_KEY_HALF
     g = prism([(-k, 0.01), (k, 0.01), (k, -DIN_KEY_D + 0.5), (k - 0.5, -DIN_KEY_D), (-k + 0.5, -DIN_KEY_D), (-k, -DIN_KEY_D + 0.5)], h)
@@ -155,11 +158,33 @@ def din_slits(s, H):
     """Cut the back plate and the gusset free on both sides of each leaf spring (keeping T on the build plate side)"""
     xl = din_leaf_x()
     for sg in (1, -1):
-        for a, b in ((xl - DIN_SLIT, xl), (xl + DIN_LEAF_T, xl + DIN_LEAF_T + DIN_SLIT)):
+        for a, b in ((xl - DIN_SLIT_IN, xl), (xl + DIN_LEAF_T, xl + DIN_LEAF_T + DIN_SLIT_OUT)):
             s -= box(*sorted((sg * a, sg * b)), -0.01, T + FIL + 0.1, Z0 + T, W / 2 + 1)
         # also remove the gusset in front of the leaf spring (so the spring is rooted only in T on the build plate side)
-        s -= box(*sorted((sg * (xl - DIN_SLIT), sg * (xl + DIN_LEAF_T + DIN_SLIT))), T, T + FIL + 0.1, Z0 + T, W / 2 + 1)
+        s -= box(*sorted((sg * (xl - DIN_SLIT_IN), sg * (xl + DIN_LEAF_T + DIN_SLIT_OUT))), T, T + FIL + 0.1, Z0 + T, W / 2 + 1)
     return s
+
+
+def din_spring_travel():
+    """How far the top end of a DIN leaf spring moves outwards while the barb tip passes the lip edge (DIN_HOOK - DIN_FIT).
+    The spring is a cantilever from the top of the front plate (z = Z0 + T). The lip edge pushes it at the lowest point of the
+    barb tip (where the 45-degree underside ends); above that point the spring stays straight, so its top end moves further.
+    Beam estimate, ignoring the twist of the spring: 1.77 mm (a linear FEA of the spring and the band gives 1.63 mm at the band)"""
+    za = W / 2 - DIN_NOSE_H + DIN_HOOK + 0.01
+    a = za - (Z0 + T)
+    return (DIN_HOOK - DIN_FIT) * (1 + 1.5 * (W / 2 - za) / a)
+
+
+def din_spring_hit(s):
+    """Overlap (mm3) between the rest of DIN bracket s and its leaf springs moved outwards by din_spring_travel(), both sides.
+    Moves each spring with its barb and the band of back plate in front of it as one piece, so the overlap is on the safe side
+    (the real spring moves less near its root). Must be 0, or the spring stops before the barb clears the lip"""
+    xl = din_leaf_x(); d = din_spring_travel(); hit = 0.0
+    for sg in (1, -1):
+        cut = box(*sorted((sg * xl, sg * (xl + DIN_LEAF_T))), -DIN_LEAF_BACK - 0.2, T + FIL + 0.2, Z0 + T, W / 2 + 1) \
+            + box(*sorted((sg * (xl - DIN_HOOK - 0.2), sg * xl)), -DIN_LEAF_BACK - 0.2, -0.3, Z0 + T, W / 2 + 1)
+        hit += (Pos(sg * d, 0, 0) * (s & cut) & (s - cut)).volume
+    return hit
 
 
 def coupon(series, fit, mark):
@@ -193,7 +218,7 @@ def _finish(s, series, H, yo):
     for sg in (1, -1):
         cx = sg * (H - CORNER_R); cy = yo - CORNER_R
         s -= box(*sorted((cx, sg * (H + 1))), cy, yo + 1, Z0 - 1, Z0 + T + 1) - Pos(cx, cy, Z0 + T / 2) * Cylinder(CORNER_R, T + 4)
-    xr = (din_leaf_x() + DIN_LEAF_T + DIN_SLIT + 2.0) if series == "DIN" else (series / 2 + FIT + ARM_T + 2.0)
+    xr = (din_leaf_x() + DIN_LEAF_T + DIN_SLIT_OUT + 2.0) if series == "DIN" else (series / 2 + FIT + ARM_T + 2.0)
     zl = Z0 + T + FIL + 1.0; drop = W / 2 - zl
     if H - xr > 1.0:
         for sg in (1, -1):
