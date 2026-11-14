@@ -36,9 +36,9 @@ Last updated: 2026-11-15
 
 ## 3. Output format (keep it the same every time)
 
-- **One model per file.** Output both 3MF and STEP.
-- 3MF files are in print orientation (front plate down), centred on a 256 mm square build plate.
-- File names are `<board>_<2020|4040|DIN35>`, plus the same with `_spacer` appended.
+- **One model per file.** Output 3MF, STL and STEP.
+- 3MF and STL files are in print orientation (front plate down), centred on a 256 mm square build plate.
+- File names are `<board>_<2020|4040|DIN35>`, plus the same with `_spacer` appended. `<board>` is the board size: `PiB`, `PiA`, `PiZero` or `VIM1S`.
 - All generated models and `viewer.html` go in `models/` and are committed together with the scripts.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -96,6 +96,15 @@ The same front plate as the frame version, with a grip for DIN rail.
 - Most of the time goes into printing walls; removing volume does not save much time.
 - The number of layers is set by the width along the rail (16 mm). Making it narrower reduces the engagement of the hooks and the key, so it was left alone.
 
+### History 6: the whole Raspberry Pi range (2026-11-15)
+
+The maintainer asked for brackets for every Raspberry Pi, and for STL files as well.
+
+- **One bracket per board size**, not one per model. Boards with the same outline and mounting holes on their official drawings would get identical files under different names, so they share one: the former `Pi4` became `PiB` (Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+), and `PiA` was added for the 3 A+ / 1 A+. `PiZero` covers the Zero, Zero W and Zero 2 W. The geometry of `PiB` is unchanged from `Pi4` (same volumes).
+- `PiA` follows `PiZero` (one hole set that fits either way round, SD notches at both ends, two windows) with the window band of `PiB` (clear of the 6 mm standoffs).
+- **Not covered**: Raspberry Pi 1 Model A / B (no official mechanical drawing, so the holes cannot be checked), Compute Modules (they need a carrier board), Raspberry Pi 400 / 500 (keyboard computers), Raspberry Pi Pico (a microcontroller board).
+- STL files are written next to 3MF and STEP, with the same placement as the 3MF and the same tessellation (0.02 mm, 0.2 rad). About 270 KB each.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details.
@@ -125,8 +134,10 @@ See the constants in `sbc_brackets.py` for the details.
 
 | Board | Source | Confidence |
 |---|---|---|
-| Raspberry Pi 4 | Published dimensions (85 x 56 mm, holes 58 x 49 mm) | High. Components are simplified |
-| Raspberry Pi Zero | Published dimensions (65 x 30 mm, holes 58 x 23 mm) | High. The microSD position is assumed |
+| Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 1 B+ (`PiB`) | Official mechanical drawings: [5](https://pip.raspberrypi.com/documents/RP-008347-DS), [4 B](https://pip.raspberrypi.com/documents/RP-008343-DS), [3 B+](https://pip.raspberrypi.com/documents/RP-008337-DS), [3 B](https://pip.raspberrypi.com/documents/RP-008335-DS), [1 B+](https://pip.raspberrypi.com/documents/RP-008351-DS). All 85 x 56 mm, holes 58 x 49 mm 3.5 mm from the edges (hole diameter 2.75 mm for M2.5 on the 3 B+ / 3 B / 1 B+, 2.7 mm on the 4 B and 5) | High. Components are simplified |
+| Raspberry Pi 2 B (`PiB`) | No drawing is published. The [official documentation](https://www.raspberrypi.com/documentation/computers/sbcs.html) says it has "the same form factor" as the 1 B+ | High |
+| Raspberry Pi 3 A+ / 1 A+ (`PiA`) | [Official 3 A+ drawing](https://pip.raspberrypi.com/documents/RP-008330-DS) (65 x 56 mm, holes 58 x 49 mm). The documentation says the 3 A+ drawings also apply to the 1 A+ | High. Only the USB-A, HDMI and GPIO header are modelled |
+| Raspberry Pi Zero / Zero W / Zero 2 W (`PiZero`) | Official drawings of the [Zero W](https://pip.raspberrypi.com/documents/RP-008367-DS) and [Zero 2 W](https://pip.raspberrypi.com/documents/RP-008358-DS) (65 x 30 mm, holes 58 x 23 mm; mini HDMI and micro USB centres at 12.4 / 41.4 / 54 mm; microSD centre 16.9 mm from the port edge). The [documentation](https://www.raspberrypi.com/documentation/computers/zero.html) says the Zero W has the same mounting holes as the Zero | High |
 | Khadas VIM1S | Official 3D model `vim1s-pcba-3d-v11.stp` | High. Holes are in a trapezoid (77 / 49 / 45.5 mm) |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
@@ -162,10 +173,11 @@ The material used for the prints and which direction was loose (front-back, up-d
 ## 9. Open items
 
 - [ ] Get the results of printing the current version and the coupons, then settle `FIT` and `HOOK`
-- [ ] Reduce the Pi 4 board holes from two sets (8 holes) to one set? Flipping the whole bracket upside down already lets one set face the ports either way
+- [ ] Reduce the `PiB` board holes from two sets (8 holes) to one set? Flipping the whole bracket upside down already lets one set face the ports either way
 - [ ] Make the VIM1S screw holes smaller for M2 (about 2.4 mm)? Currently 3 mm, which is loose for M2
 - [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2) on real parts
 - [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width)
+- [ ] Print `PiA`, and try `PiB` with a B-size board other than the Pi 4
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
 - [ ] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? The current key (24.4 mm wide) does not go in. A narrower key adds play on steel rails with 1 mm sheet (section 7)
 - [ ] Decide the license
@@ -179,16 +191,18 @@ The material used for the prints and which direction was loose (front-back, up-d
 4. Of the open items in section 9, check the ones that need the maintainer's decision.
 5. After changes, produce the output in the format of section 3, and update sections 8 and 9 and the "last updated" date of these notes.
 
-### Reference volumes (as of 2026-11-14, cm3)
+### Reference volumes (as of 2026-11-15, cm3)
 
 | Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer |
 |---|---|---|---|---|
-| Pi4 | 12.566 | 13.099 | 13.209 | 13.742 |
+| PiB | 12.566 | 13.099 | 13.209 | 13.742 |
+| PiA | 10.525 | 11.058 | 11.168 | 11.701 |
 | PiZero | 8.291 | 8.629 | 8.935 | 9.272 |
 | VIM1S | 12.699 | 13.105 | 13.342 | 13.748 |
 
 | Model | DIN35 | DIN35 spacer |
 |---|---|---|
-| Pi4 | 12.783 | 13.316 |
+| PiB | 12.783 | 13.316 |
+| PiA | 10.742 | 11.275 |
 | PiZero | 8.509 | 8.846 |
 | VIM1S | 12.916 | 13.322 |

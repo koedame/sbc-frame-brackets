@@ -1,11 +1,11 @@
-"""Generate 3MF and STEP files for every model (3 boards x 20x20 / 40x40 / DIN rail x without / with integrated standoffs) and the HTML viewer.
+"""Generate 3MF, STL and STEP files for every model (each board x 20x20 / 40x40 / DIN rail x without / with integrated standoffs) and the HTML viewer.
 
 Usage:
-  python build_all.py                          # write 18 models x (3MF + STEP) and viewer.html to models/
+  python build_all.py                          # write every model as 3MF, STL and STEP, and viewer.html, to models/
   python build_all.py --vim1s-step vim1s-pcba-3d-v11.stp   # use the official VIM1S 3D model for interference checks (not put in viewer.html)
   python build_all.py --check                  # also report interference with the frame and board, unsupported areas and print time estimates
   python build_all.py --coupons                # also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm)
-  python build_all.py --only Pi4 --series 20 DIN   # only some of them (20 / 40 / DIN)
+  python build_all.py --only PiB --series 20 DIN   # only some of them (20 / 40 / DIN)
 
 Requirements: Python 3.11 or later, build123d (plus trimesh, shapely, networkx and rtree for --check)
 """
@@ -14,17 +14,20 @@ from build123d import Pos, Compound, Mesher, export_step, export_stl
 import sbc_brackets as sb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BED = 256.0                                   # size of the build plate the 3MF is placed on (centred)
+BED = 256.0                                   # size of the build plate the 3MF and STL are placed on (centred)
 
 
 def model_id(B, series, spacer):
     return f"{B.name}_{sb.mount_tag(series)}" + ("_spacer" if spacer else "")
 
 
-def write_3mf(shape, path, name):
+def on_plate(shape):
     bb = shape.bounding_box()
-    p = Pos(BED / 2 - (bb.min.X + bb.max.X) / 2, BED / 2 - (bb.min.Y + bb.max.Y) / 2, -bb.min.Z) * shape   # centre it, keeping the print orientation
-    m = Mesher(); m.add_shape(p, linear_deflection=0.02, angular_deflection=0.2, part_number=name); m.write(path)
+    return Pos(BED / 2 - (bb.min.X + bb.max.X) / 2, BED / 2 - (bb.min.Y + bb.max.Y) / 2, -bb.min.Z) * shape   # centre it, keeping the print orientation
+
+
+def write_3mf(shape, path, name):
+    m = Mesher(); m.add_shape(on_plate(shape), linear_deflection=0.02, angular_deflection=0.2, part_number=name); m.write(path)
 
 
 def mesh(shape, tol=0.08, nd=2):
@@ -45,7 +48,7 @@ def main():
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--coupons", action="store_true")
     ap.add_argument("--no-viewer", action="store_true")
-    ap.add_argument("--only", nargs="*", default=None, help="Pi4 / PiZero / VIM1S")
+    ap.add_argument("--only", nargs="*", default=None, help="PiB / PiA / PiZero / VIM1S")
     ap.add_argument("--series", nargs="*", default=[str(x) for x in sb.SERIES], help="20 / 40 / DIN")
     a = ap.parse_args()
     a.series = [x if x == "DIN" else int(x) for x in a.series]
@@ -62,6 +65,7 @@ def main():
                 n = model_id(B, series, spacer)
                 s = B.bracket(series, spacer)
                 write_3mf(s, os.path.join(a.out, n + ".3mf"), n)
+                export_stl(on_plate(s), os.path.join(a.out, n + ".stl"), tolerance=0.02, angular_tolerance=0.2)
                 export_step(s, os.path.join(a.out, n + ".step"))
                 bb = s.bounding_box()
                 m = dict(id=n, name=B.name, title=B.title, series=series, mount=sb.mount_label(series), spacer=spacer,

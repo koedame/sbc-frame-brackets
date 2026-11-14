@@ -217,9 +217,11 @@ def add_spacers(s, pts, h, d_boss, d_pilot):
     return s
 
 
-# ======================= Raspberry Pi 4 =======================
-class Pi4:
-    name, title = "Pi4", "Raspberry Pi 4"
+# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+) =======================
+class PiB:
+    """85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+;
+    the 2 B has "the same form factor" as the 1 B+ (official documentation)"""
+    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+"
     L, S = 85.0, 56.0                                  # board outline
     HOLE_L, HOLE_S = (3.5, 61.5), (3.5, 52.5)          # mounting holes (long side, short side)
     HOLE_D = 3.0                                       # hole diameter of the version without standoffs
@@ -269,9 +271,60 @@ class Pi4:
         return g
 
 
-# ======================= Raspberry Pi Zero =======================
+# ======================= Raspberry Pi Model A+ size (3 A+, 1 A+) =======================
+class PiA:
+    """65 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges (official 3 A+ mechanical drawing, which the documentation says also applies to the 1 A+)"""
+    name, title = "PiA", "Raspberry Pi 3 A+ / 1 A+"
+    L, S, BT = 65.0, 56.0, 1.6
+    HOLES = [(3.5, 3.5), (3.5, 52.5), (61.5, 3.5), (61.5, 52.5)]   # symmetric along the long side, so one set fits either orientation
+    HOLE_D = 3.0
+    SD_DEPTH = 15.0
+    SPACER = dict(h=5.0, d=6.0, pilot=2.2, screw="M2.5")
+    BOARD_SPACER = 5.0
+
+    @classmethod
+    def xy(cls, l, s):
+        return (cls.L / 2 - l, T + BOARD_Y0 + (cls.S - s))      # GPIO side (large s) towards the back plate, ports facing out
+
+    @classmethod
+    def bracket(cls, series, spacer=False):
+        H = cls.L / 2
+        s = _l_body(series, H, BOARD_Y0 + cls.S)
+        for l, s_ in cls.HOLES:
+            x, y = cls.xy(l, s_)
+            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
+        yb = T + BOARD_Y0
+        y0w = yb + 3.5 + 6.0 / 2 + 4.0; y1w = yb + cls.S - (3.5 + 6.0 / 2 + 4.0)   # clear of the standoffs, as on PiB
+        xn = H - cls.SD_DEPTH
+        for sg in (1, -1):                             # openings at both ends = SD card notch (the board fits either way round)
+            s -= rrect(*sorted((sg * xn, sg * (H + 4))), y0w, y1w)
+        for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB)):
+            s -= rrect(x0, x1, y0w, y1w)
+        s = _finish(s, series, H, yb + cls.S)
+        if spacer:
+            sp = cls.SPACER
+            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.HOLES], sp["h"], sp["d"], sp["pilot"])
+        return s
+
+    @classmethod
+    def ghost(cls):
+        """Board for display and interference checks (simplified): USB-A, HDMI and the GPIO header, placed from the official 3 A+ drawing"""
+        def blk(l0, l1, s0, s1, h0, h1):
+            xa, ya = cls.xy(l0, s0); xb, yb_ = cls.xy(l1, s1)
+            za, zb = Z0 + T + cls.BOARD_SPACER + h0, Z0 + T + cls.BOARD_SPACER + h1
+            return box(min(xa, xb), max(xa, xb), min(ya, yb_), max(ya, yb_), za, zb)
+        t = cls.BT
+        g = blk(0, cls.L, 0, cls.S, 0, t)
+        g += blk(51.0, 66.0, 24.5, 38.5, t, t + 7.0)          # USB-A (centre 31.5 mm from the HDMI edge, Z-Height 7.0)
+        g += blk(24.5, 39.5, -1.0, 11.5, t, t + 6.5)          # HDMI (centre 32 mm, Z-Height 6.5)
+        g += blk(7.0, 58.0, 49.0, 54.5, t, t + 8.5)           # GPIO header (Z-Height 8.5)
+        return g
+
+
+# ======================= Raspberry Pi Zero size (Zero, Zero W, Zero 2 W) =======================
 class PiZero:
-    name, title = "PiZero", "Raspberry Pi Zero"
+    """65 x 30 mm, holes 58 x 23 mm, 3.5 mm from the edges (official Zero W and Zero 2 W mechanical drawings; the Zero has the same holes)"""
+    name, title = "PiZero", "Raspberry Pi Zero / Zero W / Zero 2 W"
     L, S, BT = 65.0, 30.0, 1.6
     HOLES = [(3.5, 3.5), (3.5, 26.5), (61.5, 3.5), (61.5, 26.5)]   # 58 x 23. Symmetric both ways, so one set fits either orientation
     HOLE_D = 3.0
@@ -318,7 +371,7 @@ class PiZero:
         g += blk(50.0, 58.0, -1.0, 5.0, t, t + 3.0)            # micro USB (power)
         g += blk(7.1, 58.0, 25.2, 27.8 + 2.54, t, t + 8.5)     # GPIO header (if fitted)
         g += blk(61.0, 66.0, 7.0, 23.0, t, t + 1.3)            # camera connector
-        g += blk(-2.5, 12.0, 11.5, 22.5, t, t + 1.4)           # microSD (position assumed)
+        g += blk(-2.5, 12.0, 11.4, 22.4, t, t + 1.4)           # microSD (centre 16.9 mm from the port edge, official Zero W drawing)
         return g
 
 
@@ -370,5 +423,5 @@ class VIM1S:
         return [box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)]
 
 
-BOARDS = [Pi4, PiZero, VIM1S]
+BOARDS = [PiB, PiA, PiZero, VIM1S]
 SERIES = (20, 40, "DIN")
