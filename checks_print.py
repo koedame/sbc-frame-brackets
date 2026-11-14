@@ -1,5 +1,5 @@
-"""造形可否の検査。形状を層ごとに輪切りにし、各層が1層下の輪郭から45度以内に収まるかを調べる。
-面の向きだけを見る検査と違い、宙から始まる部分(垂れ下がるリップなど)も検出する。"""
+"""Printability check. Slices the shape layer by layer and checks that each layer stays within 45 degrees of the outline of the layer below.
+Unlike a check that only looks at face angles, this also catches parts that start in mid-air (such as a hanging lip)."""
 import numpy as np, trimesh
 from shapely.ops import unary_union
 
@@ -7,7 +7,7 @@ LAYER = 0.2
 
 
 def unsupported(shape, rot=None, layer=LAYER):
-    """戻り値: (支えの無い面積の合計[mm2], 1層での最大値[mm2])。rot は造形向きへの回転(Z が上)"""
+    """Returns (total unsupported area [mm2], largest unsupported area in a single layer [mm2]). rot rotates the shape into print orientation (Z up)"""
     s = rot * shape if rot is not None else shape
     v, t = s.tessellate(0.02)
     m = trimesh.Trimesh(np.array([(p.X, p.Y, p.Z) for p in v]), np.array(t), process=True)
@@ -19,7 +19,7 @@ def unsupported(shape, rot=None, layer=LAYER):
         cur = unary_union([p.buffer(0) for p in sec.polygons_full]) if sec is not None else None
         if prev is not None and cur is not None:
             bad = cur.difference(prev.buffer(layer + 0.03))
-            ar = sum(g.area for g in getattr(bad, 'geoms', [bad]) if g.area > 0.05)   # 数値誤差の細片は無視
+            ar = sum(g.area for g in getattr(bad, 'geoms', [bad]) if g.area > 0.05)   # ignore slivers from numerical error
             total += ar; worst = max(worst, ar)
         elif prev is None and cur is not None and sec is not secs[0]:
             total += cur.area; worst = max(worst, cur.area)

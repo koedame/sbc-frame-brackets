@@ -1,17 +1,17 @@
-"""印刷時間の見積もり(比較用)。造形姿勢の形状を 0.2mm ごとに輪切りにし、外周・内周・面の塗りつぶし・移動を積算する。
-スライサーの実測ではない。同じ条件で形どうしを比べるための値。"""
+"""Print time estimate (for comparison). Slices the shape in print orientation every 0.2 mm and adds up outer walls, inner walls, infill and travel.
+This is not a slicer measurement. The numbers are for comparing shapes under the same conditions."""
 import numpy as np, trimesh
 from shapely.ops import unary_union
 
 LAYER, LW = 0.2, 0.45
-V = dict(first=25.0, outer=45.0, inner=80.0, solid=90.0, sparse=120.0)   # mm/s (PETG の一般的な設定を仮定)
-WALLS, SHELL, DENS = 2, 4, 0.15          # 壁2周、上下の密な層4枚、内部充填15%
-T_ISLAND, T_LAYER = 0.9, 0.4             # 島1つあたりの移動と引き戻し[s]、層替え[s]
-ACC = 2500.0                             # 加速度[mm/s2]。短い線分ほど最高速に届かない
+V = dict(first=25.0, outer=45.0, inner=80.0, solid=90.0, sparse=120.0)   # mm/s (assumes typical PETG settings)
+WALLS, SHELL, DENS = 2, 4, 0.15          # 2 walls, 4 solid top/bottom layers, 15% infill
+T_ISLAND, T_LAYER = 0.9, 0.4             # travel and retraction per island [s], layer change [s]
+ACC = 2500.0                             # acceleration [mm/s2]. Short segments never reach full speed
 
 
 def _move(length, v, seg):
-    """長さ length を平均線分長 seg で走る時間。加減速ぶんを足す"""
+    """Time to move length with an average segment length of seg, including acceleration"""
     if length <= 0: return 0.0
     n = max(length / max(seg, 0.5), 1.0)
     return length / v + n * v / ACC

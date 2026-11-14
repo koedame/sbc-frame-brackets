@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SBCブラケット ビューア</title>
+<title>SBC Frame Brackets viewer</title>
 <style>
-/* 左=部品表、中央=立体、右=仕様欄。色は取付部の緑と、SDカードの赤だけ */
+/* left = parts list, centre = 3D view, right = specs. The only colours are green for the bracket and red as an accent */
 :root{
   --paper:#eceeed; --panel:#f6f7f6; --ink:#1b2224; --dim:#5d686b; --rule:#c9cfce;
   --part:#0f7b6c; --accent:#c8321e;
-  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; --sans:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#15191a;--panel:#1c2122;--ink:#e3e8e7;--dim:#96a2a3;--rule:#343c3d;--part:#45c0ad;--accent:#ef6a55;color-scheme:dark}}
@@ -48,21 +48,21 @@ ul{margin:0;padding:0 14px 0 30px;font-size:13px}li{margin:3px 0}
 </style>
 </head>
 <body>
-<aside id="list"><header><h1>SBCブラケット ビューア</h1><p>アルミフレーム / DINレール用 L字ブラケット 18モデル</p></header><div id="rows"></div></aside>
+<aside id="list"><header><h1>SBC Frame Brackets</h1><p>18 L-shaped brackets for aluminium extrusion and DIN rail</p></header><div id="rows"></div></aside>
 <main id="stage">
   <div id="bar">
-    <button type="button" id="tFrame" aria-pressed="true">フレーム/レール</button>
-    <button type="button" id="tBoard" aria-pressed="true">基板</button>
-    <button type="button" id="tFlip" aria-pressed="false">上下反転</button>
-    <button type="button" id="tReset">視点を戻す</button>
+    <button type="button" id="tFrame" aria-pressed="true">Frame / rail</button>
+    <button type="button" id="tBoard" aria-pressed="true">Board</button>
+    <button type="button" id="tFlip" aria-pressed="false">Upside down</button>
+    <button type="button" id="tReset">Reset view</button>
   </div>
-  <div id="legend"><span><i style="background:var(--part)"></i>ブラケット(印刷部品)</span><span><i style="background:#9aa3a5"></i>フレーム/レール</span><span><i style="background:#8fb0c4"></i>基板</span><span>ドラッグで回転、ホイールで拡大、右ドラッグで移動</span></div>
-  <div id="err">3D表示に対応していないブラウザです。WebGLが使えるブラウザで開いてください。</div>
+  <div id="legend"><span><i style="background:var(--part)"></i>Bracket (printed part)</span><span><i style="background:#9aa3a5"></i>Frame / rail</span><span><i style="background:#8fb0c4"></i>Board</span><span>Drag to rotate, scroll to zoom, right-drag to pan</span></div>
+  <div id="err">This browser cannot show 3D content. Open this file in a browser with WebGL.</div>
 </main>
 <section id="info"></section>
 <!--
-次の 2 つのスクリプトは three.js r128 の three.min.js と OrbitControls.js で、
-どちらも three.js の一部として次の MIT ライセンスで配布されている。
+The two scripts below are three.min.js and OrbitControls.js from three.js r128.
+Both are distributed as part of three.js under the following MIT license.
 
 __THREE_LICENSE__
 -->
@@ -101,17 +101,17 @@ function apply(){if(!flipGroup)return; frameMesh.visible=show.frame; flipGroup.r
 function view(){const b=new THREE.Box3().setFromObject(flipGroup.children[0]);const c=b.getCenter(new THREE.Vector3()),r=b.getSize(new THREE.Vector3()).length()/2;
   const d=new THREE.Vector3(-0.9,1,0.55).normalize(); if(controls){controls.target.copy(c)} camera.position.copy(c).addScaledVector(d,r/Math.sin(camera.fov*Math.PI/360)*1.3); if(controls)controls.update(); else camera.lookAt(c)}
 function info(m){
-  $('#info').innerHTML=`<div class="head"><div class="id">${m.id}</div><h1>${esc(m.title)}用 ${esc(m.mount)}${m.spacer?' スペーサー一体':''}</h1></div>
-  <h2>寸法</h2><dl><dt>外形</dt><dd class="m">${m.size.join(' x ')} mm</dd><dt>体積</dt><dd class="m">${m.vol} cm3</dd>${m.min?`<dt>印刷時間</dt><dd class="m">約 ${m.min} 分(見積もり)</dd>`:''}</dl>
-  <h2>基板の固定</h2><dl>${m.spacer?`<dt>スペーサー</dt><dd>高さ${m.boss.h}mm、外径${m.boss.d}mm × 4</dd><dt>ネジ</dt><dd>${m.boss.screw}タッピング(下穴${m.boss.pilot}mm)</dd>`:`<dt>穴</dt><dd>直径3mmの貫通穴。スペーサーとネジは別に用意</dd>`}</dl>
-  <h2>取付先への固定</h2>${m.series==='DIN'?'<ul><li>中央のキーがレールの溝(側壁の間)に入り、上下方向の重さを受ける</li><li>両側の板バネの爪(0.8mm)がリップの裏に掛かる。上下同形</li><li>正面からまっすぐ押し込む。外すときは板バネの横のすきまにマイナスドライバーを入れて外側へ起こす</li></ul>':'<ul><li>上下とも同じ形の爪(返し1.0mm)で、上面と下面の溝に掛ける</li><li>正面の溝に入るキーで上下方向の重さを受ける</li><li>正面からまっすぐ押し込む。押し込めない場合はフレームの端から横に滑らせて入れる</li></ul>'}
-  <h2>造形</h2><ul><li>前板を下にして、サポート無しで印刷できる</li><li>材料はPETG推奨</li></ul>`;
+  $('#info').innerHTML=`<div class="head"><div class="id">${m.id}</div><h1>${esc(m.title)} · ${esc(m.mount)}${m.spacer?' · integrated standoffs':''}</h1></div>
+  <h2>Dimensions</h2><dl><dt>Size</dt><dd class="m">${m.size.join(' x ')} mm</dd><dt>Volume</dt><dd class="m">${m.vol} cm3</dd>${m.min?`<dt>Print time</dt><dd class="m">~${m.min} min (estimate)</dd>`:''}</dl>
+  <h2>Board mounting</h2><dl>${m.spacer?`<dt>Standoffs</dt><dd>${m.boss.h} mm tall, ${m.boss.d} mm OD × 4</dd><dt>Screws</dt><dd>${m.boss.screw} self-tapping (${m.boss.pilot} mm pilot hole)</dd>`:`<dt>Holes</dt><dd>3 mm through holes. Bring your own standoffs and screws</dd>`}</dl>
+  <h2>Mounting</h2>${m.series==='DIN'?'<ul><li>The centre key sits in the rail channel (between the side walls) and takes the vertical load</li><li>Hooks (0.8 mm) on leaf springs at both sides catch behind the lips. Identical top and bottom</li><li>Push straight on from the front. To remove, put a flat screwdriver in the gap beside a leaf spring and lever it outwards</li></ul>':'<ul><li>Identical hooks (1.0 mm barb) at the top and bottom catch the slots on the top and bottom faces</li><li>A key in the front slot takes the vertical load</li><li>Push straight on from the front. If it will not go on, slide it in from the end of the frame</li></ul>'}
+  <h2>Printing</h2><ul><li>Prints front plate down, without supports</li><li>PETG recommended</li></ul>`;
 }
 const rows=$('#rows'); let last='';
 for(const m of D.models){
   if(m.title!==last){const h=document.createElement('h2');h.textContent=m.title;rows.append(h);last=m.title}
   const b=document.createElement('button');b.className='row';b.type='button';b.dataset.id=m.id;
-  b.innerHTML=`<span>${m.series==='DIN'?'DINレール':m.series+'角'}${m.spacer?' スペーサー一体':''}</span><small>${m.size[0]}x${m.size[1]}</small>`;
+  b.innerHTML=`<span>${m.series==='DIN'?'DIN rail':m.series+'x'+m.series}${m.spacer?' + standoffs':''}</span><small>${m.size[0]}x${m.size[1]}</small>`;
   b.addEventListener('click',()=>{load(m);try{history.replaceState(null,'','#'+m.id)}catch(_){}});
   rows.append(b);
 }
