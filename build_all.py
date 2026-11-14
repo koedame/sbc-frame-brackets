@@ -2,7 +2,7 @@
 
 使い方:
   python build_all.py                          # models/ に 18モデル x (3MF + STEP) と viewer.html を出力
-  python build_all.py --vim1s-step vim1s-pcba-3d-v11.stp   # ビューアと干渉検査に VIM1S の公式3Dモデルを使う
+  python build_all.py --vim1s-step vim1s-pcba-3d-v11.stp   # 干渉検査に VIM1S の公式3Dモデルを使う(viewer.html には入れない)
   python build_all.py --check                  # フレーム・基板との干渉、サポートの要否、印刷時間の見積もりも出す
   python build_all.py --coupons                # はめあい確認用の試験片(すきま 0.00 / 0.05 / 0.10mm)も出力
   python build_all.py --only Pi4 --series 20 DIN   # 一部だけ(20 / 40 / DIN)
@@ -41,7 +41,7 @@ def ghost(B, vim_step):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(HERE, "models"))
-    ap.add_argument("--vim1s-step", default=None, help="Khadas 公式の vim1s-pcba-3d-v11.stp のパス(任意)")
+    ap.add_argument("--vim1s-step", default=None, help="干渉検査に使う Khadas 公式の vim1s-pcba-3d-v11.stp のパス(任意。viewer.html には入れない)")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--coupons", action="store_true")
     ap.add_argument("--no-viewer", action="store_true")
@@ -85,9 +85,10 @@ def main():
                 export_stl(sb.coupon(series, fit, i + 1), os.path.join(a.out, f"fit_test_{series}{series}_{i + 1}.stl"))
         print("試験片: fit_test_*_1 = すきま 0.00mm、_2 = 0.05mm(本体と同じ)、_3 = 0.10mm。切り欠きの数で区別")
     if not a.no_viewer:
+        # ビューアの基板は、配布できる簡略形状だけで作る。--vim1s-step の公式3Dモデルは干渉検査にだけ使い、
+        # 変換した形も viewer.html に入れない(メーカーの CAD データを配布物に含めないため)
         data = dict(frames={s: mesh(sb.mount_frame(s, 260), 0.2) for s in a.series},
-                    ghosts={B.name: mesh(Compound([g for g in ghosts[B.name] if g.volume > 3.0]), 0.6 if B is sb.VIM1S else 0.3,
-                                         1 if B is sb.VIM1S else 2) for B in boards},
+                    ghosts={B.name: mesh(Compound(ghost(B, None)), 0.3) for B in boards},
                     models=models)
         tpl = open(os.path.join(HERE, "viewer.tpl.html"), encoding="utf-8").read()
         three = open(os.path.join(HERE, "vendor", "three.min.js"), encoding="utf-8").read()
