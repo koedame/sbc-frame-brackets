@@ -2,8 +2,9 @@
 
 Usage:
   python build_all.py                          # write every model as 3MF, STL and STEP, and viewer.html, to models/
-  python build_all.py --vim1s-step vim1s-pcba-3d-v11.stp   # use the official VIM1S 3D model for interference checks (not put in viewer.html)
   python build_all.py --check                  # also report interference with the frame and board, unsupported areas and print time estimates
+  python build_all.py --check --board-step vim1s-pcba-3d-v11.stp --board-step ROCK5B_v1.42_3D.step
+                                               # check against the boards' official 3D models (not put in viewer.html)
   python build_all.py --coupons                # also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm)
   python build_all.py --only PiB --series 20 DIN   # only some of them (20 / 40 / DIN)
 
@@ -11,6 +12,9 @@ Requirements: Python 3.11 or later, build123d (plus trimesh, shapely, networkx a
 """
 import argparse, json, os, sys
 from build123d import Pos, Compound, Mesher, export_step, export_stl
+from OCP.BRepClass3d import BRepClass3d_SolidClassifier
+from OCP.TopAbs import TopAbs_IN
+from OCP.gp import gp_Pnt
 import sbc_brackets as sb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -35,20 +39,39 @@ def mesh(shape, tol=0.08, nd=2):
     return dict(v=[round(c, nd) for p in v for c in (p.X, p.Y, p.Z)], t=[i for tri in t for i in tri])
 
 
-def ghost(B, vim_step):
-    if B is sb.VIM1S:
-        return sb.VIM1S.ghost(vim_step)
-    return [B.ghost()]
+def overlap(s, parts):
+    """Interference between the bracket and a board: the volume (mm3) shared with its solid parts, and for parts that are only
+    surfaces, the area (mm2) of surface inside the bracket. Surfaces lying on the bracket's faces (the board resting on the
+    standoffs) are not counted"""
+    vol = area = 0.0
+    sbb = s.bounding_box()
+    for g in parts:
+        gb = g.bounding_box()
+        if (gb.min.X > sbb.max.X or gb.max.X < sbb.min.X or gb.min.Y > sbb.max.Y or gb.max.Y < sbb.min.Y
+                or gb.min.Z > sbb.max.Z or gb.max.Z < sbb.min.Z):
+            continue
+        r = s & g
+        if g.solids():
+            vol += r.volume
+            continue
+        for f in r.faces():
+            v, t = f.tessellate(0.05)
+            p = (v[t[0][0]] + v[t[0][1]] + v[t[0][2]]) / 3          # a point on the face
+            if BRepClass3d_SolidClassifier(s.wrapped, gp_Pnt(p.X, p.Y, p.Z), 1e-4).State() == TopAbs_IN:
+                area += f.area
+    return vol, area
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(HERE, "models"))
-    ap.add_argument("--vim1s-step", default=None, help="path to Khadas' official vim1s-pcba-3d-v11.stp, used for interference checks (optional; not put in viewer.html)")
+    ap.add_argument("--board-step", action="append", default=[], metavar="PATH",
+                    help="a board's official 3D model, used for the board interference check in place of the simplified board. "
+                         "Repeat for several models; the file name tells which board it is (STEPS in sbc_brackets.py). Not put in viewer.html")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--coupons", action="store_true")
     ap.add_argument("--no-viewer", action="store_true")
-    ap.add_argument("--only", nargs="*", default=None, help="PiB / PiA / PiZero / VIM1S")
+    ap.add_argument("--only", nargs="*", default=None, help=" / ".join(B.name for B in sb.BOARDS))
     ap.add_argument("--series", nargs="*", default=[str(x) for x in sb.SERIES], help="20 / 40 / DIN")
     a = ap.parse_args()
     a.series = [x if x == "DIN" else int(x) for x in a.series]
@@ -56,7 +79,12 @@ def main():
     boards = [B for B in sb.BOARDS if not a.only or B.name in a.only]
     if a.check:
         import checks_print as cp, checks_time as ct
-    ghosts = {B.name: ghost(B, a.vim1s_step) for B in boards}
+    boards_chk = {B.name: [("board", [B.ghost()])] for B in boards}   # what the board overlap is measured against
+    official = {}
+    for p in a.board_step:
+        B, solids = sb.official(p)
+        official.setdefault(B.name, []).append((os.path.basename(p), solids))
+    boards_chk.update((n, v) for n, v in official.items() if n in boards_chk)
     frames = {s: sb.mount_frame(s, 300) for s in a.series}
     models = []
     for B in boards:
@@ -75,10 +103,14 @@ def main():
                 if a.check:
                     fr = frames[series]
                     hit_frame = (s & fr).volume
-                    hit_board = sum((s & g).volume for g in ghosts[B.name])
+                    hits = []
+                    for lab, gs in boards_chk[B.name]:
+                        v, ar = overlap(s, gs)
+                        hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
+                    hit_board = "  ".join(hits)
                     unsup = cp.unsupported(s)[0]
                     m["min"] = ct.estimate(s)["min"]
-                    line += f"  frame overlap {hit_frame:.2f}  board overlap {hit_board:.2f} mm3  unsupported {unsup} mm2  ~{m['min']} min"
+                    line += f"  frame overlap {hit_frame:.2f}  {hit_board}  unsupported {unsup} mm2  ~{m['min']} min"
                 print(line)
                 if not a.no_viewer:
                     m["mesh"] = mesh(s)
@@ -89,11 +121,11 @@ def main():
                 export_stl(sb.coupon(series, fit, i + 1), os.path.join(a.out, f"fit_test_{series}{series}_{i + 1}.stl"))
         print("Coupons: fit_test_*_1 = clearance 0.00 mm, _2 = 0.05 mm (same as the brackets), _3 = 0.10 mm. Told apart by the number of notches")
     if not a.no_viewer:
-        # Boards in the viewer are built only from the simplified shapes, which can be distributed. The official 3D model from
-        # --vim1s-step is used only for interference checks; not even a converted shape goes into viewer.html
-        # (so the manufacturer's CAD data is not redistributed)
+        # Boards in the viewer are built only from the simplified shapes, which can be distributed. The official 3D models from
+        # --board-step are used only for interference checks; not even a converted shape goes into viewer.html
+        # (so the manufacturers' CAD data is not redistributed)
         data = dict(frames={s: mesh(sb.mount_frame(s, 260), 0.2) for s in a.series},
-                    ghosts={B.name: mesh(Compound(ghost(B, None)), 0.3) for B in boards},
+                    ghosts={B.name: mesh(Compound([B.ghost()]), 0.3) for B in boards},
                     models=models)
         tpl = open(os.path.join(HERE, "viewer.tpl.html"), encoding="utf-8").read()
         three = open(os.path.join(HERE, "vendor", "three.min.js"), encoding="utf-8").read()

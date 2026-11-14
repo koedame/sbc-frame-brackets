@@ -38,7 +38,7 @@ Last updated: 2026-11-15
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation (front plate down), centred on a 256 mm square build plate.
-- File names are `<board>_<2020|4040|DIN35>`, plus the same with `_spacer` appended. `<board>` is the board size: `PiB`, `PiA`, `PiZero` or `VIM1S`.
+- File names are `<board>_<2020|4040|DIN35>`, plus the same with `_spacer` appended. `<board>` is the board size: `PiB`, `PiA`, `PiZero`, `VIM1S` or `ROCK5B`.
 - All generated models and `viewer.html` go in `models/` and are committed together with the scripts.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -105,6 +105,24 @@ The maintainer asked for brackets for every Raspberry Pi, and for STL files as w
 - **Not covered**: Raspberry Pi 1 Model A / B (no official mechanical drawing, so the holes cannot be checked), Compute Modules (they need a carrier board), Raspberry Pi 400 / 500 (keyboard computers), Raspberry Pi Pico (a microcontroller board).
 - STL files are written next to 3MF and STEP, with the same placement as the 3MF and the same tessellation (0.02 mm, 0.2 rad). About 270 KB each.
 
+### History 7: popular boards from other manufacturers (2026-11-15)
+
+The maintainer asked for popular boards from other manufacturers, in the same vertical orientation as the Raspberry Pi brackets, with STL files too.
+
+- **Existing brackets first.** A board whose outline and mounting holes match an existing bracket on its official drawing or 3D model gets no new files, only its name in the class title and the README: Radxa ROCK 3C and Pine64 ROCK64 → `PiB`, Radxa ZERO 3W / 3E → `PiZero`, Khadas VIM3 / VIM4 → `VIM1S`.
+- **The VIM3 uses the `VIM1S` bracket.** A first survey said one VIM3 hole differs (53.5 mm where the VIM1S has 45.5 mm). On the official DXF and 3D model the holes are identical to the VIM1S; the 53.5 mm is measured from the board edge to the far hole, not between holes.
+- **ZERO 3W / 3E**: the holes on the official DXF are up to 0.14 mm away from the Raspberry Pi Zero positions (3.55 / 3.6 / 61.4 mm along the board and 3.6 / 26.45 / 26.5 mm across, against 3.5 / 61.5 and 3.5 / 26.5). The board holes are 2.8 mm, so an M2.5 screw still has 0.15 mm of play on each side and reaches the `PiZero` standoffs. The DXF puts the holes on a layer named `PIN_TOP`; the official 3D models confirm they are the mounting holes (through the PCB at the same positions).
+- **`--board-step` replaces `--vim1s-step`.** Each board class lists the official 3D models it fits in `STEPS` (rotation, centre of the PCB outline and height of its underside, in the file's own coordinates), and `sbc_brackets.official()` places any of them on its bracket. The placement was checked by comparing the holes in each model with the bracket holes: VIM3 / VIM4 exact, ZERO 3W / 3E within 0.14 mm, ROCK 5B / 5B+ within 0.06 mm. The VIM1S result is unchanged from before.
+- **Models that are partly surfaces.** The ROCK 5B+ model (its PCB among others) and parts of the VIM1S / VIM4 / ZERO models are shells that belong to no solid. `--check` counts their area that lies strictly inside the bracket (faces lying on the bracket's surface, such as the board resting on the standoffs, are not counted).
+- **ZERO 3E**: the pads under the holes stand 0.02 mm proud of the PCB underside in the official model, so its underside height in `STEPS` is the pad level (otherwise the pads overlap the standoff tops by 1.30 mm3).
+- **ROCK 5B / 5B+ get their own bracket (`ROCK5B`).** 100.2 x 74.25 mm, four 3.5 mm holes 93.15 x 49 mm apart, 3.55 mm from the GPIO-side edge (the survey had guessed 58 x 49 mm).
+  - Standoffs are 8 mm: the deepest parts under the ROCK 5B+ reach 5.4 mm below the board, and the ROCK 5B's microSD card sits under it. An SSD fitted in the M.2 slots under the board is not in the official models and has not been checked.
+  - Standoffs are 5.4 mm in diameter, M2.5 with a 2.2 mm pilot hole. A part under the 5B+ is 3.1 mm from a hole centre; a 7 mm standoff overlapped it.
+  - Board holes in the version without standoffs are 3 mm, as on the other brackets.
+  - No SD notch: the microSD slot is at the GPIO-side edge on the underside. The ROCK 5B's card (in its official model) sticks out 9.8 mm past that edge, above the front plate and beside the frame; on the 40x40 version it clears the slope of the back plate by 0.42 mm. The ROCK 5B+ model has no card in the slot; its slot is in the same place, so the card should sit the same way, but this has not been checked against a model.
+  - Two rows of lightening windows, clear of the standoffs.
+- **Not added**: Libre Computer AML-S905X-CC (Le Potato). Its product page gives 85 x 56 mm and holes 58 x 49 mm but not their distance from the edges; it has not been checked against the official 3D model yet. The ROCK 3C and ROCK64 have no official 3D model, so only their outline, holes and microSD position were compared on the drawings.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details.
@@ -139,6 +157,11 @@ See the constants in `sbc_brackets.py` for the details.
 | Raspberry Pi 3 A+ / 1 A+ (`PiA`) | [Official 3 A+ drawing](https://pip.raspberrypi.com/documents/RP-008330-DS) (65 x 56 mm, holes 58 x 49 mm). The documentation says the 3 A+ drawings also apply to the 1 A+ | High. Only the USB-A, HDMI and GPIO header are modelled |
 | Raspberry Pi Zero / Zero W / Zero 2 W (`PiZero`) | Official drawings of the [Zero W](https://pip.raspberrypi.com/documents/RP-008367-DS) and [Zero 2 W](https://pip.raspberrypi.com/documents/RP-008358-DS) (65 x 30 mm, holes 58 x 23 mm; mini HDMI and micro USB centres at 12.4 / 41.4 / 54 mm; microSD centre 16.9 mm from the port edge). The [documentation](https://www.raspberrypi.com/documentation/computers/zero.html) says the Zero W has the same mounting holes as the Zero | High |
 | Khadas VIM1S | Official 3D model `vim1s-pcba-3d-v11.stp` | High. Holes are in a trapezoid (77 / 49 / 45.5 mm) |
+| Khadas VIM3 / VIM4 (`VIM1S`) | Official DXF and 3D models: VIM3 [DXF](https://dl.khadas.com/products/vim3/blueprints/dxf/vim3-pcba-2d-v14.dxf) and [STEP](https://dl.khadas.com/products/vim3/blueprints/cad/vim3-pcba-3d-v14.stp), VIM4 [DXF](https://dl.khadas.com/products/vim4/blueprints/dxf/vim4-pcba-2d-v13.dxf) and [STEP](https://dl.khadas.com/products/vim4/blueprints/cad/vim4-pcba-3d-v13.stp). 82.0 x 56.63 mm, holes identical to the VIM1S | High. Interference checked against the official 3D models |
+| Radxa ROCK 3C (`PiB`) | [Official DXF v1.400](https://dl.radxa.com/rock3/docs/hw/3c/v1400/radxa_rock_3c_v1400_2d_dxf.zip) (from the [download page](https://docs.radxa.com/en/rock3/rock3c/download)). 85 x 56 mm, holes 58 x 49 mm 3.5 mm from the edges, 2.8 mm; microSD at the middle of the short edge on the underside, as on the Raspberry Pi | High for the outline and holes. No official 3D model, so not checked against the components |
+| Pine64 ROCK64 (`PiB`) | [Official dimension drawing](https://files.pine64.org/doc/rock64/rock64%20board%20dimension.pdf). 85 x 56 mm, holes 58 x 49 mm 3.5 mm from the edges; microSD at the middle of the short edge | High for the outline and holes. No official 3D model (the one linked from the wiki is from a third party), so not checked against the components |
+| Radxa ZERO 3W / 3E (`PiZero`) | Official DXF and 3D models from the [download page](https://docs.radxa.com/en/zero/zero3/download): 3W [DXF](https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_2d_dxf.zip) and [STEP](https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_3d_stp.zip), 3E [DXF](https://dl.radxa.com/zero3/docs/hw/3e/radxa_zero_3e_v1200_2d.zip) and [STEP](https://dl.radxa.com/zero3/docs/hw/3e/radxa_zero_3e_3d_stp.zip). 65 x 30 mm, 2.8 mm holes up to 0.14 mm from the Raspberry Pi Zero positions (history 7) | High. Interference checked against the official 3D models |
+| Radxa ROCK 5B / 5B+ (`ROCK5B`) | Official drawings and 3D models from the [download page](https://docs.radxa.com/en/rock5/rock5b/download): 5B [DXF v1.41](https://dl.radxa.com/rock5/5b/docs/hw/radxa_rock5b_v141_dimension_20220728_dxf.zip) and [STEP v1.42](https://dl.radxa.com/rock5/5b/docs/hw/ROCK5B_v1.42_3D.step.zip), 5B+ [DXF v1.2](https://dl.radxa.com/rock5/5b+/docs/hw/radxa_rock5bp_v12_2d.zip) and [STEP v1.2](https://dl.radxa.com/rock5/5b+/docs/hw/rock5bp_pcba_3d_V1_2_20250314.stp). 100.2 x 74.25 mm, 3.5 mm holes 93.15 x 49 mm | High. Interference checked against the official 3D models |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
 ### Checking the DIN rail dimensions (2026-11-14)
@@ -156,8 +179,8 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 - **The current key does not fit aluminium rails with 1.5 mm side walls (7.3 mm deep, 24 mm channel).** Overlaid on a rail with 1.5 mm side walls, all three DIN models interfere by 10.24 mm3 (the key hits by 0.2 mm on each side). The lip edge where the hooks catch is 1 mm thick, the same as TS35 x 7.5.
 
 - Take dimensions for new boards from the manufacturer's official 3D model or drawing. Do not place holes from memory or guesswork: for the VIM1S, the first guess ("rectangular pattern") was wrong.
-- Official 3D models are not included (excluded in `.gitignore`). To re-check interference, download it from the manufacturer's site and pass it with `--vim1s-step`.
-- Shapes converted from the official 3D model do not go into `viewer.html` either. `--vim1s-step` is used only for interference checks, and the VIM1S board in the viewer is a bare plate, because no notice allowing redistribution of the manufacturer's CAD data could be found (as of 2026-11-14).
+- Official 3D models and drawings are not included (`*.stp`, and `*.step` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step`. The file name tells which bracket it belongs to (`STEPS` in each board class).
+- Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15).
 
 ## 8. Test print log
 
@@ -178,6 +201,9 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2) on real parts
 - [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width)
 - [ ] Print `PiA`, and try `PiB` with a B-size board other than the Pi 4
+- [ ] Print `ROCK5B` and try it with a ROCK 5B / 5B+: an SSD in the M.2 slots under the board (not in the official models), and taking the ROCK 5B's microSD card in and out while mounted
+- [ ] ROCK 3C and ROCK64: check against their components if an official 3D model is published (only the outline, holes and microSD position were compared on the drawings)
+- [ ] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB`
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
 - [ ] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? The current key (24.4 mm wide) does not go in. A narrower key adds play on steel rails with 1 mm sheet (section 7)
 - [ ] Decide the license
@@ -199,6 +225,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 | PiA | 10.525 | 11.058 | 11.168 | 11.701 |
 | PiZero | 8.291 | 8.629 | 8.935 | 9.272 |
 | VIM1S | 12.699 | 13.105 | 13.342 | 13.748 |
+| ROCK5B | 17.977 | 18.632 | 18.620 | 19.275 |
 
 | Model | DIN35 | DIN35 spacer |
 |---|---|---|
@@ -206,3 +233,4 @@ The material used for the prints and which direction was loose (front-back, up-d
 | PiA | 10.742 | 11.275 |
 | PiZero | 8.509 | 8.846 |
 | VIM1S | 12.916 | 13.322 |
+| ROCK5B | 18.194 | 18.850 |
