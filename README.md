@@ -76,13 +76,14 @@ python build_all.py
 |---|---|
 | `--check` | フレーム・基板との干渉、サポートの要否、印刷時間の見積もりを表示する |
 | `--coupons` | はめあい確認用の試験片(すきま 0.00 / 0.05 / 0.10mm)も出力する |
-| `--vim1s-step <path>` | VIM1S の公式3Dモデルを、ビューアと干渉検査に使う |
+| `--vim1s-step <path>` | VIM1S の公式3Dモデルを、干渉検査に使う(ビューアには入れない) |
 | `--only Pi4 PiZero` / `--series 20 DIN` | 一部だけ生成する(`--series` は 20 / 40 / DIN) |
 | `--out <dir>` | 出力先を変える(既定は `models/`) |
 | `--no-viewer` | `viewer.html` を作らない |
 
 VIM1S の公式3Dモデル(`vim1s-pcba-3d-v11.stp`)は、Khadas の配布物のため同梱していません。
-Khadas のダウンロードサイト(https://dl.khadas.com/products/)の、VIM1S の `blueprints/cad/` から入手できます。無くてもブラケットは同じ形になり、ビューアでの基板表示が板だけになります。
+Khadas のダウンロードサイト(https://dl.khadas.com/products/)の、VIM1S の `blueprints/cad/` から入手できます。無くてもブラケットは同じ形になります。
+ビューアの VIM1S の基板は、公式3Dモデルを渡したときも板だけで表示します。Khadas の配布物を変換した形を、配布する `viewer.html` に含めないためです。
 
 ## ファイル
 
