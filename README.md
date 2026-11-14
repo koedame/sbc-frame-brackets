@@ -137,4 +137,4 @@ Khadas のダウンロードサイト(https://dl.khadas.com/products/)の、VIM1
 
 このリポジトリのスクリプトとモデルのライセンスは、まだ決めていません。
 
-`vendor/` の three.js r128 は MIT ライセンスです(`vendor/LICENSE-three.txt`)。`models/viewer.html` にも同じものが埋め込まれています。
+`vendor/` の three.js r128 は MIT ライセンスです(`vendor/LICENSE-three.txt`)。`models/viewer.html` にも同じものを埋め込み、このライセンスの全文を HTML のコメントとして入れています。
