@@ -41,6 +41,7 @@
 - ファイル名は `<機種>_<2020|4040|DIN35>` と、その末尾に `_spacer` を付けたもの。
 - 生成した全モデルと `viewer.html` は `models/` に置き、スクリプトと一緒にリポジトリに入れる。
 - `viewer.html` は three.js を埋め込み、ネット接続なしで開ける。
+- `viewer.html` には three.js の MIT ライセンスの全文(`vendor/LICENSE-three.txt`)を HTML のコメントで入れる。`viewer.html` だけを持ち出しても許諾表示が欠けないようにするため。
 
 ## 4. 設計の経緯(却下した案と理由)
 
