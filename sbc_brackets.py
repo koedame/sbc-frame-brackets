@@ -10,7 +10,7 @@ Structure
   - The front plate is the same size as the board. Holes, cut-outs and the SD card notch are per board
   - spacer=True adds standoffs (bosses) integrated into the front plate
 """
-import sys
+import os, sys
 from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Pos, Rot, Plane, RectangleRounded,
                        extrude, fillet, chamfer, Axis, import_step)
 
@@ -217,11 +217,30 @@ def add_spacers(s, pts, h, d_boss, d_pilot):
     return s
 
 
-# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+) =======================
+def official(step_path):
+    """Place a board's official 3D model on its bracket, for interference checks only. Each board class lists the official
+    models it fits in STEPS: file name -> (rotation about z in degrees, centre x and y of the PCB outline, z of the PCB
+    underside), all in the file's own coordinates. Returns (board class, parts). Some models are partly surfaces rather than
+    solids (e.g. the ROCK 5B+ PCB), so the shells that belong to no solid are returned as parts too"""
+    name = os.path.basename(step_path)
+    for B in BOARDS:
+        if name in getattr(B, "STEPS", {}):
+            rot, cx, cy, zb = B.STEPS[name]
+            loc = Pos(0, T + BOARD_Y0 + B.S / 2, Z0 + T + B.BOARD_SPACER - zb) * Rot(0, 0, rot) * Pos(-cx, -cy, 0)
+            model = loc * import_step(step_path)
+            solids = model.solids()
+            in_solid = {sh for so in solids for sh in so.shells()}
+            return B, [c for c in solids if c.volume > 0.5] + [sh for sh in model.shells() if sh not in in_solid]
+    known = ", ".join(n for B in BOARDS for n in getattr(B, "STEPS", {}))
+    raise SystemExit(f"{name}: not a known official 3D model (known: {known})")
+
+
+# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64) =======================
 class PiB:
     """85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+;
-    the 2 B has "the same form factor" as the 1 B+ (official documentation)"""
-    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+"
+    the 2 B has "the same form factor" as the 1 B+ (official documentation). The official drawings of the Radxa ROCK 3C (2D DXF) and
+    the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge"""
+    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+, Radxa ROCK 3C, Pine64 ROCK64"
     L, S = 85.0, 56.0                                  # board outline
     HOLE_L, HOLE_S = (3.5, 61.5), (3.5, 52.5)          # mounting holes (long side, short side)
     HOLE_D = 3.0                                       # hole diameter of the version without standoffs
@@ -321,11 +340,14 @@ class PiA:
         return g
 
 
-# ======================= Raspberry Pi Zero size (Zero, Zero W, Zero 2 W) =======================
+# ======================= Raspberry Pi Zero size (Zero, Zero W, Zero 2 W, Radxa ZERO 3W / 3E) =======================
 class PiZero:
-    """65 x 30 mm, holes 58 x 23 mm, 3.5 mm from the edges (official Zero W and Zero 2 W mechanical drawings; the Zero has the same holes)"""
-    name, title = "PiZero", "Raspberry Pi Zero / Zero W / Zero 2 W"
+    """65 x 30 mm, holes 58 x 23 mm, 3.5 mm from the edges (official Zero W and Zero 2 W mechanical drawings; the Zero has the same holes).
+    The official drawings and 3D models of the Radxa ZERO 3W and 3E have the same outline and holes"""
+    name, title = "PiZero", "Raspberry Pi Zero / Zero W / Zero 2 W, Radxa ZERO 3W / 3E"
     L, S, BT = 65.0, 30.0, 1.6
+    STEPS = {"radxa_zero_3w_3d.stp": (180, 32.495, 15.003, -1.6),        # Radxa ZERO 3W
+             "rs109_pcba.stp": (180, 32.495, 15.003, -1.62)}             # Radxa ZERO 3E (the pads under the holes are 0.02 mm proud)
     HOLES = [(3.5, 3.5), (3.5, 26.5), (61.5, 3.5), (61.5, 26.5)]   # 58 x 23. Symmetric both ways, so one set fits either orientation
     HOLE_D = 3.0
     SD_DEPTH = 15.0
@@ -375,10 +397,11 @@ class PiZero:
         return g
 
 
-# ======================= Khadas VIM1S =======================
+# ======================= Khadas VIM1S / VIM3 / VIM4 =======================
 class VIM1S:
-    """Dimensions taken from Khadas' official 3D model vim1s-pcba-3d-v11.stp"""
-    name, title = "VIM1S", "Khadas VIM1S"
+    """Dimensions taken from Khadas' official 3D model vim1s-pcba-3d-v11.stp. The official 3D models and 2D drawings of the
+    VIM3 and VIM4 have the same outline and holes"""
+    name, title = "VIM1S", "Khadas VIM1S / VIM3 / VIM4"
     L, S, BT = 82.0, 56.638, 1.21
     HOLES = [(2.5, 3.134), (79.5, 3.134), (16.5, 48.634), (65.5, 48.634)]   # trapezoid pattern (77 / 49 / 45.5). s=0 is the GPIO side
     HOLE_D = 3.0
@@ -386,7 +409,9 @@ class VIM1S:
     WIN_S0, WIN_S1 = 7.5, 41.0
     SPACER = dict(h=5.0, d=5.0, pilot=1.7, screw="M2")  # 5 mm because the LAN jack on the underside sticks out 3.5 mm below the board
     BOARD_SPACER = 5.0
-    STEP_X0, STEP_Y0, STEP_ZTOP = -5.84, -62.952, 0.005  # lower-left corner and top face of the board in the official 3D model
+    STEPS = {"vim1s-pcba-3d-v11.stp": (0, 35.16, -34.633, -1.205),
+             "vim3-pcba-3d-v14.stp": (180, -155.846, 46.546, 50.143),
+             "vim4-pcba-3d-v13.stp": (180, 41.0, 28.315, -1.2)}
 
     @classmethod
     def xy(cls, l, s):
@@ -414,14 +439,55 @@ class VIM1S:
         return s
 
     @classmethod
-    def ghost(cls, step_path=None):
-        """Returns the official 3D model if given, otherwise just the bare board (does not affect the bracket shape)"""
-        loc = Pos(-cls.STEP_X0 - cls.L / 2, T + BOARD_Y0 - cls.STEP_Y0, Z0 + T + cls.BOARD_SPACER + cls.BT - cls.STEP_ZTOP)
-        if step_path:
-            return [c for c in (loc * import_step(step_path)).solids() if c.volume > 0.5]
+    def ghost(cls):
+        """Just the bare board (does not affect the bracket shape). Use the official 3D models (STEPS) for interference checks"""
         z = Z0 + T + cls.BOARD_SPACER
-        return [box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)]
+        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
 
 
-BOARDS = [PiB, PiA, PiZero, VIM1S]
+# ======================= Radxa ROCK 5B / 5B+ =======================
+class ROCK5B:
+    """100.2 x 74.25 mm, four 3.5 mm holes 93.15 x 49 mm apart, 3.55 mm from the GPIO-side edge (official 2D drawings and 3D models
+    of the ROCK 5B v1.42 and ROCK 5B+ v1.2). The microSD card sticks out past the GPIO-side edge, under the board, beside the frame"""
+    name, title = "ROCK5B", "Radxa ROCK 5B / 5B+"
+    L, S, BT = 100.2, 74.25, 1.6
+    HOLES = [(3.55, 3.55), (96.70, 3.55), (3.55, 52.55), (96.70, 52.55)]   # s=0 is the GPIO side
+    HOLE_D = 3.0                                       # the board holes are 3.5 mm
+    WIN_S = ((10.55, 45.55), (59.55, 70.25))           # two rows of lightening windows, clear of the standoffs
+    SPACER = dict(h=8.0, d=5.4, pilot=2.2, screw="M2.5")  # 8 mm: parts under the 5B+ reach 5.4 mm below the board, and the 5B's microSD card sits under it. 5.4 mm: a part under the 5B+ is 3.1 mm from a hole centre
+    BOARD_SPACER = 8.0
+    STEPS = {"ROCK5B_v1.42_3D.step": (180, -6.896, 94.691, -1.5),
+             "rock5bp_pcba_3d_V1_2_20250314.stp": (0, 47.097, 37.121, -1.6)}
+
+    @classmethod
+    def xy(cls, l, s):
+        return (cls.L / 2 - l, T + BOARD_Y0 + s)
+
+    @classmethod
+    def bracket(cls, series, spacer=False):
+        H = cls.L / 2
+        s = _l_body(series, H, BOARD_Y0 + cls.S)
+        for l, s_ in cls.HOLES:
+            x, y = cls.xy(l, s_)
+            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
+        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
+        for s0, s1 in cls.WIN_S:
+            for i in range(3):
+                a = l0 + i * (wl + RIB)
+                (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
+                s -= rrect(min(xa, xb), max(xa, xb), ya, yb2)
+        s = _finish(s, series, H, T + BOARD_Y0 + cls.S)
+        if spacer:
+            sp = cls.SPACER
+            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.HOLES], sp["h"], sp["d"], sp["pilot"])
+        return s
+
+    @classmethod
+    def ghost(cls):
+        """Just the bare board (does not affect the bracket shape). Use the official 3D models (STEPS) for interference checks"""
+        z = Z0 + T + cls.BOARD_SPACER
+        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
+
+
+BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B]
 SERIES = (20, 40, "DIN")
