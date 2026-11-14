@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SBCブラケット ビューア</title>
+<style>
+/* 左=部品表、中央=立体、右=仕様欄。色は取付部の緑と、SDカードの赤だけ */
+:root{
+  --paper:#eceeed; --panel:#f6f7f6; --ink:#1b2224; --dim:#5d686b; --rule:#c9cfce;
+  --part:#0f7b6c; --accent:#c8321e;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; --sans:"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#15191a;--panel:#1c2122;--ink:#e3e8e7;--dim:#96a2a3;--rule:#343c3d;--part:#45c0ad;--accent:#ef6a55;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#15191a;--panel:#1c2122;--ink:#e3e8e7;--dim:#96a2a3;--rule:#343c3d;--part:#45c0ad;--accent:#ef6a55;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font:14px/1.6 var(--sans);display:grid;grid-template-columns:250px minmax(0,1fr) 300px;grid-template-rows:100%}
+aside,section{background:var(--panel);overflow:auto;min-height:0}
+#list{border-right:1px solid var(--rule)}
+#list header{padding:14px;border-bottom:1px solid var(--rule)}
+h1{font-size:15px;font-weight:600;margin:0;text-wrap:balance}
+#list header p{margin:4px 0 0;color:var(--dim);font-size:12px}
+h2{font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--dim);margin:14px 0 4px;padding:0 14px}
+.row{display:flex;justify-content:space-between;gap:8px;width:100%;padding:7px 14px;border:0;border-left:3px solid transparent;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.row:hover{background:var(--paper)}
+.row[aria-current="true"]{background:var(--paper);border-left-color:var(--part)}
+.row:focus-visible,button:focus-visible{outline:2px solid var(--part);outline-offset:-2px}
+.row small{font:12px var(--mono);color:var(--dim)}
+#stage{position:relative;min-width:0;min-height:0}
+#stage canvas{display:block;width:100%;height:100%}
+#bar{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap}
+#bar button{font:12px var(--sans);padding:5px 10px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:3px;cursor:pointer}
+#bar button[aria-pressed="true"]{border-color:var(--ink)}
+#bar button[aria-pressed="false"]{opacity:.6}
+#legend{position:absolute;left:12px;bottom:12px;display:flex;gap:14px;font-size:12px;color:var(--dim);flex-wrap:wrap}
+#legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px}
+#info{border-left:1px solid var(--rule);padding-bottom:20px}
+#info .head{padding:14px;border-bottom:1px solid var(--rule)}
+#info .head .id{font:12px var(--mono);color:var(--part)}
+#info .head h1{font-size:17px;margin-top:2px}
+dl{margin:0;padding:0 14px;display:grid;grid-template-columns:90px 1fr;gap:3px 10px;font-size:13px}
+dt{color:var(--dim)}dd{margin:0}dd.m{font-family:var(--mono);font-variant-numeric:tabular-nums}
+ul{margin:0;padding:0 14px 0 30px;font-size:13px}li{margin:3px 0}
+#err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--dim)}
+@media (max-width:900px){body{grid-template-columns:1fr;grid-template-rows:auto 60vh auto;height:auto}html,body{height:auto}#list{border-right:0;border-bottom:1px solid var(--rule);max-height:260px}#info{border-left:0;border-top:1px solid var(--rule)}}
+</style>
+</head>
+<body>
+<aside id="list"><header><h1>SBCブラケット ビューア</h1><p>アルミフレーム / DINレール用 L字ブラケット 18モデル</p></header><div id="rows"></div></aside>
+<main id="stage">
+  <div id="bar">
+    <button type="button" id="tFrame" aria-pressed="true">フレーム/レール</button>
+    <button type="button" id="tBoard" aria-pressed="true">基板</button>
+    <button type="button" id="tFlip" aria-pressed="false">上下反転</button>
+    <button type="button" id="tReset">視点を戻す</button>
+  </div>
+  <div id="legend"><span><i style="background:var(--part)"></i>ブラケット(印刷部品)</span><span><i style="background:#9aa3a5"></i>フレーム/レール</span><span><i style="background:#8fb0c4"></i>基板</span><span>ドラッグで回転、ホイールで拡大、右ドラッグで移動</span></div>
+  <div id="err">3D表示に対応していないブラウザです。WebGLが使えるブラウザで開いてください。</div>
+</main>
+<section id="info"></section>
+<script>__THREE__</script>
+<script>__ORBIT__</script>
+<script>
+const D=__DATA__;
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const stage=$('#stage');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true})}catch(e){$('#err').style.display='flex'}
+const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(32,1,1,5000); camera.up.set(0,0,1);
+let controls=null;
+if(renderer){renderer.setPixelRatio(Math.min(devicePixelRatio,2)); stage.prepend(renderer.domElement); controls=new THREE.OrbitControls(camera,renderer.domElement)}
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f90,0.85)); const sun=new THREE.DirectionalLight(0xffffff,0.55); camera.add(sun); sun.position.set(-1,1.5,1); scene.add(camera);
+function geom(p){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(p.v,3));g.setIndex(p.t);const n=g.toNonIndexed();n.computeVertexNormals();return n}
+const cache={};
+function getGeom(key,p){return cache[key]||(cache[key]=geom(p))}
+const show={frame:true,board:true,flip:false}; let cur=null, frameMesh=null, flipGroup=null;
+function load(m){
+  if(flipGroup){scene.remove(flipGroup)} if(frameMesh){scene.remove(frameMesh)}
+  cur=m;
+  frameMesh=new THREE.Mesh(getGeom('f'+m.series,D.frames[m.series]),new THREE.MeshStandardMaterial({color:'#9aa3a5',roughness:.45,metalness:.5}));
+  flipGroup=new THREE.Group();
+  const bg=getGeom(m.id,m.mesh);
+  flipGroup.add(new THREE.Mesh(bg,new THREE.MeshStandardMaterial({color:css('--part'),roughness:.8,side:THREE.DoubleSide})));
+  flipGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(bg,28),new THREE.LineBasicMaterial({color:css('--ink'),transparent:true,opacity:.6})));
+  const board=new THREE.Mesh(getGeom('g'+m.name,D.ghosts[m.name]),new THREE.MeshStandardMaterial({color:'#8fb0c4',transparent:true,opacity:.35,depthWrite:false,side:THREE.DoubleSide}));
+  board.userData.board=1; flipGroup.add(board);
+  scene.add(frameMesh); scene.add(flipGroup); apply(); view(); info(m);
+  document.querySelectorAll('.row').forEach(b=>b.setAttribute('aria-current',b.dataset.id===m.id));
+}
+function apply(){if(!flipGroup)return; frameMesh.visible=show.frame; flipGroup.rotation.y=show.flip?Math.PI:0; flipGroup.children.forEach(o=>{if(o.userData.board)o.visible=show.board})}
+function view(){const b=new THREE.Box3().setFromObject(flipGroup.children[0]);const c=b.getCenter(new THREE.Vector3()),r=b.getSize(new THREE.Vector3()).length()/2;
+  const d=new THREE.Vector3(-0.9,1,0.55).normalize(); if(controls){controls.target.copy(c)} camera.position.copy(c).addScaledVector(d,r/Math.sin(camera.fov*Math.PI/360)*1.3); if(controls)controls.update(); else camera.lookAt(c)}
+function info(m){
+  $('#info').innerHTML=`<div class="head"><div class="id">${m.id}</div><h1>${esc(m.title)}用 ${esc(m.mount)}${m.spacer?' スペーサー一体':''}</h1></div>
+  <h2>寸法</h2><dl><dt>外形</dt><dd class="m">${m.size.join(' x ')} mm</dd><dt>体積</dt><dd class="m">${m.vol} cm3</dd>${m.min?`<dt>印刷時間</dt><dd class="m">約 ${m.min} 分(見積もり)</dd>`:''}</dl>
+  <h2>基板の固定</h2><dl>${m.spacer?`<dt>スペーサー</dt><dd>高さ${m.boss.h}mm、外径${m.boss.d}mm × 4</dd><dt>ネジ</dt><dd>${m.boss.screw}タッピング(下穴${m.boss.pilot}mm)</dd>`:`<dt>穴</dt><dd>直径3mmの貫通穴。スペーサーとネジは別に用意</dd>`}</dl>
+  <h2>取付先への固定</h2>${m.series==='DIN'?'<ul><li>中央のキーがレールの溝(側壁の間)に入り、上下方向の重さを受ける</li><li>両側の板バネの爪(0.8mm)がリップの裏に掛かる。上下同形</li><li>正面からまっすぐ押し込む。外すときは板バネの横のすきまにマイナスドライバーを入れて外側へ起こす</li></ul>':'<ul><li>上下とも同じ形の爪(返し1.0mm)で、上面と下面の溝に掛ける</li><li>正面の溝に入るキーで上下方向の重さを受ける</li><li>正面からまっすぐ押し込む。押し込めない場合はフレームの端から横に滑らせて入れる</li></ul>'}
+  <h2>造形</h2><ul><li>前板を下にして、サポート無しで印刷できる</li><li>材料はPETG推奨</li></ul>`;
+}
+const rows=$('#rows'); let last='';
+for(const m of D.models){
+  if(m.title!==last){const h=document.createElement('h2');h.textContent=m.title;rows.append(h);last=m.title}
+  const b=document.createElement('button');b.className='row';b.type='button';b.dataset.id=m.id;
+  b.innerHTML=`<span>${m.series==='DIN'?'DINレール':m.series+'角'}${m.spacer?' スペーサー一体':''}</span><small>${m.size[0]}x${m.size[1]}</small>`;
+  b.addEventListener('click',()=>{load(m);try{history.replaceState(null,'','#'+m.id)}catch(_){}});
+  rows.append(b);
+}
+function tog(id,k){$(id).addEventListener('click',e=>{show[k]=!show[k];e.currentTarget.setAttribute('aria-pressed',show[k]);apply()})}
+tog('#tFrame','frame');tog('#tBoard','board');tog('#tFlip','flip');$('#tReset').addEventListener('click',view);
+function size(){if(!renderer)return;const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(size).observe(stage); size();
+load(D.models.find(x=>x.id===location.hash.slice(1))||D.models[0]);
+addEventListener('hashchange',()=>{const m=D.models.find(x=>x.id===location.hash.slice(1));if(m)load(m)});
+(function loop(){requestAnimationFrame(loop);if(renderer){renderer.setClearColor(css('--paper'));renderer.render(scene,camera)}})();
+</script>
+</body>
+</html>
