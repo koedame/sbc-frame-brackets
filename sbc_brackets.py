@@ -8,9 +8,10 @@ Coordinates (bracket-local, in mm)
 Structure
   - The grip (two hooks + a key that sits in the front slot + the back plate) is shared by every board
   - The front plate is the same size as the board. Holes, cut-outs and the SD card notch are per board
-  - spacer=True adds standoffs (bosses) integrated into the front plate
+  - spacer=True adds standoffs (bosses) integrated into the front plate (upright orientations only, see SPACER_ORIENTS)
 """
 import os, sys
+import math
 from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Pos, Rot, Plane, RectangleRounded,
                        extrude, fillet, chamfer, Axis, import_step)
 
@@ -201,10 +202,12 @@ def rrect(x0, x1, y0, y1, rad=WIN_R):
     return Pos((x0 + x1) / 2, (y0 + y1) / 2, Z0 - 1) * extrude(RectangleRounded(x1 - x0, y1 - y0, rad), T + 2)
 
 
-def _l_body(series, H, depth):
-    """Grip + back plate + front plate + gusset. H = half height of the front plate, depth = from the back plate to the end of the front plate"""
+def _l_body(series, H, depth, Hb=None):
+    """Grip + back plate + front plate + gusset. H = half height of the front plate, depth = from the back plate to the end of the front plate,
+    Hb = half height of the back plate (H when not given)"""
     s = grip_din() if series == "DIN" else grip(series)
-    s += box(-H, H, 0.0, T, -W / 2, W / 2)
+    Hb = H if Hb is None else Hb
+    s += box(-Hb, Hb, 0.0, T, -W / 2, W / 2)
     s += box(-H, H, T - 0.01, T + depth, Z0, Z0 + T)
     y1 = T - 0.01; z1 = Z0 + T - 0.01
     s += Rot(0, -90, 0) * prism([(z1, y1), (z1, y1 + FIL), (z1 + FIL, y1)], 2 * H)
@@ -218,13 +221,30 @@ def _finish(s, series, H, yo):
     for sg in (1, -1):
         cx = sg * (H - CORNER_R); cy = yo - CORNER_R
         s -= box(*sorted((cx, sg * (H + 1))), cy, yo + 1, Z0 - 1, Z0 + T + 1) - Pos(cx, cy, Z0 + T / 2) * Cylinder(CORNER_R, T + 4)
-    xr = (din_leaf_x() + DIN_LEAF_T + DIN_SLIT_OUT + 2.0) if series == "DIN" else (series / 2 + FIT + ARM_T + 2.0)
+    xr = xr_of(series)
     zl = Z0 + T + FIL + 1.0; drop = W / 2 - zl
     if H - xr > 1.0:
         for sg in (1, -1):
-            pts = [(sg * xr, W / 2 + 0.1), (sg * (H + 0.1), W / 2 + 0.1), (sg * (H + 0.1), zl), (sg * (xr + drop), zl)]
+            if xr + drop <= H + 0.1:
+                pts = [(sg * xr, W / 2 + 0.1), (sg * (H + 0.1), W / 2 + 0.1), (sg * (H + 0.1), zl), (sg * (xr + drop), zl)]
+            else:                                      # a narrow plate: the slope reaches the plate edge before it gets down to zl
+                pts = [(sg * xr, W / 2 + 0.1), (sg * (H + 0.1), W / 2 + 0.1),
+                       (sg * (H + 0.1), W / 2 + 0.1 - (H + 0.1 - xr) * (W / 2 + 0.1 - zl) / drop)]
             s -= xz_prism(pts if sg > 0 else list(reversed(pts)), -0.02, T + 0.005)
-    outer = [e for e in s.edges().group_by(Axis.Z)[0] if e.center().Y > 1.0]   # skip the thin tips of the hooks
+    return bed_chamfer(s)
+
+
+def xr_of(series):
+    """Half height of back plate that the hooks (or the DIN leaf springs and their slits) need"""
+    return (din_leaf_x() + DIN_LEAF_T + DIN_SLIT_OUT + 2.0) if series == "DIN" else (series / 2 + FIT + ARM_T + 2.0)
+
+
+def bed_chamfer(s):
+    """Chamfer the outline on the build plate (against elephant's foot). Only where the wall above rises vertically: on a wall that
+    already leans out at 45 degrees (the roof of an opening that starts at the build plate), a chamfer would make it overhang"""
+    leaning = [x for f in s.faces() if 0.01 < abs(f.normal_at(f.center()).Z) < 0.99 for x in f.edges()]
+    outer = [e for e in s.edges().group_by(Axis.Z)[0] if e.center().Y > 1.0          # skip the thin tips of the hooks
+             and not any(e.is_same(x) for x in leaning)]
     for c in (BED_CHAMFER, 0.3):
         try:
             return chamfer(outer, c)
@@ -260,8 +280,40 @@ def official(step_path):
     raise SystemExit(f"{name}: not a known official 3D model (known: {known})")
 
 
+class Board:
+    """What every board class shares. A board class gives its outline (L x S), where its holes, openings and standoffs are on the
+    upright-portrait front plate (holes_xy / cuts / spacer_xy, in bracket-local x and y), and a simplified board (ghost)"""
+    SD_END = False                                     # True when the microSD slot is at the l = 0 short edge
+
+    @classmethod
+    def holes_xy(cls):
+        return [cls.xy(l, s_) for l, s_ in cls.HOLES]
+
+    @classmethod
+    def spacer_xy(cls):
+        return cls.holes_xy()
+
+    @classmethod
+    def bracket(cls, series, spacer=False, orient=None):
+        if spacer and orient not in (None,) + SPACER_ORIENTS:
+            raise ValueError(f"no integrated standoffs in {orient}: on a standing board plate they cannot print without support")
+        if orient not in (None, UPRIGHT):
+            return oriented(cls, series, spacer, orient)
+        H = cls.L / 2
+        s = _l_body(series, H, BOARD_Y0 + cls.S)
+        for x, y in cls.holes_xy():
+            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
+        for c in cls.cuts():
+            s -= rrect(*c)
+        s = _finish(s, series, H, T + BOARD_Y0 + cls.S)
+        if spacer:
+            sp = cls.SPACER
+            s = add_spacers(s, cls.spacer_xy(), sp["h"], sp["d"], sp["pilot"])
+        return s
+
+
 # ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64) =======================
-class PiB:
+class PiB(Board):
     """85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+;
     the 2 B has "the same form factor" as the 1 B+ (official documentation). The official drawings of the Radxa ROCK 3C (2D DXF) and
     the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge"""
@@ -270,6 +322,7 @@ class PiB:
     HOLE_L, HOLE_S = (3.5, 61.5), (3.5, 52.5)          # mounting holes (long side, short side)
     HOLE_D = 3.0                                       # hole diameter of the version without standoffs
     SD_DEPTH = 19.0
+    SD_END = True
     SPACER = dict(h=5.0, d=6.0, pilot=2.2, screw="M2.5")
     BOARD_SPACER = 5.0                                 # height the board sits at, for display and interference checks
 
@@ -283,24 +336,19 @@ class PiB:
         return (cls.L / 2 - l, T + BOARD_Y0 + s)
 
     @classmethod
-    def bracket(cls, series, spacer=False):
-        H = cls.L / 2
-        s = _l_body(series, H, BOARD_Y0 + cls.S)
-        for flip in (False, True):                     # two sets of holes (ports down / ports up)
-            for l, s_ in cls.holes(flip):
-                x, y = cls.xy(l, s_)
-                s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
-        yb = T + BOARD_Y0; yc = yb + 28.0; xn = H - cls.SD_DEPTH
+    def holes_xy(cls):
+        return [cls.xy(l, s_) for flip in (False, True) for l, s_ in cls.holes(flip)]   # two sets of holes (ports down / ports up)
+
+    @classmethod
+    def spacer_xy(cls):
+        return [cls.xy(l, s_) for l, s_ in cls.holes(False)]                         # standoffs only for the ports-down set
+
+    @classmethod
+    def cuts(cls):
+        H = cls.L / 2; yb = T + BOARD_Y0; yc = yb + 28.0; xn = H - cls.SD_DEPTH
         y0w = yb + 3.5 + 6.0 / 2 + 4.0; y1w = 2 * yc - y0w
-        for sg in (1, -1):                             # openings at both ends = SD card notch
-            s -= rrect(*sorted((sg * xn, sg * (2 * H - xn + 4))), y0w, y1w)
-        for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB)):
-            s -= rrect(x0, x1, y0w, y1w)
-        s = _finish(s, series, H, yb + cls.S)
-        if spacer:                                     # standoffs only for the ports-down set (4 of them)
-            sp = cls.SPACER
-            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.holes(False)], sp["h"], sp["d"], sp["pilot"])
-        return s
+        c = [tuple(sorted((sg * xn, sg * (2 * H - xn + 4)))) + (y0w, y1w) for sg in (1, -1)]   # openings at both ends = SD card notch
+        return c + [(x0, x1, y0w, y1w) for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB))]
 
     @classmethod
     def ghost(cls):
@@ -316,13 +364,14 @@ class PiB:
 
 
 # ======================= Raspberry Pi Model A+ size (3 A+, 1 A+) =======================
-class PiA:
+class PiA(Board):
     """65 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges (official 3 A+ mechanical drawing, which the documentation says also applies to the 1 A+)"""
     name, title = "PiA", "Raspberry Pi 3 A+ / 1 A+"
     L, S, BT = 65.0, 56.0, 1.6
     HOLES = [(3.5, 3.5), (3.5, 52.5), (61.5, 3.5), (61.5, 52.5)]   # symmetric along the long side, so one set fits either orientation
     HOLE_D = 3.0
     SD_DEPTH = 15.0
+    SD_END = True
     SPACER = dict(h=5.0, d=6.0, pilot=2.2, screw="M2.5")
     BOARD_SPACER = 5.0
 
@@ -331,24 +380,12 @@ class PiA:
         return (cls.L / 2 - l, T + BOARD_Y0 + (cls.S - s))      # GPIO side (large s) towards the back plate, ports facing out
 
     @classmethod
-    def bracket(cls, series, spacer=False):
-        H = cls.L / 2
-        s = _l_body(series, H, BOARD_Y0 + cls.S)
-        for l, s_ in cls.HOLES:
-            x, y = cls.xy(l, s_)
-            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
-        yb = T + BOARD_Y0
+    def cuts(cls):
+        H = cls.L / 2; yb = T + BOARD_Y0
         y0w = yb + 3.5 + 6.0 / 2 + 4.0; y1w = yb + cls.S - (3.5 + 6.0 / 2 + 4.0)   # clear of the standoffs, as on PiB
         xn = H - cls.SD_DEPTH
-        for sg in (1, -1):                             # openings at both ends = SD card notch (the board fits either way round)
-            s -= rrect(*sorted((sg * xn, sg * (H + 4))), y0w, y1w)
-        for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB)):
-            s -= rrect(x0, x1, y0w, y1w)
-        s = _finish(s, series, H, yb + cls.S)
-        if spacer:
-            sp = cls.SPACER
-            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.HOLES], sp["h"], sp["d"], sp["pilot"])
-        return s
+        c = [tuple(sorted((sg * xn, sg * (H + 4)))) + (y0w, y1w) for sg in (1, -1)]   # SD card notch at both ends (fits either way round)
+        return c + [(x0, x1, y0w, y1w) for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB))]
 
     @classmethod
     def ghost(cls):
@@ -366,7 +403,7 @@ class PiA:
 
 
 # ======================= Raspberry Pi Zero size (Zero, Zero W, Zero 2 W, Radxa ZERO 3W / 3E) =======================
-class PiZero:
+class PiZero(Board):
     """65 x 30 mm, holes 58 x 23 mm, 3.5 mm from the edges (official Zero W and Zero 2 W mechanical drawings; the Zero has the same holes).
     The official drawings and 3D models of the Radxa ZERO 3W and 3E have the same outline and holes"""
     name, title = "PiZero", "Raspberry Pi Zero / Zero W / Zero 2 W, Radxa ZERO 3W / 3E"
@@ -376,6 +413,7 @@ class PiZero:
     HOLES = [(3.5, 3.5), (3.5, 26.5), (61.5, 3.5), (61.5, 26.5)]   # 58 x 23. Symmetric both ways, so one set fits either orientation
     HOLE_D = 3.0
     SD_DEPTH = 15.0
+    SD_END = True
     WIN_M = 2.5
     SPACER = dict(h=3.0, d=6.0, pilot=2.2, screw="M2.5")
     BOARD_SPACER = 3.0
@@ -385,24 +423,12 @@ class PiZero:
         return (cls.L / 2 - l, T + BOARD_Y0 + (cls.S - s))      # GPIO side (large s) towards the back plate, ports facing out
 
     @classmethod
-    def bracket(cls, series, spacer=False):
-        H = cls.L / 2
-        s = _l_body(series, H, BOARD_Y0 + cls.S)
-        for l, s_ in cls.HOLES:
-            x, y = cls.xy(l, s_)
-            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
-        yb = T + BOARD_Y0
+    def cuts(cls):
+        H = cls.L / 2; yb = T + BOARD_Y0
         y0w = yb + 3.5 + cls.HOLE_D / 2 + cls.WIN_M; y1w = yb + cls.S - 3.5 - cls.HOLE_D / 2 - cls.WIN_M
         xn = H - cls.SD_DEPTH
-        for sg in (1, -1):
-            s -= rrect(*sorted((sg * xn, sg * (H + 4))), y0w, y1w)
-        for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB)):
-            s -= rrect(x0, x1, y0w, y1w)
-        s = _finish(s, series, H, yb + cls.S)
-        if spacer:
-            sp = cls.SPACER
-            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.HOLES], sp["h"], sp["d"], sp["pilot"])
-        return s
+        c = [tuple(sorted((sg * xn, sg * (H + 4)))) + (y0w, y1w) for sg in (1, -1)]
+        return c + [(x0, x1, y0w, y1w) for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB))]
 
     @classmethod
     def ghost(cls):
@@ -423,7 +449,7 @@ class PiZero:
 
 
 # ======================= Khadas VIM1S / VIM3 / VIM4 =======================
-class VIM1S:
+class VIM1S(Board):
     """Dimensions taken from Khadas' official 3D model vim1s-pcba-3d-v11.stp. The official 3D models and 2D drawings of the
     VIM3 and VIM4 have the same outline and holes"""
     name, title = "VIM1S", "Khadas VIM1S / VIM3 / VIM4"
@@ -443,25 +469,16 @@ class VIM1S:
         return (l - cls.L / 2, T + BOARD_Y0 + s)
 
     @classmethod
-    def bracket(cls, series, spacer=False):
-        H = cls.L / 2
-        s = _l_body(series, H, BOARD_Y0 + cls.S)
-        for l, s_ in cls.HOLES:
-            x, y = cls.xy(l, s_)
-            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
+    def cuts(cls):
         l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
+        c = []
         for i in range(3):                             # three lightening windows
             a = l0 + i * (wl + RIB)
             (xa, ya), (xb, yb2) = cls.xy(a, cls.WIN_S0), cls.xy(a + wl, cls.WIN_S1)
-            s -= rrect(xa, xb, ya, yb2)
+            c.append((xa, xb, ya, yb2))
         yo = T + BOARD_Y0 + cls.S
         (xa, ya), (xb, _) = cls.xy(cls.SD_L0, cls.SD_S0), cls.xy(cls.SD_L1, 0)
-        s -= rrect(xa, xb, ya, yo + 4)                 # microSD notch (open to the outer edge)
-        s = _finish(s, series, H, yo)
-        if spacer:
-            sp = cls.SPACER
-            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.HOLES], sp["h"], sp["d"], sp["pilot"])
-        return s
+        return c + [(xa, xb, ya, yo + 4)]              # microSD notch (open to the outer edge)
 
     @classmethod
     def ghost(cls):
@@ -471,7 +488,7 @@ class VIM1S:
 
 
 # ======================= Radxa ROCK 5B / 5B+ =======================
-class ROCK5B:
+class ROCK5B(Board):
     """100.2 x 74.25 mm, four 3.5 mm holes 93.15 x 49 mm apart, 3.55 mm from the GPIO-side edge (official 2D drawings and 3D models
     of the ROCK 5B v1.42 and ROCK 5B+ v1.2). The microSD card sticks out past the GPIO-side edge, under the board, beside the frame"""
     name, title = "ROCK5B", "Radxa ROCK 5B / 5B+"
@@ -489,23 +506,15 @@ class ROCK5B:
         return (cls.L / 2 - l, T + BOARD_Y0 + s)
 
     @classmethod
-    def bracket(cls, series, spacer=False):
-        H = cls.L / 2
-        s = _l_body(series, H, BOARD_Y0 + cls.S)
-        for l, s_ in cls.HOLES:
-            x, y = cls.xy(l, s_)
-            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
+    def cuts(cls):
         l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
+        c = []
         for s0, s1 in cls.WIN_S:
             for i in range(3):
                 a = l0 + i * (wl + RIB)
                 (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
-                s -= rrect(min(xa, xb), max(xa, xb), ya, yb2)
-        s = _finish(s, series, H, T + BOARD_Y0 + cls.S)
-        if spacer:
-            sp = cls.SPACER
-            s = add_spacers(s, [cls.xy(l, s_) for l, s_ in cls.HOLES], sp["h"], sp["d"], sp["pilot"])
-        return s
+                c.append((min(xa, xb), max(xa, xb), ya, yb2))
+        return c
 
     @classmethod
     def ghost(cls):
@@ -516,3 +525,193 @@ class ROCK5B:
 
 BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B]
 SERIES = (20, 40, "DIN")
+
+
+# ======================= Mounting orientations =======================
+# The grip only prints one way up, so every orientation keeps it on the build plate (z = Z0) and changes how the board plate sits
+# relative to it. A board's holes, openings and standoffs are defined once, on the upright-portrait front plate (the "board frame":
+# holes_xy / cuts / spacer_xy / ghost / STEPS), and place() moves them, the simplified board and the official 3D models to the
+# orientation. In the flat and shelf orientations the board plate stands upright while printing, so openings get 45-degree roofs,
+# holes become teardrops, and each opening keeps the rest of its rectangle as a shallow pocket in the face under the board.
+# Those orientations have no integrated standoffs: a standoff growing sideways out of a standing plate only prints without support
+# if its underside rises at 45 degrees from the plate. Either that slope eats the seat (most of it on PiB and VIM1S, and the ROCK5B
+# standoffs never reach the board), or it is filled in below and hits the parts under the ZERO 3E and VIM1S boards.
+ORIENTS = {"upright-portrait": "Upright, portrait", "upright-landscape": "Upright, landscape",
+           "flat-portrait": "Flat, portrait", "flat-landscape": "Flat, landscape",
+           "shelf-portrait": "Shelf, portrait", "shelf-landscape": "Shelf, landscape"}
+UPRIGHT = "upright-portrait"
+SPACER_ORIENTS = ("upright-portrait", "upright-landscape")   # orientations with an integrated-standoff version
+SD_GAP = 17.0            # gap to the back plate when the microSD end of the board faces the frame, so a finger reaches the card
+POCKET = 1.0             # depth of the pocket that keeps an opening's whole rectangle clear on a standing plate (parts under the
+                         # ZERO 3E reach 0.64 mm into the plate where the 45-degree roof of its microSD-end notch leaves material)
+
+
+def shelf_top(series):
+    """Height of the shelf's top face. On DIN rail the shelf, its gusset and the root rib keep clear of the leaf springs' slits"""
+    if series == "DIN":
+        return din_leaf_x() + DIN_LEAF_T + DIN_SLIT_OUT + 0.5 + T + FIL
+    return xr_of(series)
+
+
+def gap(B, orient):
+    """From the front face of the back plate to the near edge of the board"""
+    return SD_GAP if B.SD_END and orient in ("upright-landscape", "shelf-portrait") else BOARD_Y0
+
+
+def flat_edge(B, orient, series):
+    """Where a flat-mounted board starts along the rail: beside the grip (z = W/2), or further on when one of its holes would
+    otherwise reach the gap that a DIN leaf spring needs above its free end"""
+    if series != "DIN":
+        return W / 2
+    M = place(B, orient, series, edge=W / 2)
+    xl = din_leaf_x(); k0, k1 = xl - DIN_SLIT_IN - 0.5, xl + DIN_LEAF_T + DIN_SLIT_OUT + 0.5
+    zc = W / 2 + 1 + (DIN_SLIT_IN + DIN_LEAF_T + DIN_SLIT_OUT) / 2 + 1.0       # top of the gap over the leaf spring + 1 mm
+    hit = lambda x, w: abs(x) + w > k0 and abs(x) - w < k1
+    need = 0.0
+    for x, y in B.holes_xy():
+        p = (M * Pos(x, y, Z0)).position
+        if hit(p.X, B.HOLE_D / 2):
+            need = max(need, zc - (p.Z - B.HOLE_D / 2))
+    return W / 2 + need
+
+
+def place(B, orient, series, edge=None):
+    """Location that moves the board frame (upright portrait) to the orientation"""
+    L, S = B.L, B.S; yb = T + BOARD_Y0; g = gap(B, orient); hs = shelf_top(series)
+    if edge is None and orient.startswith("flat"):
+        edge = flat_edge(B, orient, series)
+    tf = {"upright-portrait": ((0, 0, 0), (1, 0, 0), (0, 0, 1)),
+          "upright-landscape": ((-(yb + S / 2), T + g + L / 2, 0), (0, -1, 0), (0, 0, 1)),     # microSD end towards the frame, ports forward
+          "flat-portrait": ((0, -Z0, (edge or 0) + yb + S), (1, 0, 0), (0, 1, 0)),             # the board starts beside the grip
+          "flat-landscape": ((yb + S / 2, -Z0, (edge or 0) + L / 2), (0, 0, -1), (0, 1, 0)),
+          "shelf-portrait": ((hs - T - Z0, T + g + L / 2, Z0 + yb + S), (0, -1, 0), (1, 0, 0)),
+          "shelf-landscape": ((hs - T - Z0, T + g - yb, Z0 + L / 2), (0, 0, -1), (1, 0, 0))}[orient]
+    return Plane(origin=tf[0], x_dir=tf[1], z_dir=tf[2]).location
+
+
+def _vcut(kind, sk, n0, n1):
+    """Extrude a sketch drawn in (across, up) through a standing plate, from n0 to n1 along its normal.
+    kind "flat": plate in the x-z plane (across = x, normal = y); "shelf": plate in the y-z plane (across = y, normal = x)"""
+    o, xd, zd = ((0, (n0 + n1) / 2, 0), (1, 0, 0), (0, -1, 0)) if kind == "flat" else (((n0 + n1) / 2, 0, 0), (0, 1, 0), (1, 0, 0))
+    return Plane(origin=o, x_dir=xd, z_dir=zd).location * extrude(sk, abs(n1 - n0) / 2, both=True)
+
+
+def _tear(a, b, r):
+    """Teardrop (point up) so a sideways hole prints without support"""
+    q = r / math.sqrt(2)
+    return Pos(a, b) * (Circle(r) + Polygon((-q, q), (0, r * math.sqrt(2)), (q, q), (0, 0), align=None))
+
+
+def _vopen(a0, a1, b0, b1, lo, hi, top):
+    """Outlines (across, up) of an opening in a standing plate whose top is never a flat roof: a notch open at the top stays a
+    rectangle, a notch open at the side gets a roof rising towards the open edge, a closed opening gets a 45-degree roof inside
+    the rectangle (split by ribs when it is too wide for one). lo / hi / top = edges of the plate"""
+    h = b1 - b0
+    if b1 >= top:
+        return [[(a0, b0), (a1, b0), (a1, b1), (a0, b1)]]
+    if a1 > hi:
+        e = hi
+        return [[(a0, b0), (a1, b0), (a1, b1), (e, b1), (a0, b1 - (e - a0))] if e - a0 < h else
+                [(e - h, b0), (a1, b0), (a1, b1), (e, b1)]]
+    if a0 < lo:
+        e = lo
+        return [[(a1, b0), (a1, b1 - (a1 - e)), (e, b1), (a0, b1), (a0, b0)] if a1 - e < h else
+                [(e + h, b0), (e, b1), (a0, b1), (a0, b0)]]
+    w = a1 - a0; n = max(1, math.ceil((w + RIB) / (2 * h + RIB)))
+    wi = (w - (n - 1) * RIB) / n
+    out = []
+    for i in range(n):
+        c0 = a0 + i * (wi + RIB); c1 = c0 + wi
+        out.append([(c0, b0), (c1, b0), (c1, b1 - wi / 2), ((c0 + c1) / 2, b1), (c0, b1 - wi / 2)])
+    return out
+
+
+def _round_top(s, kind, lo, hi, top, n0, n1):
+    """Round the two top corners of a standing plate (the bottom ones stay square: a rounded bottom corner would overhang)"""
+    R = CORNER_R
+    for e, sg in ((hi, 1), (lo, -1)):
+        sk = Pos(e - sg * (R - 1) / 2, top - (R - 1) / 2) * Rectangle(R + 1, R + 1) - Pos(e - sg * R, top - R) * Circle(R)
+        s -= _vcut(kind, sk, n0 - 0.01, n1 + 0.01)
+    return s
+
+
+def din_caps(s):
+    """For a back plate that carries on above the grip: a gap with a 45-degree roof over each leaf spring, so the plate above does
+    not tie the spring's free end"""
+    xl = din_leaf_x(); x0, x1 = xl - DIN_SLIT_IN, xl + DIN_LEAF_T + DIN_SLIT_OUT; z1 = W / 2 + 1
+    for sg in (1, -1):
+        pts = [(x0, W / 2), (x1, W / 2), (x1, z1), ((x0 + x1) / 2, z1 + (x1 - x0) / 2), (x0, z1)]
+        s -= xz_prism(pts if sg > 0 else [(-x, z) for x, z in reversed(pts)], -0.02, T + 0.02)
+    return s
+
+
+def oriented(B, series, spacer, orient):
+    """Bracket for an orientation other than upright portrait"""
+    M = place(B, orient, series)
+    kind = orient.split("-")[0]; portrait = orient.endswith("portrait")
+    L, S = B.L, B.S; g = gap(B, orient); xr = xr_of(series); sp = B.SPACER
+    to = lambda xy: [tuple((M * Pos(x, y, Z0)).position) for x, y in xy]
+
+    def rect(c):                                       # an opening of the board frame -> (x0, x1, y0, y1, z0, z1)
+        (ax, ay, az), (bx, by, bz) = to([(c[0], c[2]), (c[1], c[3])])
+        return min(ax, bx), max(ax, bx), min(ay, by), max(ay, by), min(az, bz), max(az, bz)
+
+    if kind == "upright":                              # landscape: long side forward, the plate still lies on the build plate
+        Hp = S / 2
+        s = _l_body(series, Hp, g + L, Hb=max(Hp, xr))
+        for x, y, _ in to(B.holes_xy()):
+            s -= Pos(x, y, Z0 + T / 2) * Cylinder(B.HOLE_D / 2, T + 2)
+        for x0, x1, y0, y1, _, _ in map(rect, B.cuts()):
+            y0 = max(y0, T + FIL + 1.0)                # an opening that reaches past the board stops short of the gusset
+            if y1 - y0 > 2 * WIN_R + 0.1 and x1 - x0 > 2 * WIN_R + 0.1:
+                s -= rrect(x0, x1, y0, y1)
+        s = _finish(s, series, Hp, T + g + L)
+        if spacer:
+            s = add_spacers(s, [(x, y) for x, y, _ in to(B.spacer_xy())], sp["h"], sp["d"], sp["pilot"])
+        return s
+
+    s = grip_din() if series == "DIN" else grip(series)
+    if kind == "flat":                                 # the back plate is the board plate; the board sits beside the grip
+        Pa = (L if portrait else S) / 2; ze = flat_edge(B, orient, series); top = ze + (S if portrait else L)
+        s += box(-max(Pa, xr), max(Pa, xr), 0, T, Z0, W / 2)
+        s += box(-Pa, Pa, 0, T, W / 2 - 0.01, top)
+        if series == "DIN":
+            s = din_caps(din_slits(s, Pa))
+        n0, n1, lo, hi, b_min = 0.0, T, -Pa, Pa, max(ze + 1.0, W / 2 + 4.0)   # openings keep a rib above the grip
+        ac = lambda p: p[0]
+    else:                                              # shelf on top of the back plate, the board lying on it
+        hs = shelf_top(series); yo = T + g + (L if portrait else S); top = Z0 + (S if portrait else L)
+        s += box(-xr, hs, 0, T, Z0, W / 2)
+        s += box(hs - T, hs, 0, yo, Z0, top)
+        s += box(hs - RIB, hs, 0, T, Z0, top)          # rib along the shelf's root
+        x1 = hs - T + 0.01; y1 = T - 0.01
+        s += Pos(0, 0, (Z0 + top) / 2) * prism([(x1, y1), (x1, y1 + FIL), (x1 - FIL, y1)], top - Z0)   # gusset under the shelf
+        if series == "DIN":
+            s = din_slits(s, xr)
+        n0, n1, lo, hi, b_min = hs - T, hs, -1e9, yo, -1e9
+        ac = lambda p: p[1]
+        Pa = None
+    for p in to(B.holes_xy()):
+        s -= _vcut(kind, _tear(ac(p), p[2], B.HOLE_D / 2), n0 - 1, n1 + 1)
+    for c in map(rect, B.cuts()):
+        a0, a1 = (c[0], c[1]) if kind == "flat" else (c[2], c[3])
+        if kind == "shelf":
+            a0 = max(a0, T + FIL + 1.0)                # stop short of the gusset and the rib at the root
+        b0, b1 = max(c[4], b_min), c[5]
+        if b1 - b0 < 1.0 or a1 - a0 < 1.0:
+            continue
+        for poly in _vopen(a0, a1, b0, b1, lo, hi, top):
+            s -= _vcut(kind, Polygon(*poly, align=None), n0 - 1, n1 + 1)
+        # the rest of the rectangle as a pocket in the face under the board, its ceiling cut at 45 degrees
+        s -= _vcut(kind, Polygon((a0, b0), (a1, b0), (a1, b1 - POCKET), (a0, b1 - POCKET), align=None), n1 - POCKET, n1 + 0.01)
+        s -= _vcut("shelf" if kind == "flat" else "flat",
+                   Polygon((n1 - POCKET, b1 - POCKET - 0.01), (n1 + 0.01, b1 - POCKET - 0.01), (n1 + 0.01, b1 + 0.01), align=None), a0, a1)
+    s = _round_top(s, kind, lo, hi, top, n0, n1) if kind == "flat" else _round_top_far(s, hi, top, n0, n1)
+    return bed_chamfer(s)
+
+
+def _round_top_far(s, hi, top, n0, n1):
+    """Shelf: round only the top corner at the far end (the root end is held by the rib)"""
+    R = CORNER_R
+    sk = Pos(hi - (R - 1) / 2, top - (R - 1) / 2) * Rectangle(R + 1, R + 1) - Pos(hi - R, top - R) * Circle(R)
+    return s - _vcut("shelf", sk, n0 - 0.01, n1 + 0.01)
