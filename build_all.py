@@ -4,7 +4,7 @@ Ready-made files for every model are attached to each GitHub release; build only
 
 Usage:
   python build_all.py --board PiB --mount 20 --orient flat-portrait --format 3mf
-                                               # only what you need: here the Raspberry Pi B bracket for 20x20, flat portrait, as 3MF
+                                               # only what you need: here the PiB bracket (Raspberry Pi B size) for 20x20, flat portrait, as 3MF
   python build_all.py --board PiB --check      # also check interference with the frame and board, unsupported areas and print time,
                                                # and for DIN rail whether the leaf springs can bend far enough to push on (exit 1 if a check fails)
   python build_all.py --check --board-step vim1s-pcba-3d-v11.stp --board-step ROCK5B_v1.42_3D.step
