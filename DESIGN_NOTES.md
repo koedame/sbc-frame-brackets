@@ -3,7 +3,7 @@
 Notes for picking this project up and carrying on. The README says *what* is here; these notes say *why* it is the way it is and *what to do next*.
 Read these notes before you resume work.
 
-Last updated: 2026-11-15
+Last updated: 2026-11-16
 
 ---
 
@@ -41,10 +41,10 @@ Last updated: 2026-11-15
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the board size: `PiB`, `PiA`, `PiZero`, `VIM1S` or `ROCK5B`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the board size: `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B` or `BBB`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and attach every file to that release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. Push a tag only when the maintainer asks for a release.
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>`, which follows the latest release. Keep file names stable: renaming a file breaks those links.
-- A release holds at most 1000 files. There are now 367 (120 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
+- A release holds at most 1000 files. There are now 439 (144 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -182,10 +182,27 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `PiZero` | 0.5 mm / 7.6 MPa | 14.3 mm / 51.5 MPa | 0.4 mm / 8.2 MPa | 8.0 mm / 41.3 MPa | 13.1 mm / 46.0 MPa | 0.4 mm / 6.1 MPa |
 | `VIM1S` | 3.1 mm / 13.1 MPa | 12.5 mm / 25.9 MPa | 2.6 mm / 11.4 MPa | 11.0 mm / 26.8 MPa | 11.0 mm / 21.9 MPa | 2.3 mm / 9.1 MPa |
 | `ROCK5B` | 6.4 mm / 17.7 MPa | 16.1 mm / 22.0 MPa | 5.5 mm / 16.2 MPa | 15.3 mm / 21.9 MPa | 13.9 mm / 19.3 MPa | 4.7 mm / 12.6 MPa |
+| `BBB` | 1.8 mm / 7.7 MPa | 16.8 mm / 23.3 MPa | 2.3 mm / 15.2 MPa | 11.3 mm / 22.3 MPa | 15.5 mm / 22.3 MPa | 1.6 mm / 6.5 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
 - Upright landscape, flat landscape and shelf portrait are the long overhangs. On `PiZero` the narrow plate reaches the strength of PETG in upright landscape (51.5 of 51 MPa) and flat landscape (41.3 of 35 MPa), and 90% of it in shelf portrait. Hold the board when plugging in or pulling out a cable in those orientations (the README says so). Stiffening them is an open item (section 9).
+
+### History 9: BeagleBoard.org BeagleBone Black (2026-11-16)
+
+The maintainer asked for a BeagleBone Black bracket in all six orientations.
+
+- **Sources.** BeagleBoard.org publishes no 3D model or DXF of the board, but its design files are public. The dimensions come from the Rev C3 manufacturing data (board outline on the fabrication drawing layer, drill file, silkscreen and placement list) and the bill of materials, checked against the board dimension drawing (Fig. 486) and the cape outline (Fig. 485) in the System Reference Manual. Links in section 7.
+- **Outline 86.36 x 54.61 mm (3.400 x 2.150 in).** The text of the System Reference Manual says "3.5” x 2.15” (86.36mm x 53.34mm)". Its own dimension drawing and the manufacturing data both give 3.400 x 2.150 in, so the 3.5 in and the 53.34 mm in that line are wrong. The corners have a 0.25 in radius at the Ethernet end and a 0.5 in radius at the microSD end. PCB 0.062 in.
+- **Holes.** Four plated 0.125 in (3.175 mm) holes at (0.575, 0.125), (0.575, 2.025), (3.175, 0.250) and (3.175, 1.900) in from the corner at the Ethernet end and the P9 header edge: a trapezoid 66.04 mm long, 48.26 mm across at the Ethernet end and 41.91 mm at the microSD end. The drill file, the dimension drawing and the cape outline agree. No existing bracket matches (`PiB` is a 58 x 49 mm rectangle, `VIM1S` a different trapezoid), so the board gets its own class, `BBB`. The board-plate holes stay 3 mm, as on every bracket, which is tight for M3 screws (section 9).
+- **Rev C3, not Rev D.** The repository also has the current Rev D board file (an Allegro `.brd`, which was not read). The Rev D change notice describes electrical changes and calls the new microSD holder mechanically compatible, and the holes are part of the cape outline, so the Rev C3 data is used.
+- **The microSD end faces the frame (`SD_END`).** The microSD slot and the micro HDMI (both under the board) and the USB-A port are at one short end; Ethernet, the power jack and the mini USB (under the board) are at the other. Every setup needs power and most need Ethernet, so the microSD end is the one that faces the frame in upright landscape and shelf portrait, with the 17 mm gap. A USB-A or micro HDMI plug does not fit in that gap; the README says so.
+- **Parts under the board.** The bill of materials gives the heights of the top parts (RJ45 13.3 mm, power jack 11 mm, USB-A 7 mm, expansion headers 8.5 mm with 3.0 mm tails, which reach 1.43 mm below the board), and the footprint name of the microSD holder gives 1.8 mm. The heights of the micro HDMI and the mini USB are not published (the connector makers' sites could not be used), and the manual's "Max height: .187” (4.76mm)" does not say what it measures. So:
+  - The plate is notched under the micro HDMI and the microSD holder, open to the microSD end so a finger reaches the card, and under the mini USB, open to the Ethernet end. Two lightening windows sit between them, clear of the standoffs.
+  - The simplified board shows those two connectors reaching the plate. Extended through the plate (upright) or 0.99 mm into it (flat and shelf, just inside the `POCKET` depth), they stay clear of the plate in every orientation but flat landscape. There the outer 4 mm of the micro HDMI is over the rib that every flat bracket keeps above the grip (38 mm3 of overlap), so in that orientation the micro HDMI has to stand less than 6 mm below the board.
+  - Standoffs 6 mm tall, above the 4.76 mm whatever it measures, and 6 mm across: the nearest parts under the board (a 0402 capacitor in the placement list, and the header pins in the drill file) are 5.2 mm from a hole centre. M3 with a 2.6 mm pilot hole (the ratio of the M2.5 and M2 pilot holes).
+- **Corners.** The plate keeps the usual 3.5 mm corner radius. At the microSD end, where the board's corners have a 12.7 mm radius, the plate's rounded corners reach up to 3.8 mm past the board's along the diagonal (1.2 mm at the Ethernet end).
+- **Simplified board.** Placed from the silkscreen outlines, the header pins in the drill file and the heights in the bill of materials. It is the only interference check: there is no official 3D model to pass with `--board-step`. The board design files are published without a license file (the OSHWA certificate US000236 lists the hardware license as "Other"), so, as for the other boards, nothing taken from them is distributed: no files, and no shapes converted from them in `viewer.html`.
 
 ## 5. Current dimensions (main ones)
 
@@ -231,6 +248,7 @@ See the constants in `sbc_brackets.py` for the details.
 | Radxa ROCK 3C (`PiB`) | [Official DXF v1.400](https://dl.radxa.com/rock3/docs/hw/3c/v1400/radxa_rock_3c_v1400_2d_dxf.zip) (from the [download page](https://docs.radxa.com/en/rock3/rock3c/download)). 85 x 56 mm, holes 58 x 49 mm 3.5 mm from the edges, 2.8 mm; microSD at the middle of the short edge on the underside, as on the Raspberry Pi | High for the outline and holes. No official 3D model, so not checked against the components |
 | Pine64 ROCK64 (`PiB`) | [Official dimension drawing](https://files.pine64.org/doc/rock64/rock64%20board%20dimension.pdf). 85 x 56 mm, holes 58 x 49 mm 3.5 mm from the edges; microSD at the middle of the short edge | High for the outline and holes. No official 3D model (the one linked from the wiki is from a third party), so not checked against the components |
 | Radxa ZERO 3W / 3E (`PiZero`) | Official DXF and 3D models from the [download page](https://docs.radxa.com/en/zero/zero3/download): 3W [DXF](https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_2d_dxf.zip) and [STEP](https://dl.radxa.com/zero3/docs/hw/3w/radxa_zero_3w_3d_stp.zip), 3E [DXF](https://dl.radxa.com/zero3/docs/hw/3e/radxa_zero_3e_v1200_2d.zip) and [STEP](https://dl.radxa.com/zero3/docs/hw/3e/radxa_zero_3e_3d_stp.zip). 65 x 30 mm, 2.8 mm holes up to 0.14 mm from the Raspberry Pi Zero positions (history 7) | High. Interference checked against the official 3D models |
+| BeagleBoard.org BeagleBone Black (`BBB`) | Official design files in [beagleboard/beaglebone-black](https://github.com/beagleboard/beaglebone-black): the Rev C3 [manufacturing data](https://github.com/beagleboard/beaglebone-black/tree/1a732ca598999bf4c6c08e1d1546cdecaa0ca30b/MFG) (board outline, drill file, silkscreen, placement list) and the [bill of materials](https://github.com/beagleboard/beaglebone-black/blob/a58016c7537aa714f1d05c58d2ccf23bf2eb029b/BBB_BOM.xls), checked against the System Reference Manual's [board dimension drawing](https://docs.beagleboard.org/boards/beaglebone/black/ch09.html) (Fig. 486) and [cape outline](https://docs.beagleboard.org/boards/beaglebone/black/ch08.html) (Fig. 485). 86.36 x 54.61 mm, 3.175 mm holes in a trapezoid (history 9) | High for the outline and holes. No official 3D model: checked against a simplified board placed from the silkscreen; the heights of the micro HDMI and mini USB under the board are not published |
 | Radxa ROCK 5B / 5B+ (`ROCK5B`) | Official drawings and 3D models from the [download page](https://docs.radxa.com/en/rock5/rock5b/download): 5B [DXF v1.41](https://dl.radxa.com/rock5/5b/docs/hw/radxa_rock5b_v141_dimension_20220728_dxf.zip) and [STEP v1.42](https://dl.radxa.com/rock5/5b/docs/hw/ROCK5B_v1.42_3D.step.zip), 5B+ [DXF v1.2](https://dl.radxa.com/rock5/5b+/docs/hw/radxa_rock5bp_v12_2d.zip) and [STEP v1.2](https://dl.radxa.com/rock5/5b+/docs/hw/rock5bp_pcba_3d_V1_2_20250314.stp). 100.2 x 74.25 mm, 3.5 mm holes 93.15 x 49 mm | High. Interference checked against the official 3D models |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
@@ -250,7 +268,7 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 
 - Take dimensions for new boards from the manufacturer's official 3D model or drawing. Do not place holes from memory or guesswork: for the VIM1S, the first guess ("rectangular pattern") was wrong.
 - Official 3D models and drawings are not included (`*.stp`, and `*.step` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step`. The file name tells which bracket it belongs to (`STEPS` in each board class).
-- Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15).
+- Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15). BeagleBoard.org publishes no 3D model, and its design files have no license file (as of 2026-11-16), so only dimensions read from them are used.
 
 ## 8. Test print log
 
@@ -268,11 +286,12 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Get the results of printing the current version and the coupons, then settle `FIT` and `HOOK`
 - [ ] Reduce the `PiB` board holes from two sets (8 holes) to one set? Flipping the whole bracket upside down already lets one set face the ports either way
 - [ ] Make the VIM1S screw holes smaller for M2 (about 2.4 mm)? Currently 3 mm, which is loose for M2
-- [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2) on real parts
+- [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2, 2.6 mm for M3) on real parts
 - [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width, and whether the roots of the leaf springs whiten or crack)
 - [ ] Lower the strain at the roots of the DIN leaf springs (about 2.9%, section 4 history 4)? Each way trades against how firmly the barbs hold: a shorter barb kept at the tip end of the spring, a shallower barb, or a thinner spring
 - [ ] Print `PiA`, and try `PiB` with a B-size board other than the Pi 4
 - [ ] Print `ROCK5B` and try it with a ROCK 5B / 5B+: an SSD in the M.2 slots under the board (not in the official models), and taking the ROCK 5B's microSD card in and out while mounted
+- [ ] Print `BBB` and try it with a BeagleBone Black: how far the micro HDMI and mini USB reach below the board (not published; in flat landscape the micro HDMI has to stay within 6 mm, history 9), and M3 screws in the 3 mm holes of the version without standoffs (tight; 3.2 mm or so would need the maintainer to make an exception to the 3 mm holes)
 - [ ] ROCK 3C and ROCK64: check against their components if an official 3D model is published (only the outline, holes and microSD position were compared on the drawings)
 - [ ] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB`
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
@@ -280,7 +299,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print the new orientations (history 8): the teardrop holes and pockets of the flat and shelf plates, the shelf under a board, and how far the long overhangs (upright landscape, flat landscape, shelf portrait) bend when a cable is plugged in
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
-- [ ] A release holds at most 1000 files (now 367, 72 per board). At about 13 boards, zip some files together (per board, for example) or split the formats
+- [ ] A release holds at most 1000 files (now 439, 72 per board). At about 13 boards, zip some files together (per board, for example) or split the formats
 - [ ] Decide the license
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
@@ -294,7 +313,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 6. To publish the files, ask the maintainer first. Once they agree, push a version tag (`git tag v0.2.0 && git push origin v0.2.0`); the workflow builds every model and attaches the files to that release.
 7. Update sections 8 and 9 and the "last updated" date of these notes.
 
-### Reference volumes (as of 2026-11-15, cm3)
+### Reference volumes (as of 2026-11-16, cm3)
 
 Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version.
 
@@ -307,6 +326,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | PiZero | 8.291 | 8.629 | 8.935 | 9.272 | 8.440 | 8.777 |
 | VIM1S | 12.699 | 13.105 | 13.342 | 13.748 | 12.847 | 13.253 |
 | ROCK5B | 17.977 | 18.632 | 18.620 | 19.275 | 18.126 | 18.781 |
+| BBB | 13.989 | 14.566 | 14.632 | 15.209 | 14.138 | 14.715 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -317,6 +337,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | PiZero | 7.609 | 7.947 | 8.605 | 8.943 | 8.126 | 8.464 |
 | VIM1S | 11.584 | 11.990 | 12.193 | 12.600 | 11.714 | 12.121 |
 | ROCK5B | 16.834 | 17.489 | 17.477 | 18.132 | 16.983 | 17.638 |
+| BBB | 14.428 | 15.005 | 15.014 | 15.591 | 14.540 | 15.117 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -327,6 +348,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | PiZero | 8.208 | 8.371 | 7.935 |
 | VIM1S | 13.139 | 13.302 | 12.867 |
 | ROCK5B | 19.195 | 19.358 | 18.922 |
+| BBB | 14.450 | 14.613 | 14.177 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -337,6 +359,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | PiZero | 6.526 | 7.518 | 7.038 |
 | VIM1S | 12.749 | 12.912 | 12.476 |
 | ROCK5B | 18.319 | 18.483 | 18.448 |
+| BBB | 13.406 | 13.569 | 13.133 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -347,6 +370,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | PiZero | 8.188 | 9.308 | 9.092 |
 | VIM1S | 12.208 | 13.328 | 13.113 |
 | ROCK5B | 18.215 | 19.335 | 19.120 |
+| BBB | 15.061 | 16.181 | 15.965 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -357,3 +381,4 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | PiZero | 8.397 | 9.518 | 9.302 |
 | VIM1S | 14.159 | 15.280 | 15.064 |
 | ROCK5B | 19.573 | 20.693 | 20.478 |
+| BBB | 14.791 | 15.912 | 15.696 |
