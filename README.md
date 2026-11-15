@@ -32,7 +32,7 @@ Ready-made files for every model are attached to the [latest release](https://gi
 - **No supports.** Every model prints with the grip on the plate. The 3MF and STL files are already oriented and centred on the plate.
 - **Ready to download.** 3MF, STL and STEP files for all 168 models are attached to the latest release. There is nothing to build unless you want to change a shape.
 - **The whole Raspberry Pi range.** One bracket per board size: Raspberry Pi 5, 4, 3, 2 and 1 B+ share one, the A+ boards share one, and the Zero family shares one.
-- **Other popular boards.** The Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4 and Libre Computer Le Potato fit the Raspberry Pi B bracket, the Radxa ZERO 3W / 3E fit the Zero bracket, the Khadas VIM3 / VIM4 fit the VIM1S bracket, and the Radxa ROCK 5B / 5B+ have their own, as do BeagleBoard.org BeagleBone Black and the Hardkernel ODROID-M2.
+- **Other popular boards.** The Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4 and Libre Computer Le Potato fit the `PiB` bracket made for the Raspberry Pi Model B size, the Radxa ZERO 3W / 3E fit the `PiZero` bracket, the Khadas VIM3 / VIM4 fit the `VIM1S` bracket, and the Radxa ROCK 5B / 5B+ have their own, as do BeagleBoard.org BeagleBone Black and the Hardkernel ODROID-M2.
 - **Three mounts.** 20x20 extrusion, 40x40 extrusion (6 mm slot) and TS35 x 7.5 DIN rail.
 - **Checked in CAD.** `--check` measures interference with the frame and the board, unsupported area, an estimated print time and, for DIN rail, whether the leaf springs have room to bend.
 - **Offline 3D viewer.** Download [`viewer.html`](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/viewer.html) from the latest release and open it in any browser with WebGL. No network connection needed.
@@ -82,7 +82,7 @@ The board outlines and mounting holes were taken from the manufacturers' officia
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/orientations-dark.png">
-  <img alt="The Raspberry Pi B bracket on a 20x20 extrusion in six orientations: upright, flat and shelf, each in portrait and landscape" src="docs/images/orientations-light.png">
+  <img alt="The PiB bracket, for Raspberry Pi Model B size boards, on a 20x20 extrusion in six orientations: upright, flat and shelf, each in portrait and landscape" src="docs/images/orientations-light.png">
 </picture>
 
 Every board comes in all six orientations on all three mounts. The grip on the frame is the same in all of them.
@@ -104,7 +104,7 @@ The flat orientations keep the board closest to the frame. The shelf orientation
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/gallery-dark.png">
-  <img alt="A grid of brackets: the Raspberry Pi B size, A+ size, Zero size, Khadas VIM1S, Radxa ROCK 5B, BeagleBoard.org BeagleBone Black and Hardkernel ODROID-M2, each on a 20x20 extrusion, a 40x40 extrusion and a TS35 DIN rail" src="docs/images/gallery-light.png">
+  <img alt="A grid of brackets for Raspberry Pi B size, A+ size and Zero size boards, Khadas VIM1S, Radxa ROCK 5B, BeagleBoard.org BeagleBone Black and Hardkernel ODROID-M2, each on a 20x20 extrusion, a 40x40 extrusion and a TS35 DIN rail" src="docs/images/gallery-light.png">
 </picture>
 
 Every file is attached to the [latest release](https://github.com/koedame/sbc-frame-brackets/releases/latest): 3MF, STL and STEP for all 168 models, the offline viewer and the fit test coupons.
@@ -406,6 +406,8 @@ Take the dimensions from the manufacturer's official 3D model or drawing, not fr
 | `models/` | Default output directory. Not committed: the generated files are attached to the releases instead |
 | `docs/images/` | Images for this README |
 | `requirements.txt` | Python packages |
+| `.github/dependabot.yml` | Weekly update checks for the Python packages and the actions |
+| [`SECURITY.md`](SECURITY.md) | How to report a security problem |
 | [`LICENSE`](LICENSE) | MIT license for the scripts and documentation |
 | [`LICENSE-CC-BY-4.0.txt`](LICENSE-CC-BY-4.0.txt) | CC BY 4.0 for the models and images |
 
@@ -421,10 +423,19 @@ Take the dimensions from the manufacturer's official 3D model or drawing, not fr
 - None of the Radxa, Pine64, Khadas, BeagleBoard.org, Hardkernel or Libre Computer boards has been tried on a printed bracket.
 - The DIN rail versions have not been printed yet. The centre key does not fit aluminium DIN rails with 1.5 mm side walls (see [`DESIGN_NOTES.md`](DESIGN_NOTES.md) section 7).
 
+## Contributing
+
+Issues and pull requests are welcome, for example a board that is missing or a dimension that is wrong.
+
+- Take dimensions from the manufacturer's published drawings or 3D models, and add the source to section 7 of [`DESIGN_NOTES.md`](DESIGN_NOTES.md). Do not add the manufacturer's CAD files, or shapes converted from them, to the repository: most of them are not licensed for redistribution.
+- Run `python build_all.py --board <board> --check` for the brackets you changed. The pull request runs the same check for every model.
+- Your contribution is licensed under the same terms as the files it changes: MIT for the scripts and documentation, CC BY 4.0 for the models and images (see [License](#license)).
+- Report security problems privately as described in [`SECURITY.md`](SECURITY.md), not in an issue.
+
 ## Disclaimer
 
 - The strength, retention and heat resistance of printed parts depend on the material and print settings. No warranty is given. Test on real parts before using these with heavy or hot equipment.
-- Raspberry Pi, Khadas, Radxa, Pine64, Libre Computer, Hardkernel, ODROID and the product names used here (VIM1S, ROCK 5B, ROCK64, Le Potato, ODROID-C4 and so on) are trademarks or registered trademarks of their respective owners. This project is not affiliated with or endorsed by them.
+- Raspberry Pi is a trademark of Raspberry Pi Ltd. PINE64 is a trademark of Pine Store Limited. Khadas, Radxa, Libre Computer, Hardkernel, ODROID and the other product names used here (VIM1S, ROCK 5B, ROCK64, Le Potato, ODROID-C4 and so on) are trademarks or registered trademarks of their respective owners. The names are used only to say which boards a bracket is made for. This project is not affiliated with, endorsed by, owned by or administered by any of them.
 - BeagleBoard.org® and BeagleBone® are registered trademarks of [BeagleBoard.org Foundation](https://www.beagleboard.org/). The `BBB` bracket is an accessory made for BeagleBoard.org BeagleBone Black, not an official BeagleBoard.org product.
 
 ## License

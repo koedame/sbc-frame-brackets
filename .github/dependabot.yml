@@ -1,0 +1,19 @@
+version: 2
+
+# One pull request a week for minor and patch updates, and one per dependency for major ones.
+# Security updates are not grouped: each alert gets its own pull request right away.
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      pip-minor-patch:
+        update-types: ["minor", "patch"]
+      pip-major:
+        update-types: ["major"]
+        group-by: dependency-name
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
