@@ -404,6 +404,8 @@ Take the dimensions from the manufacturer's official 3D model or drawing, not fr
 | `models/` | Default output directory. Not committed: the generated files are attached to the releases instead |
 | `docs/images/` | Images for this README |
 | `requirements.txt` | Python packages |
+| [`LICENSE`](LICENSE) | MIT license for the scripts and documentation |
+| [`LICENSE-CC-BY-4.0.txt`](LICENSE-CC-BY-4.0.txt) | CC BY 4.0 for the models and images |
 
 ## Status
 
@@ -425,6 +427,7 @@ Take the dimensions from the manufacturer's official 3D model or drawing, not fr
 
 ## License
 
-The license for the scripts and models in this repository has not been decided yet.
-
-three.js r128 in `vendor/` is under the MIT license (`vendor/LICENSE-three.txt`). The same code is embedded in `viewer.html` (attached to each release), together with the full license text as an HTML comment.
+- **Scripts and documentation: [MIT](LICENSE).** The Python files (`*.py`), the viewer template (`viewer.tpl.html`), the workflow in `.github/`, this README and [`DESIGN_NOTES.md`](DESIGN_NOTES.md).
+- **Models and images: [CC BY 4.0](LICENSE-CC-BY-4.0.txt).** The 3MF, STL and STEP files of the brackets and the fit test coupons (attached to the releases, or built yourself with the scripts), the models shown in `viewer.html`, and the images in `docs/images/`.
+  You can print, change and share them, also commercially, as long as you give credit: write "SBC Frame Brackets by koedame, CC BY 4.0", link to this repository and say if you changed anything.
+- **three.js**: `vendor/` holds three.js r128, © 2010-2021 three.js authors, under the MIT license (`vendor/LICENSE-three.txt`). The same code is embedded in `viewer.html` (attached to each release), together with the full license text as an HTML comment. The rest of the code in `viewer.html` comes from `viewer.tpl.html` (MIT).

@@ -36,6 +36,7 @@ Last updated: 2026-11-16
 | Width along the rail is 16 mm (the print height) | Reduced from 30 mm after the maintainer pointed it out |
 | Generated files are attached to GitHub releases and not committed. The README links to `releases/latest/download/<file name>` | Maintainer's decision (2026-11-15, history 8) |
 | A release is published only when the maintainer asks for it, every time | Maintainer's instruction |
+| Scripts and documentation are MIT. Models (3MF, STL, STEP, the models in `viewer.html`) and images are CC BY 4.0. Credit is all that is asked; commercial use is allowed | Maintainer's decision (2026-11-16). CC BY rather than CC BY-NC because these are small mounting parts, and "non-commercial" is hard for users to judge |
 
 ## 3. Output format (keep it the same every time)
 
@@ -324,7 +325,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
 - [ ] A release holds at most 1000 files (now 511, 72 per board). At about 13 boards, zip some files together (per board, for example) or split the formats
-- [ ] Decide the license
+- [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
 ## 10. Steps to resume work
