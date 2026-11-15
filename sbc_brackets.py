@@ -285,6 +285,20 @@ class Board:
     """What every board class shares. A board class gives its outline (L x S), where its holes, openings and standoffs are on the
     upright-portrait front plate (holes_xy / cuts / spacer_xy, in bracket-local x and y), and a simplified board (ghost)"""
     SD_END = False                                     # True when the microSD slot is at the l = 0 short edge
+    WIN_N = 3                                          # lightening windows per row, for boards that give the rows in WIN_S
+
+    @classmethod
+    def cuts(cls):
+        """Rows of lightening windows, clear of the standoffs: WIN_S gives the s range of each row, with WIN_N windows per row
+        between l = 6 and L - 6"""
+        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - (cls.WIN_N - 1) * RIB) / cls.WIN_N
+        c = []
+        for s0, s1 in cls.WIN_S:
+            for i in range(cls.WIN_N):
+                a = l0 + i * (wl + RIB)
+                (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
+                c.append((min(xa, xb), max(xa, xb), ya, yb2))
+        return c
 
     @classmethod
     def holes_xy(cls):
@@ -512,17 +526,6 @@ class ROCK5B(Board):
         return (cls.L / 2 - l, T + BOARD_Y0 + s)
 
     @classmethod
-    def cuts(cls):
-        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
-        c = []
-        for s0, s1 in cls.WIN_S:
-            for i in range(3):
-                a = l0 + i * (wl + RIB)
-                (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
-                c.append((min(xa, xb), max(xa, xb), ya, yb2))
-        return c
-
-    @classmethod
     def ghost(cls):
         """Just the bare board (does not affect the bracket shape). Use the official 3D models (STEPS) for interference checks"""
         z = Z0 + T + cls.BOARD_SPACER
@@ -607,15 +610,33 @@ class M2(Board):
         return (l - cls.L / 2, T + BOARD_Y0 + s)       # the microSD edge away from the frame in upright landscape and shelf portrait
 
     @classmethod
-    def cuts(cls):
-        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
-        c = []
-        for s0, s1 in cls.WIN_S:
-            for i in range(3):
-                a = l0 + i * (wl + RIB)
-                (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
-                c.append((xa, xb, ya, yb2))
-        return c
+    def ghost(cls):
+        """Just the bare board (does not affect the bracket shape). Use the official 3D model (STEPS) for interference checks"""
+        z = Z0 + T + cls.BOARD_SPACER
+        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
+
+
+# ======================= LattePanda 3 Delta =======================
+class LP3Delta(Board):
+    """125 x 78 mm, four 3.2 mm holes 118 x 71 mm apart, 3.5 mm from the edges (official KiCad footprint in the LattePanda KiCad
+    library, and official 3D model V1.1). The three USB-A ports are at one short end, the HDMI, Ethernet, headphone and USB-C ports
+    at the other. The microSD and nano SIM slot is under the board at the long edge with the 12 V input header and, under the board,
+    the display and touch panel connectors; the other long edge has the RTC battery, the Arduino-side GPIO header and the power
+    button. Under the board are the two M.2 slots, the cards in them and their standoffs (the deepest, 5.1 mm below the board)"""
+    name, title = "LP3Delta", "LattePanda 3 Delta"
+    L, S, BT = 125.0, 78.0, 1.2
+    HOLES = [(3.5, 3.5), (121.5, 3.5), (3.5, 74.5), (121.5, 74.5)]   # l = 0 is the USB-A end, s = 0 the RTC battery edge
+    HOLE_D = 3.0                                       # the board holes are 3.2 mm
+    WIN_S = ((10.5, 36.0), (42.0, 67.5))               # two rows of lightening windows, clear of the standoffs
+    WIN_N = 4
+    SPACER = dict(h=8.0, d=6.0, pilot=2.6, screw="M3")  # 8 mm: the M.2 standoffs reach 5.1 mm below the board. 6 mm across: the
+                                                       # nearest part under the board is 3.2 mm from a hole centre
+    BOARD_SPACER = 8.0
+    STEPS = {"LattePanda 3 Delta 3D Model V1.1 20250221.step": (180, 0.0, 0.0, -1.2)}
+
+    @classmethod
+    def xy(cls, l, s):
+        return (cls.L / 2 - l, T + BOARD_Y0 + s)       # the USB-A end towards the frame in upright landscape and shelf portrait
 
     @classmethod
     def ghost(cls):
@@ -624,7 +645,35 @@ class M2(Board):
         return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
 
 
-BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB, M2]
+# ======================= LattePanda Mu on the Lite Carrier =======================
+class MuLite(Board):
+    """146 x 102 mm, four 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm from the corner between the
+    PCIe slot end and the edge opposite the ports (official KiCad design of the Lite Carrier V1 and V2, and official 3D model
+    V2.0.1). All the ports are along one long edge. The power and reset buttons stick out of the other long edge, near the PCIe
+    end. The LattePanda Mu module, its cooler and the M.2 cards sit on top of the board; under it, the pins of the PCIe slot reach
+    3.3 mm"""
+    name, title = "MuLite", "LattePanda Mu Lite Carrier"
+    L, S, BT = 146.0, 102.0, 1.6
+    HOLES = [(3.5, 3.5), (142.5, 3.5), (3.0, 98.5), (142.5, 98.5)]   # l = 0 is the PCIe slot end, s = 0 the edge with the buttons
+    HOLE_D = 3.0                                       # the board holes are 3.2 mm
+    WIN_S = ((10.5, 48.0), (54.0, 91.5))               # two rows of lightening windows, clear of the standoffs
+    WIN_N = 4
+    SPACER = dict(h=5.0, d=6.0, pilot=2.6, screw="M3")  # 5 mm: the pins of the PCIe slot reach 3.3 mm below the board
+    BOARD_SPACER = 5.0
+    STEPS = {"DFR1142 Lite Carrier for LattePanda Mu(V2.0.1).step": (180, -69.5, 47.5, 0.0)}
+
+    @classmethod
+    def xy(cls, l, s):
+        return (cls.L / 2 - l, T + BOARD_Y0 + s)       # the PCIe slot end towards the frame in upright landscape and shelf portrait
+
+    @classmethod
+    def ghost(cls):
+        """Just the bare board (does not affect the bracket shape). Use the official 3D model (STEPS) for interference checks"""
+        z = Z0 + T + cls.BOARD_SPACER
+        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
+
+
+BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB, M2, LP3Delta, MuLite]
 SERIES = (20, 40, "DIN")
 
 
