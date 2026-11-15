@@ -523,7 +523,63 @@ class ROCK5B(Board):
         return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
 
 
-BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B]
+# ======================= BeagleBoard.org BeagleBone Black =======================
+class BBB(Board):
+    """86.36 x 54.61 mm (3.400 x 2.150 in), four 3.175 mm (1/8 in) holes in a trapezoid, from the board outline and drill file of
+    the official Rev C manufacturing data and the board dimension drawing in the System Reference Manual. The microSD slot,
+    micro HDMI and USB-A are at one short end (microSD and micro HDMI under the board), Ethernet, the power jack and mini USB
+    (under the board) at the other. No official 3D model is published"""
+    name, title = "BBB", "BeagleBoard.org BeagleBone Black"
+    L, S, BT = 86.36, 54.61, 1.575
+    # l = 0 is the microSD end (x = 3.400 in in the manufacturing data), s is y there (0 at the P9 header edge).
+    # From the drill file: (3.175, 0.250), (3.175, 1.900), (0.575, 0.125), (0.575, 2.025) in
+    HOLES = [(5.715, 6.35), (5.715, 48.26), (71.755, 3.175), (71.755, 51.435)]
+    HOLE_D = 3.0                                       # the board holes are 3.175 mm
+    SD_END = True
+    SD_NOTCH = (23.0, 20.0, 44.5)                      # microSD end notch: depth, s range (microSD holder and micro HDMI under the board)
+    USB_NOTCH = (75.0, 38.0, 50.0)                     # power end notch: from l, s range (mini USB under the board)
+    WIN_L, WIN_S = (29.0, 69.0), (10.0, 44.61)         # two lightening windows, clear of the standoffs and the notches
+    SPACER = dict(h=6.0, d=6.0, pilot=2.6, screw="M3")  # 6 mm tall: the System Reference Manual gives a "max height" of 4.76 mm without
+                                                       # saying of what. 6 mm across: the nearest parts under the board are 5.2 mm from a hole centre
+    BOARD_SPACER = 6.0
+
+    @classmethod
+    def xy(cls, l, s):
+        return (cls.L / 2 - l, T + BOARD_Y0 + s)
+
+    @classmethod
+    def cuts(cls):
+        def r(l0, l1, s0, s1):
+            (xa, ya), (xb, yb_) = cls.xy(l0, s0), cls.xy(l1, s1)
+            return min(xa, xb), max(xa, xb), ya, yb_
+        d, s0, s1 = cls.SD_NOTCH; u, t0, t1 = cls.USB_NOTCH; (a, b), (w0, w1) = cls.WIN_L, cls.WIN_S
+        wl = (b - a - RIB) / 2
+        return [r(-4.0, d, s0, s1), r(u, cls.L + 4.0, t0, t1)] + [r(c, c + wl, w0, w1) for c in (a, a + wl + RIB)]
+
+    @classmethod
+    def ghost(cls):
+        """Board for display and interference checks (simplified). x, y are the manufacturing data's coordinates (mm, top view):
+        outlines from the silkscreen, header pins from the drill file, heights from the official bill of materials. The heights of
+        the micro HDMI and mini USB under the board are not published, so they are shown reaching the plate (it is notched there)"""
+        def blk(x0, x1, y0, y1, h0, h1):
+            (xa, ya), (xb, yb_) = cls.xy(cls.L - x0, y0), cls.xy(cls.L - x1, y1)
+            za, zb = Z0 + T + cls.BOARD_SPACER + h0, Z0 + T + cls.BOARD_SPACER + h1
+            return box(min(xa, xb), max(xa, xb), ya, yb_, za, zb)
+        t = cls.BT; down = 0.02 - cls.BOARD_SPACER
+        g = blk(0, cls.L, 0, cls.S, 0, t)
+        g += blk(-2.62, 19.23, 21.89, 37.80, t, t + 13.3)     # Ethernet (RJ45, 13.3 mm tall)
+        g += blk(-2.54, 12.07, 4.95, 14.10, t, t + 11.0)      # power jack (11 mm)
+        g += blk(72.34, 86.33, 10.26, 23.37, t, t + 7.0)      # USB-A (7 mm)
+        for y0 in (0.635, 48.895):                             # P9 / P8 expansion headers (8.5 mm), and their pins through the board
+            g += blk(18.415, 76.835, y0, y0 + 5.08, t, t + 8.5)
+            g += blk(19.2, 76.1, y0 + 0.77, y0 + 4.31, t - 3.0, 0)
+        g += blk(66.17, 86.36, 24.26, 44.41, -1.8, 0)         # microSD holder, under the board (1.8 mm)
+        g += blk(80.45, 87.05, 21.90, 30.11, down, 0)         # micro HDMI, under the board
+        g += blk(-0.50, 6.50, 40.28, 47.98, down, 0)          # mini USB, under the board
+        return g
+
+
+BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB]
 SERIES = (20, 40, "DIN")
 
 
