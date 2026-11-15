@@ -265,7 +265,8 @@ def add_spacers(s, pts, h, d_boss, d_pilot):
 def official(step_path):
     """Place a board's official 3D model on its bracket, for interference checks only. Each board class lists the official
     models it fits in STEPS: file name -> (rotation about z in degrees, centre x and y of the PCB outline, z of the PCB
-    underside), all in the file's own coordinates. Returns (board class, parts). Some models are partly surfaces rather than
+    underside), all in the file's own coordinates. For a PCB shorter than the board class, the centre is that of the board
+    class's outline (L x S) around the PCB's holes. Returns (board class, parts). Some models are partly surfaces rather than
     solids (e.g. the ROCK 5B+ PCB), so the shells that belong to no solid are returned as parts too"""
     name = os.path.basename(step_path)
     for B in BOARDS:
@@ -312,14 +313,17 @@ class Board:
         return s
 
 
-# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4) =======================
+# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4, Libre Computer Le Potato) =======================
 class PiB(Board):
     """85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+;
     the 2 B has "the same form factor" as the 1 B+ (official documentation). The official drawings of the Radxa ROCK 3C (2D DXF) and
     the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge.
     So does the Hardkernel ODROID-C4 (official PCB mechanical drawing, DXF), with 3.0 mm holes, but its microSD slot is under the
-    board at the middle of the GPIO-header edge, which faces the back plate on the ports-down set of holes"""
-    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4"
+    board at the middle of the GPIO-header edge, which faces the back plate on the ports-down set of holes.
+    The Libre Computer AML-S905X-CC (Le Potato) PCB is 84 x 56 mm in its official 3D model, 1 mm shorter at the port end; its
+    3.0 mm holes are 3.5 mm from the microSD end and the long edges, as on the Raspberry Pi"""
+    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4, Libre Computer Le Potato"
+    STEPS = {"AML-S905X-CC-V1.0.stp": (0, 41.5, 28.0, 0.0)}     # Le Potato: the PCB spans x 0-84, so 41.5 is the centre of the 85 mm outline
     L, S = 85.0, 56.0                                  # board outline
     HOLE_L, HOLE_S = (3.5, 61.5), (3.5, 52.5)          # mounting holes (long side, short side)
     HOLE_D = 3.0                                       # hole diameter of the version without standoffs
