@@ -312,12 +312,14 @@ class Board:
         return s
 
 
-# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64) =======================
+# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4) =======================
 class PiB(Board):
     """85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+;
     the 2 B has "the same form factor" as the 1 B+ (official documentation). The official drawings of the Radxa ROCK 3C (2D DXF) and
-    the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge"""
-    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+, Radxa ROCK 3C, Pine64 ROCK64"
+    the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge.
+    So does the Hardkernel ODROID-C4 (official PCB mechanical drawing, DXF), with 3.0 mm holes, but its microSD slot is under the
+    board at the middle of the GPIO-header edge, which faces the back plate on the ports-down set of holes"""
+    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4"
     L, S = 85.0, 56.0                                  # board outline
     HOLE_L, HOLE_S = (3.5, 61.5), (3.5, 52.5)          # mounting holes (long side, short side)
     HOLE_D = 3.0                                       # hole diameter of the version without standoffs
@@ -579,7 +581,46 @@ class BBB(Board):
         return g
 
 
-BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB]
+# ======================= Hardkernel ODROID-M2 =======================
+class M2(Board):
+    """90 x 90 mm, four 3.3 mm holes at (3.5, 3.5), (86.5, 3.5), (86.5, 75.5) and (16.6, 78.5) mm from the corner between the edge
+    with the microSD slot and the edge with the GPIO header (official PCB mechanical drawing rev 1.0, DXF, and 3D model rev 1.0).
+    Most ports are along the edge opposite the GPIO header. The microSD card sticks out 9.9 mm past its edge, on top of the board,
+    and the USB-C port on that edge sticks out 1.4 mm. Under the board are a connector next to the UART label (6.8 mm deep; a surface
+    rather than a solid in the 3D model), the RTC battery holder (6.5 mm), the M.2 slot (5.5 mm) and the standoff for an M.2 2280 SSD (4.1 mm)"""
+    name, title = "M2", "Hardkernel ODROID-M2"
+    L, S, BT = 90.0, 90.0, 1.5
+    HOLES = [(3.5, 3.5), (86.5, 3.5), (86.5, 75.5), (16.6, 78.5)]   # l = 0 is the microSD edge, s = 0 the GPIO-header edge
+    HOLE_D = 3.0                                       # the board holes are 3.3 mm
+    WIN_S = ((10.5, 40.0), (46.0, 68.5))               # two rows of lightening windows, clear of the standoffs
+    SPACER = dict(h=8.0, d=6.0, pilot=2.6, screw="M3")  # 8 mm: the connector by the UART label reaches 6.8 mm below the board and an
+                                                       # SSD on the 4.1 mm M.2 standoff about 6.5 mm. 6 mm across: the nearest part is 3.4 mm from a hole centre
+    BOARD_SPACER = 8.0
+    STEPS = {"M2_MAIN_REV1.0.step": (0, 45.0, 45.0, -1.498)}
+
+    @classmethod
+    def xy(cls, l, s):
+        return (l - cls.L / 2, T + BOARD_Y0 + s)       # the microSD edge away from the frame in upright landscape and shelf portrait
+
+    @classmethod
+    def cuts(cls):
+        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
+        c = []
+        for s0, s1 in cls.WIN_S:
+            for i in range(3):
+                a = l0 + i * (wl + RIB)
+                (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
+                c.append((xa, xb, ya, yb2))
+        return c
+
+    @classmethod
+    def ghost(cls):
+        """Just the bare board (does not affect the bracket shape). Use the official 3D model (STEPS) for interference checks"""
+        z = Z0 + T + cls.BOARD_SPACER
+        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
+
+
+BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB, M2]
 SERIES = (20, 40, "DIN")
 
 
