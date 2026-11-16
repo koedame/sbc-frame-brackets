@@ -1,0 +1,24 @@
+{
+  "title": "LattePanda 3 Delta",
+  "notes": [
+    "125 x 78 mm, four 3.2 mm holes 118 x 71 mm apart, 3.5 mm from the edges (official KiCad footprint in the LattePanda KiCad library, and official 3D model V1.1).",
+    "l = L is the end with the three USB-A ports (towards the frame in upright landscape and shelf portrait), l = 0 the end with the HDMI, Ethernet, headphone and USB-C ports. s = 0 is the edge with the RTC battery, the Arduino-side GPIO header and the power button, which faces the back plate.",
+    "The microSD and nano SIM slot is under the board at the s = S edge, with the 12 V input header and, under the board, the display and touch panel connectors.",
+    "Under the board are the two M.2 slots, the cards in them and their standoffs (the deepest, 5.1 mm below the board).",
+    "Standoffs 8 mm tall: the M.2 standoffs reach 5.1 mm below the board. 6 mm across: the nearest part under the board is 3.2 mm from a hole centre.",
+    "Two rows of windows, clear of the standoffs."
+  ],
+  "size": [125.0, 78.0],
+  "frame_edge": "s=0",
+  "microsd_edge": "s=S",
+  "holes": [[121.5, 3.5], [3.5, 3.5], [121.5, 74.5], [3.5, 74.5]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 8.0, "d": 6.0, "pilot": 2.6, "screw": "M3"},
+  "windows": {"rows": [[10.5, 36.0], [42.0, 67.5]], "per_row": 4},
+  "parts": [
+    {"name": "PCB", "box": [0, 125.0, 0, 78.0, 0, 1.2]}
+  ],
+  "official_models": {
+    "LattePanda 3 Delta 3D Model V1.1 20250221.step": {"rotate": 180, "centre": [0.0, 0.0], "underside": -1.2}
+  }
+}

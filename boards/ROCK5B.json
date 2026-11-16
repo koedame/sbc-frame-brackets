@@ -1,0 +1,23 @@
+{
+  "title": "Radxa ROCK 5B / 5B+",
+  "notes": [
+    "100.2 x 74.25 mm, four 3.5 mm holes 93.15 x 49 mm apart, 3.55 mm from the GPIO-side edge (official 2D drawings and 3D models of the ROCK 5B v1.42 and ROCK 5B+ v1.2).",
+    "s = 0 is the GPIO-side edge, which faces the back plate. The microSD card sticks out past it, under the board, beside the frame.",
+    "Standoffs 8 mm tall: parts under the 5B+ reach 5.4 mm below the board, and the 5B's microSD card sits under it. 5.4 mm across: a part under the 5B+ is 3.1 mm from a hole centre.",
+    "Two rows of windows, clear of the standoffs."
+  ],
+  "size": [100.2, 74.25],
+  "frame_edge": "s=0",
+  "microsd_edge": "s=0",
+  "holes": [[96.65, 3.55], [3.5, 3.55], [96.65, 52.55], [3.5, 52.55]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 8.0, "d": 5.4, "pilot": 2.2, "screw": "M2.5"},
+  "windows": {"rows": [[10.55, 45.55], [59.55, 70.25]], "per_row": 3},
+  "parts": [
+    {"name": "PCB", "box": [0, 100.2, 0, 74.25, 0, 1.6]}
+  ],
+  "official_models": {
+    "ROCK5B_v1.42_3D.step": {"rotate": 180, "centre": [-6.896, 94.691], "underside": -1.5},
+    "rock5bp_pcba_3d_V1_2_20250314.stp": {"rotate": 0, "centre": [47.097, 37.121], "underside": -1.6}
+  }
+}

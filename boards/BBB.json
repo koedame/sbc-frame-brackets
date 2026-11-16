@@ -1,0 +1,31 @@
+{
+  "title": "BeagleBoard.org BeagleBone Black",
+  "notes": [
+    "86.36 x 54.61 mm (3.400 x 2.150 in), four 3.175 mm (1/8 in) holes in a trapezoid, from the board outline and drill file of the official Rev C manufacturing data and the board dimension drawing in the System Reference Manual. No official 3D model is published.",
+    "l and s are x and y of the manufacturing data (top view; s = 0 is the P9 header edge, which faces the back plate). Holes from the drill file: (3.175, 0.250), (3.175, 1.900), (0.575, 0.125), (0.575, 2.025) in.",
+    "The microSD slot, micro HDMI and USB-A are at the l = L end (microSD and micro HDMI under the board), Ethernet, the power jack and mini USB (under the board) at the l = 0 end.",
+    "Openings: a notch at the microSD end for the microSD holder and micro HDMI, a notch at the power end for the mini USB, and two windows clear of the standoffs and the notches.",
+    "Standoffs 6 mm tall: the System Reference Manual gives a \"max height\" of 4.76 mm without saying of what. 6 mm across: the nearest parts under the board are 5.2 mm from a hole centre.",
+    "Parts: outlines from the silkscreen, header pins from the drill file, heights from the official bill of materials. The heights of the micro HDMI and mini USB under the board are not published, so they are shown reaching the plate (it is notched there)."
+  ],
+  "size": [86.36, 54.61],
+  "frame_edge": "s=0",
+  "microsd_edge": "l=L",
+  "holes": [[80.645, 6.35], [80.645, 48.26], [14.605, 3.175], [14.605, 51.435]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 6.0, "d": 6.0, "pilot": 2.6, "screw": "M3"},
+  "openings": [[63.36, 90.36, 20.0, 44.5], [-4.0, 11.36, 38.0, 50.0], [40.36, 57.36, 10.0, 44.61], [17.36, 34.36, 10.0, 44.61]],
+  "parts": [
+    {"name": "PCB", "box": [0, 86.36, 0, 54.61, 0, 1.575]},
+    {"name": "Ethernet (RJ45, 13.3 mm tall)", "box": [-2.62, 19.23, 21.89, 37.80, 1.575, 14.875]},
+    {"name": "power jack (11 mm)", "box": [-2.54, 12.07, 4.95, 14.10, 1.575, 12.575]},
+    {"name": "USB-A (7 mm)", "box": [72.34, 86.33, 10.26, 23.37, 1.575, 8.575]},
+    {"name": "P9 expansion header (8.5 mm)", "box": [18.415, 76.835, 0.635, 5.715, 1.575, 10.075]},
+    {"name": "P9 pins through the board", "box": [19.2, 76.1, 1.405, 4.945, -1.425, 0]},
+    {"name": "P8 expansion header (8.5 mm)", "box": [18.415, 76.835, 48.895, 53.975, 1.575, 10.075]},
+    {"name": "P8 pins through the board", "box": [19.2, 76.1, 49.665, 53.205, -1.425, 0]},
+    {"name": "microSD holder, under the board (1.8 mm)", "box": [66.17, 86.36, 24.26, 44.41, -1.8, 0]},
+    {"name": "micro HDMI, under the board", "box": [80.45, 87.05, 21.90, 30.11, -5.98, 0]},
+    {"name": "mini USB, under the board", "box": [-0.50, 6.50, 40.28, 47.98, -5.98, 0]}
+  ]
+}
