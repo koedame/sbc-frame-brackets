@@ -13,7 +13,7 @@ Structure
 """
 import glob, json, math, os, sys
 from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Pos, Rot, Plane, RectangleRounded,
-                       extrude, fillet, chamfer, Axis, import_step, Solid)
+                       extrude, fillet, chamfer, Axis, import_step, Solid, Compound)
 from OCP.StlAPI import StlAPI_Reader
 from OCP.TopoDS import TopoDS, TopoDS_Shape
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Sewing, BRepBuilderAPI_MakeSolid
@@ -289,6 +289,11 @@ def official(step_path):
                 part = part if part.volume > 0 else Solid(part.wrapped.Reversed())
             else:
                 part = import_step(step_path)
+            if "exclude" in m:   # top-level parts that are not on the board on a bracket, such as the case base it comes on
+                missing = set(m["exclude"]) - {c.label for c in part.children}
+                if missing:
+                    raise SystemExit(f"{name}: no top-level part named {', '.join(sorted(missing))} to exclude")
+                part = Compound(children=[c for c in part.children if c.label not in m["exclude"]])
             model = loc * part
             solids = model.solids()
             in_solid = {sh for so in solids for sh in so.shells()}
@@ -302,7 +307,7 @@ BOARD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards")
 FIELDS = {"title": True, "notes": False, "size": True, "frame_edge": True, "microsd_edge": False, "holes": True, "hole_d": True,
           "standoffs": True, "openings": False, "windows": False, "parts": True, "official_models": False}   # name: required
 STANDOFF_FIELDS = {"h", "d", "pilot", "screw", "foot", "through", "at"}
-MODEL_FIELDS = {"rotate", "centre", "underside", "tilt"}
+MODEL_FIELDS = {"rotate", "centre", "underside", "tilt", "exclude"}
 
 
 class Board:
@@ -362,7 +367,7 @@ class Board:
             bad(f"unknown windows field {k!r}")
         for f, m in d.get("official_models", {}).items():
             if set(m) - MODEL_FIELDS or not {"rotate", "centre", "underside"} <= set(m):
-                bad(f"official_models[{f!r}] has rotate, centre, underside and an optional tilt")
+                bad(f"official_models[{f!r}] has rotate, centre, underside and optionally tilt and exclude")
 
     def xy(self, l, s):
         """Board (l, s) -> bracket-local (x, y) on the upright-portrait front plate. Both ways round it is a turn, never a mirror"""

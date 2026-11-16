@@ -42,10 +42,10 @@ Last updated: 2026-11-16
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1` or `OPi5Pro`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro` or `OrinNano`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and attach every file to that release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. GitHub's secondary rate limit can stop an upload of several hundred files part way, so the job uploads only the files the release is still missing, tries up to four times 10 minutes apart, and a re-run of the job picks up where it stopped. Push a tag only when the maintainer asks for a release.
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>`, which follows the latest release. Keep file names stable: renaming a file breaks those links.
-- A release holds at most 1000 files. There are now 871 (288 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
+- A release holds at most 1000 files. There are now 943 (312 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -190,6 +190,7 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `N2Plus` | 13.3 mm / 22.1 MPa | 9.4 mm / 13.3 MPa | 13.1 mm / 21.9 MPa | 7.2 mm / 12.9 MPa | 8.8 mm / 12.0 MPa | 10.8 mm / 18.1 MPa |
 | `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.1 mm / 18.0 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
 | `OPi5Pro` | 1.4 mm / 4.7 MPa | 13.3 mm / 15.6 MPa | 1.8 mm / 7.8 MPa | 9.3 mm / 15.1 MPa | 12.8 mm / 15.2 MPa | 1.3 mm / 4.3 MPa |
+| `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 15.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
@@ -310,6 +311,24 @@ The maintainer asked for the Orange Pi 5, 5 Pro and 5 Plus. Only the 5 Pro is ad
 - **Beam estimates** (table in history 8). A 10 N push at the far edge gives at most 13.3 mm (upright landscape) and 15.6 MPa, below the strength of PETG in every orientation. The DIN rail versions are within 0.1 mm of these.
 - 288 models, 871 release files.
 
+### History 16: NVIDIA Jetson Orin Nano Developer Kit (2026-11-16)
+
+The maintainer asked for the Jetson Orin Nano Developer Kit.
+
+- **Sources.** NVIDIA's Jetson Download Center has the carrier board specification (SP-11324-001 v1.3), the developer kit's 3D model (STEP) and the carrier board's reference design files (A04, with the board outline and drill layers). Links in section 7. Neither the files nor shapes made from them are in this repository or the viewer.
+- **Super.** The official user guide says the existing developer kit becomes the Super developer kit with a software upgrade, so one bracket fits both.
+- **Outline and holes.** 100 x 79 mm, 1.57 mm thick, six 2.75 mm unplated holes. The bracket uses the four the developer kit's base is screwed to, 86 x 58 mm apart, 4 mm from the `l` = 0 end, 17 mm from the `s` = 0 edge and 4 mm from the `s` = S edge. The other two are 6 mm further towards `l` = L and are not used. The positions are from the specification's figure 4-1 and the reference design's drill layer.
+- **Edges.** `s` = 0 is the front edge with the power jack, DisplayPort, four USB-A ports, Ethernet and USB-C. They stick out 1.9 mm past it. The microSD card goes into a slot under the module, at the `s` = S edge, which faces the back plate. The 40-pin header is along the `l` = L end and the two camera connectors are at the `l` = 0 end.
+- **Under the board.** The M.2 Key E slot with the Wi-Fi card and two M.2 Key M slots (2230 and 2280). In the official 3D model the Wi-Fi card and the 2230 SSD reach 4.8 mm below the board, more than the 4.30 mm the specification gives for the carrier board's own parts. The 2280 slot is empty in the model: its box puts an SSD at the height of the 2230 SSD.
+- **Standoffs.** 8 mm tall, leaving 3.2 mm under the deepest card. 5 mm across: the nearest parts under the board are 3.4 mm from a hole centre (the pins of the fan connector next to the hole at `l` = 90, `s` = 75). The 2.2 mm pilot holes are for M2.5 self-tapping screws, as the board's holes are 2.75 mm.
+- **Openings.** Two rows of three windows, 4.5 mm clear of the standoffs, with a 6 mm rib between the rows. The microSD slot is under the module, so there is no notch: in upright portrait and shelf landscape the card faces the back plate 4 mm away, which rises 5 mm above the board's underside, so the card can only be changed with the board off the bracket (README).
+- **Parts.** Boxes round the parts in the official 3D model, rounded to 0.01 mm: the PCB, the module with its heatsink and fan, the five connectors at the front edge and, under the board, the M.2 slots with the Wi-Fi card and the SSDs.
+- **`exclude` in `official_models` (new).** The official 3D model is the developer kit on its base, with the base's four screws and the two Wi-Fi antennas, which lie in the base past the `s` = S edge on cables from the Wi-Fi card. On a bracket the board is off the base, and the antennas are wherever the user puts them. `exclude` lists top-level parts of the file by name to leave out. A name that is not in the file stops the build, so a typo cannot quietly leave the base in. Left in, the base overlaps the bracket (364 mm3 in upright portrait for 20x20), so the check could not pass.
+- `--check`: no overlap with the frame or with the official 3D model and no unsupported area in all 24 models, and the DIN leaf springs bend freely in all 8 DIN models. The same with the parts boxes in place of the 3D model.
+- **Beam estimates** (table in history 8). A 10 N push at the far edge gives at most 11.9 mm (flat landscape) and 18.9 MPa (upright portrait), below the strength of PETG in every orientation. The DIN rail versions are within 0.4 mm of these.
+- **README.** In the download table for upright landscape, the `M1` row with standoffs was under the `OPi5Pro` row and `OPi5Pro` had no row with standoffs. Both are fixed, and a check that every model is linked exactly once found nothing else.
+- 312 models, 943 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -364,6 +383,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | LattePanda 3 Delta (`LP3Delta`) | Official [3D model V1.1](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%203%20Delta/LattePanda%203%20Delta%203D%20Model%20V1.1%20step%2020250221.zip) (STEP) and [KiCad footprint](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%20KiCAD%20Library/footprints/Module_LattePanda.pretty/LattePanda_3_Delta.kicad_mod) in the [LattePanda 3D models repository](https://github.com/LattePandaTeam/LattePanda-3D-Models) (CC BY 3.0); ports from the [specification](https://docs.lattepanda.com/content/3rd_delta_edition/specification/) in the LattePanda documentation. 125 x 78 mm, 3.2 mm holes 118 x 71 mm 3.5 mm from the edges (history 12) | High. Interference checked against the official 3D model |
 | LattePanda Mu Lite Carrier (`MuLite`) | Official KiCad designs of the Lite Carrier [V2](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29) and [V1](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu), the [3D model V2.0.1](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/Carrier-Boards/DFR1142_Lite_Carrier_for_LattePanda_Mu%28V2.0.1%29.zip) (STEP) and the module's [dimension drawing](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/LattePanda_Mu_Dimension_Drawing.pdf), in the [LattePanda Mu repository](https://github.com/LattePandaTeam/LattePanda-Mu) (MIT); ports from the [Lite Carrier page](https://docs.lattepanda.com/content/mu_edition/lite_carrier/) in the LattePanda documentation. 146 x 102 mm, 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm (history 12) | High. Interference checked against the official 3D model of the carrier (the module, cooler and M.2 cards on top are not in it) |
 | Orange Pi 5 Pro (`OPi5Pro`) | Official [mechanical drawing](https://drive.google.com/file/d/10j5W9Dki9KfirN4JE5pp6X2RujavGOyS/view) `OPi_5_Pro_V1_2_1-dxf.pdf` (PDF, top and bottom views, board v1.2), from the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-Pro.html). 89.1 x 56 mm, 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges and 7.6 mm from the microSD end; microSD and an M.2 2280 slot under the board (history 15) | High for the outline and holes. No official 3D model and no heights on the drawing: checked against the outline only, and against the connectors past the edges as tall boxes |
+| NVIDIA Jetson Orin Nano Developer Kit / Super (`OrinNano`) | Official [carrier board specification SP-11324-001 v1.3](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_specification_sp.pdf) (PDF, figure 4-1), [3D model](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_3d_step_model.zip/) `P3766-P3768SKU4-P3767ENVELOPE.stp` (STEP, the developer kit on its base) and [carrier board reference design files A04](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_reference_design_files_a04_20230320.zip/) (outline and drill layers), from the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads); Super from the [user guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/index.html). 100 x 79 mm, 2.75 mm holes 86 x 58 mm apart, 4 mm from the `l` = 0 end and 4 mm from the `s` = S edge (history 16) | High. Interference checked against the official 3D model, with the base, its screws and the antennas left out. No SSD in the 2280 slot in the model |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
 ### Checking the DIN rail dimensions (2026-11-14)
@@ -413,6 +433,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `MuLite` and try it with a LattePanda Mu on the Lite Carrier: switching it on with the Auto_Power jumper where the buttons face the frame, a card in the PCIe slot (not checked), and how far the long overhangs bend (history 12)
 - [ ] Print `OPi5Pro` and try it with an Orange Pi 5 Pro: an M.2 2280 SSD under the board (how far it reaches is not published; the standoffs are 8 mm), the parts under the board (no heights or 3D model are published), and taking the microSD card in and out while mounted (history 15)
 - [ ] Orange Pi 5 and Orange Pi 5 Plus: their holes are only in the official 3D models (STEP in RAR archives on the service and support pages). Check them and add the boards (history 15)
+- [ ] Print `OrinNano` and try it with a Jetson Orin Nano Developer Kit off its base: M2.5 screws in the 2.2 mm pilot holes and in the 3 mm holes of the version without standoffs, an M.2 2280 SSD under the board (not in the official model), and where to put the Wi-Fi antennas (history 16)
 - [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
@@ -422,7 +443,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and `MuLite` 99% of it in flat landscape (history 12)
 - [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
-- [ ] A release holds at most 1000 files (now 871 for 12 boards, 72 per board). A 14th board would pass it: before that, zip some files together (per board, for example) or split the formats
+- [ ] A release holds at most 1000 files (now 943 for 13 boards, 72 per board). The next board would pass it: before that, zip some files together (per board, for example) or split the formats
 - [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
@@ -456,6 +477,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 22.543 | 23.375 | 23.186 | 24.018 | 22.692 | 23.523 |
 | M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.658 | 30.490 |
 | OPi5Pro | 17.013 | 17.564 | 17.657 | 18.207 | 17.162 | 17.712 |
+| OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.285 | 21.836 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -473,6 +495,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 26.836 | 27.668 | 27.479 | 28.311 | 26.985 | 27.816 |
 | M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.542 | 33.373 |
 | OPi5Pro | 17.576 | 18.126 | 18.178 | 18.729 | 17.701 | 18.252 |
+| OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.360 | 20.911 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -490,6 +513,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 23.582 | 23.745 | 23.310 |
 | M1 | 31.350 | 31.513 | 31.077 |
 | OPi5Pro | 17.163 | 17.326 | 17.385 |
+| OrinNano | 22.639 | 22.802 | 22.367 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -507,6 +531,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 24.556 | 24.719 | 24.283 |
 | M1 | 30.802 | 30.965 | 30.529 |
 | OPi5Pro | 15.776 | 15.939 | 15.504 |
+| OrinNano | 20.772 | 20.936 | 20.820 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -524,6 +549,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 27.919 | 29.039 | 28.824 |
 | M1 | 34.146 | 35.267 | 35.051 |
 | OPi5Pro | 17.997 | 19.117 | 18.901 |
+| OrinNano | 21.849 | 22.970 | 22.754 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -541,3 +567,4 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 24.221 | 25.342 | 25.126 |
 | M1 | 31.681 | 32.801 | 32.585 |
 | OPi5Pro | 17.322 | 18.442 | 18.227 |
+| OrinNano | 21.790 | 22.910 | 22.694 |

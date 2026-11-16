@@ -63,5 +63,6 @@ The key is the file name as the manufacturer publishes it; `--board-step <path>`
 | `rotate` | Degrees about z, counter-clockwise seen from above, that turn the file's x and y axes into the `l` and `s` directions |
 | `centre` | The point (after `tilt`) that goes to the centre of the outline, `(L/2, S/2)` |
 | `underside` | z (after `tilt`) of what sits on the standoffs: the PCB's underside, or for a board held by its heatsink, the underside of the heatsink's base |
+| `exclude` | Optional. `["<name>", ...]`, top-level parts of the file to leave out because they are not on the board when it is on a bracket, such as the case base a developer kit comes screwed to and its screws. Each name is a top-level part's name in the STEP file and must be in it |
 
 Check the placement with `python build_all.py --board <board> --format step --check --board-step <file>`: every model must report a board overlap of 0. Never commit the manufacturer's files, or anything converted from them.
