@@ -4,3 +4,5 @@ __pycache__/
 *.stp.gz
 /*.step
 /models/
+/*.stl
+/*.STL

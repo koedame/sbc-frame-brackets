@@ -42,10 +42,10 @@ Last updated: 2026-11-16
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the board size: `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta` or `MuLite`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the board size: `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus` or `M1`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and attach every file to that release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. GitHub's secondary rate limit can stop an upload of several hundred files part way, so the job uploads only the files the release is still missing, tries up to four times 10 minutes apart, and a re-run of the job picks up where it stopped. Push a tag only when the maintainer asks for a release.
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>`, which follows the latest release. Keep file names stable: renaming a file breaks those links.
-- A release holds at most 1000 files. There are now 655 (216 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
+- A release holds at most 1000 files. There are now 799 (264 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -187,6 +187,8 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `M2` | 12.0 mm / 22.3 MPa | 8.7 mm / 14.6 MPa | 9.1 mm / 19.0 MPa | 8.4 mm / 14.7 MPa | 7.8 mm / 12.8 MPa | 9.2 mm / 18.1 MPa |
 | `LP3Delta` | 5.9 mm / 15.0 MPa | 32.5 mm / 29.6 MPa | 5.7 mm / 14.9 MPa | 31.2 mm / 29.3 MPa | 27.7 mm / 26.5 MPa | 4.6 mm / 12.3 MPa |
 | `MuLite` | 14.3 mm / 20.6 MPa | 52.1 mm / 34.9 MPa | 14.0 mm / 20.3 MPa | 46.4 mm / 34.5 MPa | 42.6 mm / 30.8 MPa | 10.0 mm / 16.3 MPa |
+| `N2Plus` | 13.3 mm / 22.1 MPa | 9.4 mm / 13.3 MPa | 13.1 mm / 21.9 MPa | 7.2 mm / 12.9 MPa | 8.8 mm / 12.0 MPa | 10.8 mm / 18.1 MPa |
+| `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.1 mm / 18.0 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
@@ -223,7 +225,7 @@ The maintainer asked for the Hardkernel ODROID-C4, M1, M2 and N2+ in all six ori
   - Two rows of three lightening windows, clear of the standoffs, as on `ROCK5B`.
   - `--check` with the official 3D model: no overlap with the frame or the board and no unsupported area in all 24 models.
   - Beam estimates (table in history 8): the board is square, so upright portrait is as long an overhang as the landscape orientations. A 10 N push at the far edge gives at most 12.0 mm and 22.3 MPa (upright portrait), below the strength of PETG in every orientation.
-- **Not added: ODROID-N2+ and ODROID-M1.** Their heatsinks cover the whole top of the board. The N2+ heatsink drawing gives M3 threads at the four mounting hole positions (83.5 x 58 mm apart, the same as on the N2 drawing and the N2+ add-on board template), so the board is screwed to the heatsink from underneath and the integrated standoffs cannot take screws from the top. The M1 heatsink drawing gives "M3 x 12ea", four of them 83.5 x 90 mm apart, which is the M1's mounting hole rectangle (90 x 122 mm board, 3.3 mm holes). The heights of the parts under these boards are not published (no 3D model of either board).
+- **Not added here: ODROID-N2+ and ODROID-M1.** The heatsink drawings give M3 threads at the boards' mounting holes (83.5 x 58 mm apart on the N2+, 83.5 x 90 mm on the M1), and the heatsinks were read as covering the top of the boards, so standoffs taking screws from the top would not do. They were added in history 13, which found the heatsinks under the boards.
 - 168 models, 511 release files.
 
 ### History 11: Libre Computer AML-S905X-CC (Le Potato) (2026-11-16)
@@ -260,6 +262,23 @@ The maintainer asked for the LattePanda 3 Delta and the LattePanda Mu in all six
 - **Not added.** The Mu's other carriers. On the Mini Carrier (DFR1293) the module and its cooler hang under the carrier, about 29 mm deep, so its bracket would need standoffs about 30 mm tall or an opening for the cooler (section 9). The Full EVA Carrier (DFR1141) is a 170 x 170 mm Mini-ITX board, and the GPU Carrier (DFR1144) is sold as a kit with its graphics card.
 - **Terms.** The LattePanda 3D models repository puts its models under CC BY 3.0, and the LattePanda Mu repository is under the MIT license. The files are still kept out of the repository and `viewer.html`, as for the other manufacturers (section 7).
 - 216 models, 655 release files.
+
+### History 13: Hardkernel ODROID-N2+ and ODROID-M1, held by their heatsinks (2026-11-16)
+
+History 10 left these out because their heatsinks are screwed to the boards through the mounting holes. Asked how to go on, the maintainer chose integrated standoffs 10 mm tall, as tubes for M3 screws put in from under the plate and into the heatsink's threads, with the clearance not checked. A closer look at the heatsinks then showed that history 10 had them upside down: they are under the boards, not on top. The 10 mm tubes and the M3 screws into the heatsink stayed; what they screw into changed (below).
+
+- **Sources.** On the boards' hardware pages of the ODROID wiki: the N2+ heatsink drawing of 2020-07-07 (DXF) and its 3D model (STL), the M1 heatsink drawing of 2021-11-08 (DWG), the N2 board drawing rev 0.4 (DXF), the N2+ add-on board template rev 0.5 (DWG) and the M1 board drawing rev 1.0 (DXF). The DWG files were converted to DXF only to read them. Links in section 7.
+- **The heatsink is the stand.** On both boards the SoC and the DRAM are on the underside (bottom copper of the board drawings), and the heatsink sits under the board with its fins down: a 100 mm wide aluminium extrusion, 19 mm tall, with a 3 mm base, 15 fins 5 mm deep between 17.15 and 82.85 mm across, a side wall along each long edge that reaches 6 mm below the base, and a pad on top for the SoC. The N2+ and M1 drawings have the same profile (and so does the N2+ 3D model); the N2+ heatsink is 91 mm long and the M1 heatsink 123 mm. The board lies on top between the side walls, 0.5 mm in from the open ends.
+- **The bracket holds the heatsink (`HKSink`, with `N2Plus` and `M1`).** The plate is the heatsink's footprint, 91 x 100 and 123 x 100 mm, so it does not stick out beyond the device it holds. `l` runs along the extrusion from the end away from the ports and `s` across it from the side of the GPIO header.
+- **Holes.** The N2+ heatsink has eight M3 threaded holes through its base: the board is screwed to the four 83.5 x 58 mm apart (its mounting holes, the same on the N2 drawing and the N2+ template), and the other four, 71.5 x 71.5 mm apart, 9.75 mm from the ends and 14.25 mm from the sides, are free. The M1 heatsink has twelve ("M3 x 12ea"): four 83.5 x 90 mm apart for the board, and eight 14.25 mm from the sides at 9.75, 41.75, 81.25 and 113.25 mm from the end. The bracket uses the free four of the N2+ and the outer four of the M1's eight (103.5 x 71.5 mm). They open from below between a side wall and the outermost fin, whose root is 2.9 mm from the hole centre.
+- **Standoffs.** 10 mm tall (the maintainer's choice), which keeps the side walls 4 mm and the fins 5 mm off the plate. The top 6.5 mm goes up between the side wall and the fin, so it is 5 mm across around a 3.4 mm through hole (0.8 mm wall); against the N2+ 3D model it is 0.40 mm from the fin, at the fin's root. Under the heatsink it widens to 8 mm for the bottom 3.5 mm (`foot` in `SPACER`, new in `add_spacers()`). M3 x 16 screws go in from under the plate: 3 mm of plate, 10 mm of standoff and the 3 mm base, so the screw ends flush with the top of the base and does not reach the board. The screw heads stand out under the plate: in the upright and shelf orientations that face is free, but in the flat orientations it lies against the frame, so the README asks for countersunk screws in holes countersunk by hand there (on the other boards' flat brackets, too, nothing can stand out behind the plate; section 9). The viewer shows that instead of a pilot hole (`through` in `SPACER`).
+- **Parts under the board** are inside the heatsink now, so there is nothing of the board left to check against the bracket. The board's height above the heatsink is not published; the simplified board is drawn 13 mm above the bottoms of the side walls (the pad ends at 11.2 mm on the N2+ model and 10.9 mm on the M1 drawing, and the SoC sits on it), for the viewer only.
+- **Edges.** On both boards the Ethernet, USB, HDMI and power ports are at one open end of the heatsink, and the microSD slot, the audio jack and the infrared receiver at the other. `SD_END` puts the microSD end towards the frame with the 17 mm gap in upright landscape and shelf portrait, and `xy()` puts the GPIO header side towards the back plate in upright portrait. On the N2+ the microSD slot is under the board, 10.1 x 15 mm on the bottom mechanical layer, and sticks out 1.8 mm past the board (1.3 mm past the heatsink). On both boards the 40-pin GPIO header runs along the board edge beside one side wall, its two pin rows at `s` = 7.2 and 9.8 mm. The four holes are symmetric, so the heatsink also fits turned round. The README says where each edge ends up.
+- **Version without standoffs.** The same 3 mm holes as every bracket (tight for M3). Own spacers have to fit between the side wall and the fin, so the README asks for round M3 spacers no more than 5 mm across. Flat and shelf have no integrated standoffs, as on every board.
+- **Official 3D model.** The N2+ heatsink is published only as STL, so `official()` now reads STL files as closed meshes and takes an optional first rotation about x (the STL has y up). With `--board-step N2_BODY_20200707.STL`, no overlap with the frame or the heatsink and no unsupported area in all 24 `N2Plus` models, and a 2.8 mm probe along each bracket hole through the base finds no heatsink material, so the bracket holes are on the heatsink's threaded holes. The simplified heatsink (`HKSink.ghost()`, the fins as one block reaching 0.5 mm deeper than they do) holds all of the N2+ model at or below the top of the base; only the pad and parts of the side walls' top edges (the ridges for the case), above the base, are outside it. There is no 3D model of the M1 heatsink, so `M1` is checked against the simplified heatsink.
+- `--check`: no overlap with the frame or the heatsink and no unsupported area in all 48 models, and the DIN leaf springs bend freely in all 16 DIN models.
+- **Beam estimates** (table in history 8). A 10 N push at the far edge gives at most 21.9 mm (`M1` upright landscape) and 22.1 MPa (`N2Plus` upright portrait), below the strength of PETG in every orientation. These two are heavier than the other boards: the N2+ heatsink is about 135 g from the volume of its 3D model in aluminium, and the M1 heatsink about 180 g scaled from that by its length, roughly 0.2 and 0.25 kg with the boards. At 2.5 N the worst shelf, `M1` shelf portrait, bends 1.8 mm at 1.9 MPa (0.71 mm and 0.76 MPa per newton).
+- 264 models, 799 release files.
 
 ## 5. Current dimensions (main ones)
 
@@ -309,6 +328,8 @@ See the constants in `sbc_brackets.py` for the details.
 | BeagleBoard.org BeagleBone Black (`BBB`) | Official design files in [beagleboard/beaglebone-black](https://github.com/beagleboard/beaglebone-black): the Rev C3 [manufacturing data](https://github.com/beagleboard/beaglebone-black/tree/1a732ca598999bf4c6c08e1d1546cdecaa0ca30b/MFG) (board outline, drill file, silkscreen, placement list) and the [bill of materials](https://github.com/beagleboard/beaglebone-black/blob/a58016c7537aa714f1d05c58d2ccf23bf2eb029b/BBB_BOM.xls), checked against the System Reference Manual's [board dimension drawing](https://docs.beagleboard.org/boards/beaglebone/black/ch09.html) (Fig. 486) and [cape outline](https://docs.beagleboard.org/boards/beaglebone/black/ch08.html) (Fig. 485). 86.36 x 54.61 mm, 3.175 mm holes in a trapezoid (history 9) | High for the outline and holes. No official 3D model: checked against a simplified board placed from the silkscreen; the heights of the micro HDMI and mini USB under the board are not published |
 | Radxa ROCK 5B / 5B+ (`ROCK5B`) | Official drawings and 3D models from the [download page](https://docs.radxa.com/en/rock5/rock5b/download): 5B [DXF v1.41](https://dl.radxa.com/rock5/5b/docs/hw/radxa_rock5b_v141_dimension_20220728_dxf.zip) and [STEP v1.42](https://dl.radxa.com/rock5/5b/docs/hw/ROCK5B_v1.42_3D.step.zip), 5B+ [DXF v1.2](https://dl.radxa.com/rock5/5b+/docs/hw/radxa_rock5bp_v12_2d.zip) and [STEP v1.2](https://dl.radxa.com/rock5/5b+/docs/hw/rock5bp_pcba_3d_V1_2_20250314.stp). 100.2 x 74.25 mm, 3.5 mm holes 93.15 x 49 mm | High. Interference checked against the official 3D models |
 | Hardkernel ODROID-M2 (`M2`) | Official [PCB mechanical drawing rev 1.0](https://wiki.odroid.com/_media/odroid-m2/hardware/m2_main_rev1.0_dxf.zip) (DXF), [assembly drawing](https://wiki.odroid.com/_media/odroid-m2/hardware/m2_assembydrawings.pdf) and [3D model rev 1.0](https://wiki.odroid.com/_media/odroid-m2/hardware/m2_main_rev1.0_20240611_step.zip) (STEP), from the [hardware page](https://wiki.odroid.com/odroid-m2/hardware/start). 90 x 90 mm, 3.3 mm holes at (3.5, 3.5), (86.5, 3.5), (86.5, 75.5) and (16.6, 78.5) mm (history 10) | High. Interference checked against the official 3D model |
+| Hardkernel ODROID-N2+ (`N2Plus`) | Official [heatsink drawing](https://wiki.odroid.com/_media/odroid-n2/n2_body_20200707.zip) (DXF, 2020-07-07) and [heatsink 3D model](https://wiki.odroid.com/_media/odroid-n2/odroid-n2plus-heatsink.zip) (STL), the [board drawing rev 0.4](https://dn.odroid.com/S922X/ODROID-N2/Schematic/N2_MAIN_REV0.4_20190207_MECH.zip) (DXF) and the [add-on board template rev 0.5](https://wiki.odroid.com/_media/odroid-n2/n2_main_rev0.5_20200406_template.zip) (DWG), from the [hardware page](https://wiki.odroid.com/odroid-n2/hardware). Heatsink 100 x 91 x 19 mm under the 90 x 90 mm board; the bracket uses the heatsink's four free M3 holes, 71.5 x 71.5 mm apart (history 13) | High. Interference checked against the official 3D model of the heatsink. No 3D model of the board |
+| Hardkernel ODROID-M1 (`M1`) | Official [heatsink drawing](https://wiki.odroid.com/_media/odroid-m1/hardware/m1_heatsink_body_211108.zip) (DWG, 2021-11-08) and the [board drawing rev 1.0](https://wiki.odroid.com/_media/odroid-m1/hardware/m1_main_r_rev1.0_dxf_20220613.zip) (DXF), from the [hardware page](https://wiki.odroid.com/odroid-m1/hardware/start). Heatsink 100 x 123 x 19 mm (the N2+ profile) under the 90 x 122 mm board; the bracket uses four of the heatsink's free M3 holes, 103.5 x 71.5 mm apart (history 13) | Medium-high. No 3D model of the heatsink or the board: checked against a simplified heatsink drawn from the drawing |
 | Libre Computer AML-S905X-CC (Le Potato) (`PiB`) | [Official 3D model V1.0](https://libre.computer/products/aml-s905x-cc/AML-S905X-CC-V1.0.stp.gz) (STEP, gzipped, from the [product page](https://libre.computer/products/aml-s905x-cc/)). PCB 84 x 56 mm, 3.0 mm holes 58 x 49 mm 3.5 mm from the microSD end and the long edges; microSD at the middle of the short edge on the underside (history 11). No 2D drawing is published | High. Interference checked against the official 3D model |
 | LattePanda 3 Delta (`LP3Delta`) | Official [3D model V1.1](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%203%20Delta/LattePanda%203%20Delta%203D%20Model%20V1.1%20step%2020250221.zip) (STEP) and [KiCad footprint](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%20KiCAD%20Library/footprints/Module_LattePanda.pretty/LattePanda_3_Delta.kicad_mod) in the [LattePanda 3D models repository](https://github.com/LattePandaTeam/LattePanda-3D-Models) (CC BY 3.0); ports from the [specification](https://docs.lattepanda.com/content/3rd_delta_edition/specification/) in the LattePanda documentation. 125 x 78 mm, 3.2 mm holes 118 x 71 mm 3.5 mm from the edges (history 12) | High. Interference checked against the official 3D model |
 | LattePanda Mu Lite Carrier (`MuLite`) | Official KiCad designs of the Lite Carrier [V2](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29) and [V1](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu), the [3D model V2.0.1](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/Carrier-Boards/DFR1142_Lite_Carrier_for_LattePanda_Mu%28V2.0.1%29.zip) (STEP) and the module's [dimension drawing](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/LattePanda_Mu_Dimension_Drawing.pdf), in the [LattePanda Mu repository](https://github.com/LattePandaTeam/LattePanda-Mu) (MIT); ports from the [Lite Carrier page](https://docs.lattepanda.com/content/mu_edition/lite_carrier/) in the LattePanda documentation. 146 x 102 mm, 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm (history 12) | High. Interference checked against the official 3D model of the carrier (the module, cooler and M.2 cards on top are not in it) |
@@ -329,7 +350,7 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 - **The current key does not fit aluminium rails with 1.5 mm side walls (7.3 mm deep, 24 mm channel).** Overlaid on a rail with 1.5 mm side walls, all three DIN models interfere by 10.24 mm3 (the key hits by 0.2 mm on each side). The lip edge where the hooks catch is 1 mm thick, the same as TS35 x 7.5.
 
 - Take dimensions for new boards from the manufacturer's official 3D model or drawing. Do not place holes from memory or guesswork: for the VIM1S, the first guess ("rectangular pattern") was wrong.
-- Official 3D models and drawings are not included (`*.stp`, and `*.step` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`). The file name tells which bracket it belongs to (`STEPS` in each board class).
+- Official 3D models and drawings are not included (`*.stp`, and `*.step` and `*.stl` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`). The file name tells which bracket it belongs to (`STEPS` in each board class).
 - Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15; Libre Computer as of 2026-11-16). BeagleBoard.org publishes no 3D model, and its design files have no license file (as of 2026-11-16), so only dimensions read from them are used. The LattePanda 3D models are under CC BY 3.0 and the LattePanda Mu repository under the MIT license (as of 2026-11-16), which would allow redistribution with attribution; they are kept out all the same, so every board is handled the same way.
 
 ## 8. Test print log
@@ -360,14 +381,15 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `LP3Delta` and try it with a LattePanda 3 Delta: M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs, and how far the long overhangs bend (history 12)
 - [ ] Print `MuLite` and try it with a LattePanda Mu on the Lite Carrier: switching it on with the Auto_Power jumper where the buttons face the frame, a card in the PCIe slot (not checked), and how far the long overhangs bend (history 12)
 - [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
-- [ ] ODROID-N2+ and ODROID-M1 (history 10): standoffs that let M3 screws pass from under the plate through the board into the heatsink, and the heights of the parts under the boards
+- [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
 - [ ] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? The current key (24.4 mm wide) does not go in. A narrower key adds play on steel rails with 1 mm sheet (section 7)
 - [ ] Print the new orientations (history 8): the teardrop holes and pockets of the flat and shelf plates, the shelf under a board, and how far the long overhangs (upright landscape, flat landscape, shelf portrait) bend when a cable is plugged in
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and `MuLite` 99% of it in flat landscape (history 12)
+- [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
-- [ ] A release holds at most 1000 files (now 655, 72 per board). At about 13 boards, zip some files together (per board, for example) or split the formats
+- [ ] A release holds at most 1000 files (now 799, 72 per board). At about 13 boards, zip some files together (per board, for example) or split the formats
 - [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
@@ -398,6 +420,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.807 | 20.567 |
 | LP3Delta | 21.926 | 22.687 | 22.569 | 23.330 | 22.075 | 22.835 |
 | MuLite | 26.666 | 27.152 | 27.309 | 27.795 | 26.815 | 27.300 |
+| N2Plus | 22.543 | 23.375 | 23.186 | 24.018 | 22.692 | 23.523 |
+| M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.658 | 30.490 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -412,6 +436,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.807 | 20.567 |
 | LP3Delta | 19.856 | 20.617 | 20.499 | 21.260 | 20.004 | 20.765 |
 | MuLite | 24.728 | 25.213 | 25.371 | 25.857 | 24.877 | 25.362 |
+| N2Plus | 26.836 | 27.668 | 27.479 | 28.311 | 26.985 | 27.816 |
+| M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.542 | 33.373 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -426,6 +452,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M2 | 20.645 | 20.808 | 20.373 |
 | LP3Delta | 23.865 | 24.028 | 23.592 |
 | MuLite | 29.860 | 30.023 | 29.587 |
+| N2Plus | 23.582 | 23.745 | 23.310 |
+| M1 | 31.350 | 31.513 | 31.077 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -440,6 +468,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M2 | 21.270 | 21.433 | 20.997 |
 | LP3Delta | 21.966 | 22.129 | 21.694 |
 | MuLite | 30.049 | 30.212 | 29.776 |
+| N2Plus | 24.556 | 24.719 | 24.283 |
+| M1 | 30.802 | 30.965 | 30.529 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -454,6 +484,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M2 | 20.754 | 21.874 | 21.658 |
 | LP3Delta | 21.834 | 22.954 | 22.738 |
 | MuLite | 27.729 | 28.849 | 28.633 |
+| N2Plus | 27.919 | 29.039 | 28.824 |
+| M1 | 34.146 | 35.267 | 35.051 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -468,3 +500,5 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M2 | 21.379 | 22.499 | 22.283 |
 | LP3Delta | 23.980 | 25.100 | 24.885 |
 | MuLite | 31.704 | 32.824 | 32.609 |
+| N2Plus | 24.221 | 25.342 | 25.126 |
+| M1 | 31.681 | 32.801 | 32.585 |
