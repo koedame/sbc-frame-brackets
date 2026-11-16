@@ -1,0 +1,43 @@
+{
+  "title": "Sipeed NanoKVM Lite",
+  "notes": [
+    "The NanoKVM Lite is a LicheeRV Nano with Sipeed's HDMI board plugged in on top of it, and no case. The LicheeRV Nano has no mounting holes (its only holes big enough, two 3.2 mm ones, are under the Ethernet jack, which covers them), so the bracket holds a printed cradle, NanoKVMLite_cradle, and the board snaps into the cradle. The outline, the holes and the standoffs below are the cradle's.",
+    "Dimensions from Sipeed's official 3D model of the Lite, NanoKVM Lite.step (3D_NanoKVM_Lite.zip in the NanoKVM hardware files), and the official LicheeRV Nano dimension drawing (LicheeRV_Nano_70405_Dimension): the board is 35.6 x 22.9 mm, 35.54 x 22.84 x 1.59 mm in the 3D model. The cradle keeps 0.15 mm clear of the drawing's outline all round.",
+    "l runs along the board from the Ethernet end (l = 0) to the end with the USB-C port, the HDMI port and the microSD slot (l = L), s across it. The cradle is 51.1 x 25.6 mm; the board's outline in it is l 7.75 to 43.35, s 1.35 to 24.25, its underside 4 mm above the cradle's.",
+    "The USB-C, HDMI and microSD end faces the frame in upright landscape and shelf portrait, 17 mm (SD_GAP) plus the cradle's 7.75 mm from the back plate to the end of the board, and the HDMI and USB-C ports stand 1.5 and 1 mm out of it: right-angle plugs fit there, straight ones do not. In the other four orientations neither end faces the frame.",
+    "How the cradle holds the board (3D model): ledges reach 0.8 mm under the four corners of the board, where nothing is under its long edges (the header pins under the board end 0.95 mm in from the edge). End stops beyond the short ends reach 3.45 mm in from each long edge, clear of the USB-C port and the Ethernet jack, and end 0.1 mm below the top of the board, under the female headers and the HDMI board, which stand out past the end. A lip 6 mm long at the middle of each side wall reaches 0.6 mm over the edge and snaps over the plastic of the 10-pin headers along both long edges, whose top is 2.57 mm above the board (8.16 above the cradle's underside); there the HDMI board, which ends 12.7 mm from the USB-C end of the board, is not above them. The walls bend outwards between the end stops to let the board in.",
+    "Sipeed supplies the Lite with a heatsink for the underside of the board, whose size is not published. The cradle is open under the board: with the 6 mm standoffs there are 10 mm from the board's underside to the plate, 13 mm at the opening in the plate under it. The microSD card goes in under the board at the USB-C end; take the board out of the cradle to change it.",
+    "Standoffs 6 mm tall under the cradle's end plates, 9.5 mm either side of the centre line, so that the screw heads are beside a USB-C plug's overmould rather than under it. M2.5 x 8 self-tapping screws go through the 2 mm end plates into the integrated standoffs.",
+    "Parts: the LicheeRV Nano's PCB (the drawing's outline), the parts under it and the header pins through it, the plastic and the pins of the two 10-pin headers, the two 2-pin female headers, the HDMI board with its port, the USB-C port, the Ethernet jack, and a microSD card (11 x 15 x 1 mm, against the back of its 7 mm socket). The heatsink is not in them. The cradle is added from the cradle field."
+  ],
+  "size": [51.1, 25.6],
+  "frame_edge": "s=0",
+  "microsd_edge": "l=L",
+  "holes": [[3.0, 3.3], [3.0, 22.3], [48.1, 3.3], [48.1, 22.3]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 6.0, "d": 6.0, "pilot": 2.2, "screw": "M2.5"},
+  "openings": [[9.55, 41.55, 4.3, 21.3]],
+  "cradle": {
+    "board": [7.75, 43.35, 1.35, 24.25, 4.0, 5.59],
+    "ledge": 0.8,
+    "stop": 3.45,
+    "lip": {"l": [22.55, 28.55], "top": 8.16, "over": 0.6}
+  },
+  "parts": [
+    {"name": "LicheeRV Nano PCB", "box": [7.75, 43.35, 1.35, 24.25, 4.0, 5.59]},
+    {"name": "parts and pins under the board", "box": [8.28, 42.86, 2.33, 23.27, 2.28, 4.0]},
+    {"name": "10-pin header", "box": [7.80, 35.75, 1.38, 3.92, 5.59, 8.16]},
+    {"name": "10-pin header", "box": [7.80, 35.75, 21.68, 24.22, 5.59, 8.16]},
+    {"name": "10-pin header pins", "box": [7.80, 35.75, 2.33, 2.97, 8.16, 13.96]},
+    {"name": "10-pin header pins", "box": [7.80, 35.75, 22.63, 23.27, 8.16, 13.96]},
+    {"name": "2-pin female header", "box": [38.00, 43.58, 1.40, 3.90, 5.59, 12.43]},
+    {"name": "2-pin female header", "box": [38.00, 43.58, 21.70, 24.20, 5.59, 12.43]},
+    {"name": "HDMI board", "box": [30.68, 44.83, 1.32, 24.30, 12.07, 20.89]},
+    {"name": "USB-C", "box": [36.48, 44.32, 8.33, 17.27, 3.69, 8.85]},
+    {"name": "Ethernet", "box": [8.16, 24.51, 3.40, 22.20, 4.39, 19.14]},
+    {"name": "microSD", "box": [29.34, 44.34, 7.30, 18.30, 2.50, 3.50]}
+  ],
+  "official_models": {
+    "NanoKVM Lite.step": {"rotate": 90, "centre": [0.0, 48.27], "underside": -24.17}
+  }
+}

@@ -317,12 +317,50 @@ def official(step_path):
     raise SystemExit(f"{name}: not a known official 3D model (known: {known})")
 
 
+# ======================= Cradle (for a board with no mounting holes) =======================
+CRADLE_FIT = 0.15        # clearance around the held board (per side)
+CRADLE_STOP_T = 1.6      # thickness of the end stops beyond the board's short ends
+CRADLE_PLATE = 2.0       # thickness of the end plates the screws go through
+CRADLE_LEDGE = 5.0       # length of each ledge under a corner of the board, along l
+CRADLE_WALL_MIN = 1.0    # thinnest side wall that still prints and holds
+
+
+def cradle(c, L, S, holes, hole_d):
+    """A cradle for a board with no mounting holes (the definition's cradle field, boards/README.md). It is the L x S outline
+    that sits on the standoffs, in the outline's coordinates (l, s, h), with h = 0 its underside: it prints that side down,
+    without supports. The board rests on ledges under its four corners between two side walls, with end stops beyond its short
+    ends. A short lip at the middle of each wall, 45 degrees above and below, snaps over the parts along the board's long edge:
+    the walls bend outwards between the end stops to let the board in. End plates beyond the end stops carry the screw holes"""
+    l0, l1, s0, s1, h0, h1 = c["board"]
+    a0, a1 = l0 - CRADLE_FIT - CRADLE_STOP_T, l1 + CRADLE_FIT + CRADLE_STOP_T     # outer faces of the end stops
+    lip = c["lip"]; reach = CRADLE_FIT + lip["over"]                             # how far the lip stands out of the wall
+    z_lip = lip["top"] + 0.05 - CRADLE_FIT                                       # its 45-degree underside clears the parts' top
+    top = z_lip + 2 * reach                                                      # 0.05 mm at the board's edge
+    s = box(0, a0, 0, S, 0, CRADLE_PLATE) + box(a1, L, 0, S, 0, CRADLE_PLATE)
+    for w0, w1, e, sg in ((0, s0 - CRADLE_FIT, s0, 1), (s1 + CRADLE_FIT, S, s1, -1)):   # the two long sides; sg points inwards
+        s += box(a0, a1, w0, w1, 0, top)
+        st = sorted((e - sg * CRADLE_FIT, e + sg * c["stop"]))
+        s += box(a0, l0 - CRADLE_FIT, *st, 0, h1 - 0.1) + box(l1 + CRADLE_FIT, a1, *st, 0, h1 - 0.1)
+        ld = sorted((e - sg * CRADLE_FIT, e + sg * c["ledge"]))
+        s += (box(l0 - CRADLE_FIT, l0 - CRADLE_FIT + CRADLE_LEDGE, *ld, 0, h0)
+              + box(l1 + CRADLE_FIT - CRADLE_LEDGE, l1 + CRADLE_FIT, *ld, 0, h0))
+        wall = e - sg * CRADLE_FIT
+        profile = Polygon((wall - sg * 0.01, z_lip), (wall + sg * reach, z_lip + reach), (wall - sg * 0.01, top), align=None)
+        s += extrude(Plane.YZ.offset(lip["l"][0]) * profile, lip["l"][1] - lip["l"][0])   # (s, h) profile, along l
+    for l, w in holes:
+        s -= Pos(l, w, CRADLE_PLATE / 2) * Cylinder(hole_d / 2, CRADLE_PLATE + 2)
+    return s
+
+
 # ======================= Boards (boards/*.json) =======================
 BOARD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards")
 FIELDS = {"title": True, "notes": False, "size": True, "frame_edge": True, "microsd_edge": False, "holes": True, "hole_d": True,
-          "standoffs": True, "openings": False, "windows": False, "parts": True, "official_models": False}   # name: required
+          "standoffs": True, "openings": False, "windows": False, "parts": True, "official_models": False,
+          "cradle": False}   # name: required
 STANDOFF_FIELDS = {"h", "d", "pilot", "screw", "foot", "through", "at"}
 MODEL_FIELDS = {"rotate", "centre", "underside", "tilt", "exclude"}
+CRADLE_FIELDS = {"board", "ledge", "stop", "lip"}
+LIP_FIELDS = {"l", "top", "over"}
 
 
 class Board:
@@ -343,6 +381,8 @@ class Board:
         self.standoff_at = d["standoffs"].get("at", self.holes)
         self.openings, self.windows, self.parts = d.get("openings", []), d.get("windows"), d["parts"]
         self.official_models = d.get("official_models", {})
+        self.cradle_def = d.get("cradle")
+        self._cradle = None
         # the short end at the top in upright portrait is the one that faces the frame in upright landscape and shelf portrait
         self.sd_end = d.get("microsd_edge") == ("l=L" if self.frame_edge == "s=0" else "l=0")
 
@@ -383,6 +423,21 @@ class Board:
         for f, m in d.get("official_models", {}).items():
             if set(m) - MODEL_FIELDS or not {"rotate", "centre", "underside"} <= set(m):
                 bad(f"official_models[{f!r}] has rotate, centre, underside and optionally tilt and exclude")
+        c = d.get("cradle")
+        if c is not None:
+            if set(c) != CRADLE_FIELDS or set(c["lip"]) != LIP_FIELDS:
+                bad("cradle has board, ledge, stop and lip, and lip has l, top and over")
+            l0, l1, s0, s1, h0, h1 = c["board"]
+            if not (l0 < l1 and s0 < s1 and CRADLE_PLATE < h0 < h1 < c["lip"]["top"]):
+                bad("cradle board is [l0, l1, s0, s1, h0, h1] with h0 above the end plates and h1 below the lip's top")
+            if min(s0, S - s1) - CRADLE_FIT < CRADLE_WALL_MIN:
+                bad(f"the cradle's side walls are thinner than {CRADLE_WALL_MIN} mm: make S wider")
+            if not l0 <= c["lip"]["l"][0] < c["lip"]["l"][1] <= l1:
+                bad("cradle lip l is [from, to] along the board")
+            a0, a1 = l0 - CRADLE_FIT - CRADLE_STOP_T, l1 + CRADLE_FIT + CRADLE_STOP_T
+            for l, s in d["holes"]:
+                if not (l + d["hole_d"] / 2 <= a0 - 1 or l - d["hole_d"] / 2 >= a1 + 1):
+                    bad(f"hole {[l, s]} is not in an end plate of the cradle (l up to {a0 - 1:.2f} or from {a1 + 1:.2f}, less the hole)")
 
     def xy(self, l, s):
         """Board (l, s) -> bracket-local (x, y) on the upright-portrait front plate. Both ways round it is a turn, never a mirror"""
@@ -408,6 +463,19 @@ class Board:
             (xa, ya), (xb, yb) = self.xy(l0, s0), self.xy(l1, s1)
             out.append((min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)))
         return out
+
+    def cradle(self):
+        """The cradle as printed, in the outline's coordinates (l, s, h) with h = 0 on the build plate; None for a board that
+        is screwed on directly"""
+        if self.cradle_def and self._cradle is None:
+            self._cradle = cradle(self.cradle_def, self.L, self.S, self.holes, self.hole_d)
+        return self._cradle
+
+    def cradle_placed(self):
+        """The cradle on the standoffs, in the board frame like ghost()"""
+        rot = 0 if self.frame_edge == "s=0" else 180   # xy() is a translation for s=0 and a half turn for s=S
+        return (Pos(0, T + BOARD_Y0 + self.S / 2, Z0 + T + self.standoffs["h"]) * Rot(0, 0, rot)
+                * Pos(-self.L / 2, -self.S / 2, 0) * self.cradle())
 
     def ghost(self):
         """Simplified board for display and interference checks: the boxes of the definition's parts, their heights from the

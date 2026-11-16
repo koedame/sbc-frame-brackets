@@ -45,6 +45,16 @@ def write_3mf(shape, path, name):
     m = Mesher(); m.add_shape(on_plate(shape), linear_deflection=0.02, angular_deflection=0.2, part_number=name); m.write(path)
 
 
+def write(shape, formats, out, name):
+    """Write a model in the formats asked for: 3MF and STL laid on the build plate as printed, STEP where it is"""
+    if "3mf" in formats:
+        write_3mf(shape, os.path.join(out, name + ".3mf"), name)
+    if "stl" in formats:
+        export_stl(on_plate(shape), os.path.join(out, name + ".stl"), tolerance=0.02, angular_tolerance=0.2)
+    if "step" in formats:
+        export_step(shape, os.path.join(out, name + ".step"))
+
+
 def mesh(shape, tol=0.08, nd=2):
     v, t = (sb.world() * shape).tessellate(tol, 0.3)
     return dict(v=[round(c, nd) for p in v for c in (p.X, p.Y, p.Z)], t=[i for tri in t for i in tri])
@@ -100,7 +110,27 @@ def main():
         official.setdefault(B.name, []).append((os.path.basename(p), solids))
     boards_chk.update((n, v) for n, v in official.items() if n in boards_chk)
     frames = {s: sb.mount_frames(s, 300) for s in a.mount}
-    models = []; ghosts = {}; failed = []
+    models = []; ghosts = {}; cradles = {}; failed = []; n_checked = 0
+    for B in [B for B in boards if B.cradle()]:   # a board with no mounting holes snaps into a cradle that is screwed on
+        n, c = f"{B.name}_cradle", B.cradle()
+        write(c, a.format, a.out, n)
+        bb = c.bounding_box()
+        line = f"{n:40s} size {[round(x, 1) for x in (bb.size.X, bb.size.Y, bb.size.Z)]} mm  volume {round(c.volume / 1000, 1)} cm3"
+        if a.check:
+            hits = []; bad = len(c.solids()) != 1
+            for lab, gs in boards_chk[B.name]:
+                v, ar = overlap(B.cradle_placed(), gs)
+                hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
+                bad |= round(v, 2) > 0 or round(ar, 2) > 0
+            unsup = cp.unsupported(c)[0]
+            bad |= unsup > 0
+            line += (f"  {'  '.join(hits)}  unsupported {unsup} mm2  ~{ct.estimate(c)['min']} min"
+                     + ("" if len(c.solids()) == 1 else f"  {len(c.solids())} separate solids (must be 1)"))
+            n_checked += 1
+            if bad:
+                failed.append(n)
+        print(line)
+        boards_chk[B.name] = [(lab, gs + [B.cradle_placed()]) for lab, gs in boards_chk[B.name]]   # the brackets must clear it too
     for B, orient, series, spacer in [(B, o, se, sp) for B in boards for o in a.orient for se in a.mount for sp in (False, True)
                                        if o in sb.SPACER_ORIENTS or not sp]:   # flat and shelf: no integrated standoffs
         n = model_id(B, series, spacer, orient)
@@ -108,16 +138,13 @@ def main():
         gk = B.name if orient == sb.UPRIGHT else f"{B.name}_{sb.mount_tag(series)}_{orient}"   # board shown with this model
         if viewer and gk not in ghosts:
             ghosts[gk] = mesh(Compound([M * B.ghost()]), 0.3)
+            if B.cradle():
+                cradles[gk] = mesh(M * B.cradle_placed())
         s = B.bracket(series, spacer, orient)
-        if "3mf" in a.format:
-            write_3mf(s, os.path.join(a.out, n + ".3mf"), n)
-        if "stl" in a.format:
-            export_stl(on_plate(s), os.path.join(a.out, n + ".stl"), tolerance=0.02, angular_tolerance=0.2)
-        if "step" in a.format:
-            export_step(s, os.path.join(a.out, n + ".step"))
+        write(s, a.format, a.out, n)
         bb = s.bounding_box()
         m = dict(id=n, name=B.name, title=B.title, series=series, mount=sb.mount_label(series), spacer=spacer,
-                 orient=orient, orient_label=sb.ORIENTS[orient], ghost=gk,
+                 orient=orient, orient_label=sb.ORIENTS[orient], ghost=gk, cradle=f"{B.name}_cradle" if B.cradle() else None,
                  size=[round(x, 1) for x in (bb.size.X, bb.size.Y, bb.size.Z)], vol=round(s.volume / 1000, 1), min=None,
                  hole_d=B.hole_d, boss=(dict(B.standoffs, n=len(B.spacer_xy())) if spacer else None))
         line = f"{n:40s} size {m['size']} mm  volume {m['vol']} cm3"
@@ -143,6 +170,7 @@ def main():
                 spring = sb.din_spring_hit(s)
                 bad |= round(spring, 2) > 0
                 line += f"  leaf spring travel {sb.din_spring_travel():.2f} mm overlap {spring:.2f} mm3"
+            n_checked += 1
             if bad:
                 failed.append(n)
         print(line)
@@ -160,6 +188,7 @@ def main():
         # (so the manufacturers' CAD data is not redistributed)
         data = dict(frames={s: mesh(sb.mount_frame(s, 260), 0.2) for s in a.mount},
                     ghosts=ghosts,
+                    cradles=cradles,
                     models=models)
         tpl = open(os.path.join(HERE, "viewer.tpl.html"), encoding="utf-8").read()
         three = open(os.path.join(HERE, "vendor", "three.min.js"), encoding="utf-8").read()
@@ -174,8 +203,8 @@ def main():
         print("Wrote viewer.html")
     if a.check:
         if failed:
-            sys.exit(f"Checks failed for {len(failed)} of {len(models)} models: " + ", ".join(failed))
-        print(f"Checks passed for all {len(models)} models")
+            sys.exit(f"Checks failed for {len(failed)} of {n_checked} models: " + ", ".join(failed))
+        print(f"Checks passed for all {n_checked} models")
 
 
 if __name__ == "__main__":

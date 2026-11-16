@@ -1,12 +1,12 @@
 ---
 name: sbc-frame-brackets
-description: Get or make a screwless, support-free 3D-printed bracket that clips a single-board computer (Raspberry Pi, Radxa, Khadas, Hardkernel ODROID, Orange Pi, NVIDIA Jetson Orin Nano, BeagleBone, LattePanda, Sipeed NanoKVM-Desk and others) onto 20x20 or 40x40 aluminium extrusion or a TS35 DIN rail, as 3MF, STL and STEP. Use when someone wants to mount a board on an extrusion frame or a DIN rail, asks for a bracket, holder or mount for a single-board computer, or wants a board added to sbc-frame-brackets.
+description: Get or make a screwless, support-free 3D-printed bracket that clips a single-board computer (Raspberry Pi, Radxa, Khadas, Hardkernel ODROID, Orange Pi, NVIDIA Jetson Orin Nano, BeagleBone, LattePanda, Sipeed NanoKVM-Desk and NanoKVM Lite, and others) onto 20x20 or 40x40 aluminium extrusion or a TS35 DIN rail, as 3MF, STL and STEP. Use when someone wants to mount a board on an extrusion frame or a DIN rail, asks for a bracket, holder or mount for a single-board computer, or wants a board added to sbc-frame-brackets.
 license: MIT
 ---
 
 # SBC frame brackets
 
-[sbc-frame-brackets](https://github.com/koedame/sbc-frame-brackets) makes L-shaped brackets that clip onto an aluminium extrusion (6 mm slot) or a DIN rail without screws and hold a board by its mounting holes.
+[sbc-frame-brackets](https://github.com/koedame/sbc-frame-brackets) makes L-shaped brackets that clip onto an aluminium extrusion (6 mm slot) or a DIN rail without screws and hold a board by its mounting holes. A board with none, such as the Sipeed NanoKVM Lite, snaps into a printed cradle that is screwed on in its place.
 Every supported board already has ready-made files attached to the latest release. Build only for a board that is not supported yet.
 
 Work through the steps in order. Steps 3 to 8 are only for a new board.
@@ -40,7 +40,7 @@ If the board is listed, **do not build anything**. Give the link to the zip of t
 https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<bracket>.zip
 ```
 
-The zip holds every mount, orientation and format of that bracket in a folder named after it, so also tell the user which file in it to use. File names are `<bracket>_<2020|4040|DIN35>[_<orientation suffix>][_spacer].<3mf|stl|step>`, for example `PiB_2020.3mf`, `PiB_2020_upright-landscape_spacer.3mf` or `PiB_DIN35_flat-portrait.step`.
+The zip holds every mount, orientation and format of that bracket in a folder named after it, so also tell the user which file in it to use. The `NanoKVMLite` zip also has `NanoKVMLite_cradle`, the cradle the board snaps into, which has to be printed too (one fits every bracket of that board). File names are `<bracket>_<2020|4040|DIN35>[_<orientation suffix>][_spacer].<3mf|stl|step>`, for example `PiB_2020.3mf`, `PiB_2020_upright-landscape_spacer.3mf` or `PiB_DIN35_flat-portrait.step`.
 Point the user to "Printing" (PETG, no supports) and "Mounting" in the README, and to "Where the edges of the board end up" if they care which connector ends up where.
 
 A board that is not listed may still share its outline, mounting holes and microSD position with a listed bracket; many boards copy the Raspberry Pi B layout. Only say so after comparing with the official drawing (step 3), and say which drawing you compared.
@@ -85,6 +85,7 @@ Copy the closest existing definition (`PiA.json` is the simplest, `VIM1S.json` h
 - **`frame_edge`** (`"s=0"` or `"s=S"`) is the edge along `l` that faces the back plate. Turn the drawing so that this edge is at the bottom: the end on the right is then at the top in upright portrait and faces the frame in upright landscape and shelf portrait.
 - **`standoffs`**: `h` tall enough that the deepest part under the board clears the plate, `d` narrow enough to miss the nearest part around each hole. `pilot` is 1.7 for M2, 2.2 for M2.5, 2.6 for M3 (self-tapping). `--check` reports standoffs that are too short or too wide as a board overlap.
 - **`openings`** and **`windows`** must stay clear of the standoffs. A microSD slot under the board usually needs a notch so that a finger reaches the card: an opening that starts 4 mm outside the edge (`-4`, or `L + 4`), so that it is open there, and reaches 11 to 15 mm in, as in the existing definitions. The same works for a connector under the board.
+- **A board with no mounting holes** gets a `cradle` (`boards/README.md`, `NanoKVMLite.json`); `size`, `holes`, `hole_d` and `standoffs` are then the cradle's.
 - **`parts`**: the PCB itself (`[0, L, 0, S, 0, <thickness>]`) and every part from step 3, as boxes, heights from the board's underside (negative below it): a part 8.5 mm tall on a 1.6 mm board is `1.6, 10.1`. They decide what `--check` tests the bracket against.
 
 ## 6. Build only what is needed, with `--check`
