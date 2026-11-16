@@ -3,20 +3,18 @@
   "notes": [
     "85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+; the 2 B has \"the same form factor\" as the 1 B+ (official documentation).",
     "The official drawings of the Radxa ROCK 3C (2D DXF) and the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge.",
-    "So does the Hardkernel ODROID-C4 (official PCB mechanical drawing, DXF), with 3.0 mm holes, but its microSD slot is under the board at the middle of the GPIO-header edge, which faces the back plate on the ports-down set of holes.",
+    "So does the Hardkernel ODROID-C4 (official PCB mechanical drawing, DXF), with 3.0 mm holes, but its microSD slot is under the board at the middle of the GPIO-header edge, which faces the back plate.",
     "The Libre Computer AML-S905X-CC (Le Potato) PCB is 84 x 56 mm in its official 3D model, 1 mm shorter at the port end; its 3.0 mm holes are 3.5 mm from the microSD end and the long edges, as on the Raspberry Pi. Its PCB spans x 0-84, so 41.5 is the centre of the 85 mm outline.",
     "l = 0 is the microSD end, s = S the GPIO-header edge, which faces the back plate. USB and LAN are at the l = L end.",
-    "Two sets of holes: the set 3.5 mm from the microSD end, with standoffs, holds the board ports down; the same set moved 20 mm along the long side holds it ports up.",
-    "The openings at both ends are the microSD notch (19 mm deep), so the board fits either way round. The windows keep clear of the standoffs."
+    "One set of holes, 3.5 mm from the microSD end, which puts the ports at the bottom in upright portrait. Mounting the bracket upside down puts them at the top. A second set 20 mm further along, for the board turned round, was dropped as the maintainer decided (2026-11-17).",
+    "The opening at the microSD end is the notch for the card (19 mm deep). The one at the other end was the notch for the board turned round and is left as a lightening opening under the USB and LAN ports. The windows keep clear of the standoffs."
   ],
   "size": [85.0, 56.0],
   "frame_edge": "s=S",
   "microsd_edge": "l=0",
-  "holes": [[3.5, 3.5], [3.5, 52.5], [61.5, 3.5], [61.5, 52.5],
-            [81.5, 3.5], [81.5, 52.5], [23.5, 3.5], [23.5, 52.5]],
+  "holes": [[3.5, 3.5], [3.5, 52.5], [61.5, 3.5], [61.5, 52.5]],
   "hole_d": 3.0,
-  "standoffs": {"h": 5.0, "d": 6.0, "pilot": 2.2, "screw": "M2.5",
-                "at": [[3.5, 3.5], [3.5, 52.5], [61.5, 3.5], [61.5, 52.5]]},
+  "standoffs": {"h": 5.0, "d": 6.0, "pilot": 2.2, "screw": "M2.5"},
   "openings": [[-23.0, 19.0, 10.5, 45.5], [66.0, 108.0, 10.5, 45.5], [25.0, 39.5, 10.5, 45.5], [45.5, 60.0, 10.5, 45.5]],
   "parts": [
     {"name": "PCB", "box": [0, 85.0, 0, 56.0, 0, 1.6]},

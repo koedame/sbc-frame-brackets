@@ -153,7 +153,7 @@ File names are `<bracket>_<mount>[_<orientation>][_spacer]`; upright portrait ha
 | Shelf, portrait | `PiB_2020_shelf-portrait` | none |
 | Shelf, landscape | `PiB_2020_shelf-landscape` | none |
 
-- **Without standoffs**: the board plate has 3 mm through holes (2.4 mm on `NanoKVMDesk`, for M2). Bring your own standoffs and screws.
+- **Without standoffs**: the board plate has 3 mm through holes (2.4 mm on `VIM1S` and `NanoKVMDesk`, for M2). Bring your own standoffs and screws.
 - **With standoffs** (`_spacer`, upright orientations only): standoffs are printed as part of the board plate. Screw through the board straight into them (on `N2Plus` and `M1`, from under the plate into the heatsink, and on `NanoKVMDesk` into the case; see below).
 - **Fit test coupons**, attached on their own: `fit_test_2020_1.stl` to `_3.stl` and `fit_test_4040_1.stl` to `_3.stl` (clearance 0.00 / 0.05 / 0.10 mm, told apart by the number of notches).
 
@@ -192,7 +192,7 @@ On `OrinNano`, take the board off the developer kit's base: the bracket takes it
 
 On `NanoKVMDesk` the bracket holds the NanoKVM-Desk by its case, with the two rear screws on its bottom, which Sipeed's quick start guide says can be used for mounting. Peel off the rear rubber feet, take out the two rear screws (M2 x 6, or M2 x 7 on units made after October 2025) and screw the case on from under the plate with M2 x 12 screws through the two rear standoffs: 3 mm of plate and 3 mm of standoff, then 6 mm into the case, as deep as the original screws. Leave the two front screws alone: Sipeed says they are shorter and close to the board inside. The two front standoffs are rests that keep the case from rocking on the two screws; neither case has a screw hole above them, and the front rubber feet can stay. With the version without standoffs, use 3 mm M2 standoffs: two under the rear screws, with the same M2 x 12 screws through them, and two at the front holes, fixed to the plate with short screws from under it. In the flat orientations the screw heads lie against the frame, so use countersunk screws in holes countersunk by hand, as on `N2Plus` and `M1`. Both the current case (plastic front shell) and the earlier one (3D-printed front shell) were checked against Sipeed's official 3D models.
 
-In the flat and shelf orientations the board plate prints standing up, so its holes are teardrop-shaped (a 3 mm screw still passes through) and there is no version with integrated standoffs. A standoff sticking out sideways from a standing plate cannot print without support unless its underside slopes up at 45 degrees, and that slope either eats most of the face the board sits on or runs into the parts under the board. Use your own standoffs with these.
+In the flat and shelf orientations the board plate prints standing up, so its holes are teardrop-shaped (a screw that fits the round hole still passes through) and there is no version with integrated standoffs. A standoff sticking out sideways from a standing plate cannot print without support unless its underside slopes up at 45 degrees, and that slope either eats most of the face the board sits on or runs into the parts under the board. Use your own standoffs with these.
 
 <details>
 <summary><b>How the brackets hold on</b></summary>
@@ -215,10 +215,10 @@ Estimated print time of the 20x20 version (upright: without / with standoffs):
 
 | Bracket | Upright, portrait | Upright, landscape | Flat, portrait | Flat, landscape | Shelf, portrait | Shelf, landscape |
 |---|---|---|---|---|---|---|
-| `PiB` | ~48 / 63 min | ~50 / 62 min | ~54 min | ~58 min | ~56 min | ~60 min |
+| `PiB` | ~43 / 58 min | ~44 / 57 min | ~53 min | ~57 min | ~55 min | ~59 min |
 | `PiA` | ~39 / 53 min | ~43 / 56 min | ~46 min | ~48 min | ~52 min | ~48 min |
 | `PiZero` | ~33 / 41 min | ~34 / 40 min | ~34 min | ~36 min | ~34 min | ~39 min |
-| `VIM1S` | ~44 / 58 min | ~42 / 55 min | ~56 min | ~55 min | ~53 min | ~58 min |
+| `VIM1S` | ~44 / 58 min | ~42 / 54 min | ~56 min | ~55 min | ~53 min | ~58 min |
 | `ROCK5B` | ~59 / 81 min | ~57 / 77 min | ~78 min | ~79 min | ~75 min | ~81 min |
 | `BBB` | ~46 / 64 min | ~48 / 63 min | ~56 min | ~59 min | ~57 min | ~62 min |
 | `M2` | ~62 / 85 min | ~62 / 85 min | ~83 min | ~83 min | ~82 min | ~82 min |
@@ -261,7 +261,7 @@ Mounted upside down, top and bottom swap.
 
 - The Zero boards have their microSD slot at a short end too. The Khadas VIM1S / VIM3 / VIM4 have it under the board in the middle of the power and HDMI edge, and the Radxa ROCK 5B / 5B+ under the board at the GPIO edge.
 - BeagleBoard.org BeagleBone Black has its microSD slot and micro HDMI under the board at one short end, next to the USB-A port, and Ethernet, the power jack and mini USB at the other. That microSD end faces the frame in upright landscape and shelf portrait: the 17 mm gap leaves room for the card and a finger, but not for a USB-A or micro HDMI plug. The P9 header edge is where the GPIO edge is in the table.
-- The Hardkernel ODROID-C4 (on `PiB`, 3.0 mm holes) has its microSD slot under the board in the middle of the GPIO edge, not at a short end. In upright portrait with the integrated standoffs and in shelf landscape that edge faces the frame, 4 mm away, so the card can only be changed with the board off. The versions without standoffs also have holes for the board turned round, which puts the GPIO edge and the card away from the frame.
+- The Hardkernel ODROID-C4 (on `PiB`, 3.0 mm holes) has its microSD slot under the board in the middle of the GPIO edge, not at a short end. In upright portrait and shelf landscape that edge faces the frame, 4 mm away, so the card can only be changed with the board off. In the other orientations that edge is away from the frame.
 - The Libre Computer Le Potato (on `PiB`, 3.0 mm holes) has its mounting holes and microSD slot where the Raspberry Pi has them, so the table applies as it is. Its board is 84 mm long, 1 mm shorter than the Raspberry Pi at the USB and Ethernet end.
 - The Hardkernel ODROID-M2 is square. Its GPIO header edge is where the GPIO edge is in the table, and most of its ports are where the power and HDMI edge is. The microSD card (sticking out 9.9 mm on top of the board) and the USB-C port are where the other short end is, so they never face the frame.
 - The LattePanda 3 Delta has its three USB-A ports at the end where the microSD end is in the table, but that end gets the usual 4 mm gap, not 17 mm: in upright landscape and shelf portrait the USB-A ports face the frame, and in flat landscape they are against the grip, so they cannot be used in those orientations. The HDMI, Ethernet, headphone and USB-C ports are at the other short end. The edge with the RTC battery, the Arduino-side GPIO header and the power button is where the GPIO edge is in the table. The edge with the microSD and nano SIM slot (under the board, 18 to 31 mm from the USB-A end), the 12 V input header and the display and touch panel connectors (under the board) is where the power and HDMI edge is, so it never faces the frame.

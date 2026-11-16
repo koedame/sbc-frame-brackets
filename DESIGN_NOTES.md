@@ -3,7 +3,7 @@
 Notes for picking this project up and carrying on. The README says *what* is here; these notes say *why* it is the way it is and *what to do next*.
 Read these notes before you resume work.
 
-Last updated: 2026-11-16
+Last updated: 2026-11-17
 
 ---
 
@@ -32,7 +32,7 @@ Last updated: 2026-11-16
 | The front plate is notched where the SD card goes in and out | Maintainer's instruction |
 | No text on the bottom face (the face on the build plate) | Maintainer's instruction |
 | Standoffs are separate parts by default. Integrated standoffs are offered as an alternative (upright orientations only, history 8) | Maintainer's instruction |
-| Board holes are 3 mm diameter (version without standoffs) | Maintainer's instruction |
+| Board holes are 3 mm diameter (version without standoffs), 2.4 mm on boards that take M2 screws | Maintainer's instruction (2.4 mm for M2: 2026-11-17, history 18) |
 | Width along the rail is 16 mm (the print height) | Reduced from 30 mm after the maintainer pointed it out |
 | Generated files are attached to GitHub releases and not committed, in one zip per board. The README links to `releases/latest/download/<board>.zip` | Maintainer's decisions (release files 2026-11-15, history 8; one zip per board 2026-11-16, history 17) |
 | A release is published after every merged change to the models, the README's download links or the viewer, without asking each time | Maintainer's decision (2026-11-16; until then a release was published only when the maintainer asked for it) |
@@ -219,7 +219,7 @@ The maintainer asked for the Hardkernel ODROID-C4, M1, M2 and N2+ in all six ori
 
 - **Sources.** The PCB mechanical drawings on the boards' hardware pages of the ODROID wiki: the C4 rev 1.0 drawing (DXF, and PDF of both sides) and the M2 rev 1.0 drawing (DXF), assembly drawing (PDF) and 3D model (STEP). Links in section 7.
 - **ODROID-C4 → `PiB`.** On the DXF the outline is 85 x 56 mm and the four mounting holes are 3.0 mm, 58 x 49 mm apart, 3.5 mm from both long edges and from the short edge away from the USB and Ethernet ports: the `PiB` ports-down set. Two more 3.0 mm holes inside the outline are not on that rectangle and are not used.
-  - The microSD slot is not at a short edge as on the Raspberry Pi. It is under the board at the middle of the GPIO header edge (centre about 45.5 mm from the short edge away from the ports), and the card goes in from that edge. In upright portrait the integrated standoffs are on the ports-down set, which puts that edge 4 mm from the back plate, so the card can only be changed with the board off. The version without standoffs also has the ports-up set, which turns the board round with that edge outwards. Shelf landscape also puts that edge 4 mm from the frame, but has no standoffs, so the board can be turned round on the ports-up set there too. In the other orientations the edge is not towards the frame. The README says both.
+  - The microSD slot is not at a short edge as on the Raspberry Pi. It is under the board at the middle of the GPIO header edge (centre about 45.5 mm from the short edge away from the ports), and the card goes in from that edge. In upright portrait the integrated standoffs are on the ports-down set, which puts that edge 4 mm from the back plate, so the card can only be changed with the board off. The version without standoffs also has the ports-up set, which turns the board round with that edge outwards. Shelf landscape also puts that edge 4 mm from the frame, but has no standoffs, so the board can be turned round on the ports-up set there too. In the other orientations the edge is not towards the frame. The README says both. (History 18 removed the ports-up set, so in upright portrait and shelf landscape the card can now only be changed with the board off.)
   - The eMMC module socket is also under the board. No official 3D model of the C4 board is published, so, as for the ROCK 3C and ROCK64, the bracket was not checked against its components.
 - **ODROID-M2 gets its own bracket (`M2`).** 90 x 90 mm with 2 mm corner radii and a 13.6 x 7.9 mm cut-out at the Ethernet corner (the plate stays square). Four 3.3 mm holes at (3.5, 3.5), (86.5, 3.5), (86.5, 75.5) and (16.6, 78.5) mm from the corner between the microSD edge and the GPIO header edge. The DXF, the assembly drawing and the 3D model agree; on the bracket the holes of the placed 3D model are within 0.001 mm of the bracket holes. No existing bracket matches.
   - The GPIO header edge faces the back plate in upright portrait (`s = 0`), so most ports, on the opposite edge, face out. The USB-C port is on the microSD edge and sticks out 1.4 mm.
@@ -302,7 +302,7 @@ The maintainer asked for the Orange Pi 5, 5 Pro and 5 Plus. Only the 5 Pro is ad
 
 - **Sources.** Orange Pi puts each board's user manual, schematic and mechanical drawing on the board's service and support page (links in section 7). For the 5 Pro the mechanical drawing is a PDF, `OPi_5_Pro_V1_2_1-dxf.pdf` (board v1.2), with a dimensioned top view and a bottom view.
 - **Orange Pi 5 and 5 Plus not added yet.** Their user manuals give the outline but not the holes, and the mechanical data on their pages is a 3D model (STEP in a RAR archive), which has not been checked yet.
-- **Outline and holes.** 89.1 x 56 mm, four 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges, 7.6 mm from the end with the microSD slot and 23.5 mm from the Ethernet end. That is the Raspberry Pi B's hole pattern, but the board is 4.1 mm longer and the holes are 7.6 mm, not 3.5 mm, from the microSD end, so it does not fit `PiB`. Turned round it would sit on `PiB`'s ports-up set of holes (23.5 and 81.5 mm), but only without standoffs and 4.1 mm past the end of the plate, so it gets its own bracket.
+- **Outline and holes.** 89.1 x 56 mm, four 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges, 7.6 mm from the end with the microSD slot and 23.5 mm from the Ethernet end. That is the Raspberry Pi B's hole pattern, but the board is 4.1 mm longer and the holes are 7.6 mm, not 3.5 mm, from the microSD end, so it does not fit `PiB`. Turned round it would sit on `PiB`'s ports-up set of holes (23.5 and 81.5 mm, removed in history 18), but only without standoffs and 4.1 mm past the end of the plate, so it gets its own bracket.
 - **Edges.** `l` = 0 is the microSD end, where the power, MaskROM and reset buttons also are, and `s` = 0 the edge with the two HDMI ports, the audio jack and USB-C. The GPIO header edge (`s` = S) faces the back plate, and Ethernet and USB are at the `l` = L end, as on the Raspberry Pi B, so the README's table of edges applies as it is.
 - **Under the board** (bottom view): an M.2 2280 SSD slot along the whole board, 12.9 to 36.4 mm from the HDMI edge, with its connector at the microSD end; the microSD slot, 0 to 11.7 mm from its end and 36.4 to 48.8 mm from the HDMI edge, with the card sticking out past the end; the eMMC socket, two camera connectors and two small connectors at the HDMI edge. The drawing gives no heights, and no 3D model is published.
 - **Standoffs.** 8 mm tall, for the SSD: how far it reaches below the board is not published, so the height follows the other boards with an M.2 slot underneath (`ROCK5B`, `M2`, `LP3Delta`; on the ODROID-M2 an SSD reaches about 6.5 mm). Not checked with an SSD fitted. 5 mm across, the size of the pad around each hole on the drawing: the nearest parts under the board are 2.8 mm (a connector at the HDMI edge) and 2.9 mm (a slot for a connector's pegs) from a hole centre.
@@ -352,6 +352,16 @@ The maintainer asked for the Sipeed NanoKVM Lite, the NanoKVM Full and the NanoK
 - **README.** The print time table had no rows for `OPi5Pro` and `OrinNano`, and the table of official 3D models had no row for the Jetson. Both are added.
 - 336 models, 21 release files.
 
+### History 18: one set of `PiB` holes, and M2 holes on `VIM1S` (2026-11-17)
+
+The maintainer decided two open items of section 9.
+
+- **`PiB` has one set of holes, not two.** The second set, 20 mm further from the microSD end, held the board turned round, with the ports at the top in upright portrait. Mounting the bracket upside down does the same, so that set is gone. The set that is left is the one 3.5 mm from the microSD end, which also has the integrated standoffs. The estimated print time of the 20x20 brackets (`checks_time.py`) is about 5 minutes shorter in the upright orientations and about 1 minute shorter in the others, and the beam estimates (history 8) change by less than 1%.
+- **What turning the board round still did.** It also put the GPIO edge away from the frame. On the ODROID-C4, whose microSD slot is under the board at that edge, the card can now be changed only with the board off in upright portrait and shelf landscape (history 10; the README says so). The opening at the USB and Ethernet end, which was the microSD notch for the turned board, stays as a lightening opening.
+- **`VIM1S` has 2.4 mm holes, for M2.** The VIM1S, VIM3 and VIM4 have 2.2 mm holes for M2 screws (the official 3D models of the VIM1S and VIM4, and the VIM3 DXF). The 3 mm holes of the version without standoffs left an M2 screw 0.5 mm of play on each side, so the board could shift. 2.4 mm is the medium clearance hole for M2 in ISO 273 (class 2 in JIS B 1001), as on `NanoKVMDesk`. Section 2 now says 2.4 mm on boards that take M2.
+- **The elephant's-foot chamfer of the upright `VIM1S` brackets.** With 3 mm holes, the two holes 2.5 mm from the end of the plate left 1.0 mm of wall, too little for the 0.5 mm chamfer on both sides of it, so `bed_chamfer()` fell back to 0.3 mm on the whole outline of the upright `VIM1S` brackets (the "chamfer 0.5 failed" message on every build). With 2.4 mm holes the 0.5 mm chamfer fits. It takes a little more off the bottom edge, so in the beam estimates the upright `VIM1S` brackets bend 1 to 2% more under the side push, with about 3% more stress (3.05 to 3.10 mm and 13.1 to 13.5 MPa in upright portrait). The flat and shelf ones bend slightly less.
+- `--check` passes for all 24 `PiB` models against the official 3D model of the Le Potato and all 24 `VIM1S` models against those of the VIM1S, VIM3 and VIM4. The other boards are unchanged.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -391,7 +401,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | Raspberry Pi 2 B (`PiB`) | No drawing is published. The [official documentation](https://www.raspberrypi.com/documentation/computers/sbcs.html) says it has "the same form factor" as the 1 B+ | High |
 | Raspberry Pi 3 A+ / 1 A+ (`PiA`) | [Official 3 A+ drawing](https://pip.raspberrypi.com/documents/RP-008330-DS) (65 x 56 mm, holes 58 x 49 mm). The documentation says the 3 A+ drawings also apply to the 1 A+ | High. Only the USB-A, HDMI and GPIO header are modelled |
 | Raspberry Pi Zero / Zero W / Zero 2 W (`PiZero`) | Official drawings of the [Zero W](https://pip.raspberrypi.com/documents/RP-008367-DS) and [Zero 2 W](https://pip.raspberrypi.com/documents/RP-008358-DS) (65 x 30 mm, holes 58 x 23 mm; mini HDMI and micro USB centres at 12.4 / 41.4 / 54 mm; microSD centre 16.9 mm from the port edge). The [documentation](https://www.raspberrypi.com/documentation/computers/zero.html) says the Zero W has the same mounting holes as the Zero | High |
-| Khadas VIM1S | Official 3D model `vim1s-pcba-3d-v11.stp` | High. Holes are in a trapezoid (77 / 49 / 45.5 mm) |
+| Khadas VIM1S | Official 3D model `vim1s-pcba-3d-v11.stp` | High. Holes are in a trapezoid (77 / 49 / 45.5 mm), 2.2 mm for M2 |
 | Khadas VIM3 / VIM4 (`VIM1S`) | Official DXF and 3D models: VIM3 [DXF](https://dl.khadas.com/products/vim3/blueprints/dxf/vim3-pcba-2d-v14.dxf) and [STEP](https://dl.khadas.com/products/vim3/blueprints/cad/vim3-pcba-3d-v14.stp), VIM4 [DXF](https://dl.khadas.com/products/vim4/blueprints/dxf/vim4-pcba-2d-v13.dxf) and [STEP](https://dl.khadas.com/products/vim4/blueprints/cad/vim4-pcba-3d-v13.stp). 82.0 x 56.63 mm, holes identical to the VIM1S | High. Interference checked against the official 3D models |
 | Hardkernel ODROID-C4 (`PiB`) | [Official PCB mechanical drawing rev 1.0](https://wiki.odroid.com/_media/odroid-c4/c4_main_rev1.0.dxf.zip) (DXF; [PDF of both sides](https://wiki.odroid.com/_media/odroid-c4/c4_main_rev1.0_pcb_topnbottom.zip), from the [hardware page](https://wiki.odroid.com/odroid-c4/hardware/hardware)). 85 x 56 mm, 3.0 mm holes 58 x 49 mm 3.5 mm from the edges; the microSD slot is under the board at the middle of the GPIO header edge (history 10) | High for the outline and holes. No official 3D model of the board, so not checked against the components |
 | Radxa ROCK 3C (`PiB`) | [Official DXF v1.400](https://dl.radxa.com/rock3/docs/hw/3c/v1400/radxa_rock_3c_v1400_2d_dxf.zip) (from the [download page](https://docs.radxa.com/en/rock3/rock3c/download)). 85 x 56 mm, holes 58 x 49 mm 3.5 mm from the edges, 2.8 mm; microSD at the middle of the short edge on the underside, as on the Raspberry Pi | High for the outline and holes. No official 3D model, so not checked against the components |
@@ -443,8 +453,6 @@ The material used for the prints and which direction was loose (front-back, up-d
 ## 9. Open items
 
 - [ ] Get the results of printing the current version and the coupons, then settle `FIT` and `HOOK`
-- [ ] Reduce the `PiB` board holes from two sets (8 holes) to one set? Flipping the whole bracket upside down already lets one set face the ports either way
-- [ ] Make the VIM1S screw holes smaller for M2 (about 2.4 mm)? Currently 3 mm, which is loose for M2
 - [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2, 2.6 mm for M3) on real parts
 - [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width, and whether the roots of the leaf springs whiten or crack)
 - [ ] Lower the strain at the roots of the DIN leaf springs (about 2.9%, section 4 history 4)? Each way trades against how firmly the barbs hold: a shorter barb kept at the tip end of the spring, a shallower barb, or a thinner spring
@@ -453,7 +461,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `BBB` and try it with a BeagleBone Black: how far the micro HDMI and mini USB reach below the board (not published; in flat landscape the micro HDMI has to stay within 6 mm, history 9), and M3 screws in the 3 mm holes of the version without standoffs (tight; 3.2 mm or so would need the maintainer to make an exception to the 3 mm holes)
 - [ ] ROCK 3C and ROCK64: check against their components if an official 3D model is published (only the outline, holes and microSD position were compared on the drawings)
 - [ ] Print `M2` and try it with an ODROID-M2: an M.2 SSD under the board (not in the official model), M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs
-- [ ] ODROID-C4 on `PiB`: the eMMC module and the microSD slot are under the board and no official 3D model is published. Try it on a print, with the board turned round on the ports-up set to reach the card
+- [ ] ODROID-C4 on `PiB`: the eMMC module and the microSD slot are under the board and no official 3D model is published. Try it on a print
 - [ ] Print `LP3Delta` and try it with a LattePanda 3 Delta: M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs, and how far the long overhangs bend (history 12)
 - [ ] Print `MuLite` and try it with a LattePanda Mu on the Lite Carrier: switching it on with the Auto_Power jumper where the buttons face the frame, a card in the PCIe slot (not checked), and how far the long overhangs bend (history 12)
 - [ ] Print `OPi5Pro` and try it with an Orange Pi 5 Pro: an M.2 2280 SSD under the board (how far it reaches is not published; the standoffs are 8 mm), the parts under the board (no heights or 3D model are published), and taking the microSD card in and out while mounted (history 15)
@@ -464,6 +472,8 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Sipeed NanoKVM Full: add it if Sipeed publishes a 3D model or drawing of its case (history 17)
 - [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
+- [x] Reduce the `PiB` board holes from two sets (8 holes) to one set? → one set, the maintainer's decision (history 18). Mounting the bracket upside down puts the ports the other way
+- [x] Make the `VIM1S` screw holes smaller for M2? → 2.4 mm, the maintainer's decision (history 18)
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
 - [ ] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? The current key (24.4 mm wide) does not go in. A narrower key adds play on steel rails with 1 mm sheet (section 7)
@@ -485,7 +495,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 6. To publish the files, push the next version tag on `main` once the pull request is merged (`git tag v0.5.0 && git push origin v0.5.0`); the workflow builds every model, packs them into one zip per board and attaches the zips to that release. Then check that every file the README links to is in the release.
 7. Update sections 8 and 9 and the "last updated" date of these notes.
 
-### Reference volumes (as of 2026-11-16, cm3)
+### Reference volumes (as of 2026-11-17, cm3)
 
 Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version.
 
@@ -493,10 +503,10 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer | DIN35 | DIN35 spacer |
 |---|---|---|---|---|---|---|
-| PiB | 12.566 | 13.099 | 13.209 | 13.742 | 12.714 | 13.247 |
+| PiB | 12.656 | 13.189 | 13.299 | 13.832 | 12.804 | 13.337 |
 | PiA | 10.525 | 11.058 | 11.168 | 11.701 | 10.673 | 11.207 |
 | PiZero | 8.291 | 8.629 | 8.935 | 9.272 | 8.440 | 8.777 |
-| VIM1S | 12.699 | 13.105 | 13.342 | 13.748 | 12.847 | 13.253 |
+| VIM1S | 12.684 | 13.063 | 13.328 | 13.706 | 12.833 | 13.211 |
 | ROCK5B | 17.977 | 18.632 | 18.620 | 19.275 | 18.126 | 18.781 |
 | BBB | 13.989 | 14.566 | 14.632 | 15.209 | 14.138 | 14.715 |
 | M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.807 | 20.567 |
@@ -512,10 +522,10 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer | DIN35 | DIN35 spacer |
 |---|---|---|---|---|---|---|
-| PiB | 12.209 | 12.743 | 12.812 | 13.345 | 12.335 | 12.868 |
+| PiB | 12.299 | 12.833 | 12.902 | 13.435 | 12.425 | 12.958 |
 | PiA | 11.891 | 12.425 | 12.494 | 13.027 | 12.017 | 12.550 |
 | PiZero | 7.609 | 7.947 | 8.605 | 8.943 | 8.126 | 8.464 |
-| VIM1S | 11.584 | 11.990 | 12.193 | 12.600 | 11.714 | 12.121 |
+| VIM1S | 11.567 | 11.946 | 12.177 | 12.556 | 11.698 | 12.077 |
 | ROCK5B | 16.834 | 17.489 | 17.477 | 18.132 | 16.983 | 17.638 |
 | BBB | 14.428 | 15.005 | 15.014 | 15.591 | 14.540 | 15.117 |
 | M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.807 | 20.567 |
@@ -531,10 +541,10 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.005 | 13.168 | 13.204 |
+| PiB | 13.095 | 13.258 | 13.294 |
 | PiA | 10.458 | 10.621 | 10.185 |
 | PiZero | 8.208 | 8.371 | 7.935 |
-| VIM1S | 13.139 | 13.302 | 12.867 |
+| VIM1S | 13.172 | 13.335 | 12.899 |
 | ROCK5B | 19.195 | 19.358 | 18.922 |
 | BBB | 14.450 | 14.613 | 14.177 |
 | M2 | 20.645 | 20.808 | 20.373 |
@@ -550,10 +560,10 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 12.281 | 12.444 | 12.008 |
+| PiB | 12.372 | 12.535 | 12.099 |
 | PiA | 10.920 | 11.083 | 10.647 |
 | PiZero | 6.526 | 7.518 | 7.038 |
-| VIM1S | 12.749 | 12.912 | 12.476 |
+| VIM1S | 12.781 | 12.944 | 12.509 |
 | ROCK5B | 18.319 | 18.483 | 18.448 |
 | BBB | 13.406 | 13.569 | 13.133 |
 | M2 | 21.270 | 21.433 | 20.997 |
@@ -569,10 +579,10 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.110 | 14.231 | 14.015 |
+| PiB | 13.201 | 14.321 | 14.106 |
 | PiA | 12.198 | 13.318 | 13.103 |
 | PiZero | 8.188 | 9.308 | 9.092 |
-| VIM1S | 12.208 | 13.328 | 13.113 |
+| VIM1S | 12.240 | 13.361 | 13.145 |
 | ROCK5B | 18.215 | 19.335 | 19.120 |
 | BBB | 15.061 | 16.181 | 15.965 |
 | M2 | 20.754 | 21.874 | 21.658 |
@@ -588,10 +598,10 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.647 | 14.767 | 14.552 |
+| PiB | 13.737 | 14.858 | 14.642 |
 | PiA | 11.561 | 12.682 | 12.466 |
 | PiZero | 8.397 | 9.518 | 9.302 |
-| VIM1S | 14.159 | 15.280 | 15.064 |
+| VIM1S | 14.192 | 15.312 | 15.097 |
 | ROCK5B | 19.573 | 20.693 | 20.478 |
 | BBB | 14.791 | 15.912 | 15.696 |
 | M2 | 21.379 | 22.499 | 22.283 |
