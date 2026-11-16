@@ -60,8 +60,22 @@ jobs:
           n=$(ls models | wc -l)
           if [ "$n" -gt 1000 ]; then echo "::error::$n files, but a release holds at most 1000"; exit 1; fi
           # Upload to a draft first, so releases/latest never points at a release with only some of the files.
-          # A re-run after a failed upload finds the draft and uploads again over it
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 ||
             gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title "$TAG" --generate-notes
-          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber models/*
+          # GitHub's secondary rate limit can stop a large upload part way. Each try (and a re-run of the job)
+          # uploads only the files the release does not have yet, and drops any upload that did not finish.
+          for try in 1 2 3 4 5; do
+            gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets \
+              --jq '.assets[] | select(.state != "uploaded") | .name' |
+              while read -r name; do gh release delete-asset "$TAG" "$name" --repo "$GITHUB_REPOSITORY" --yes; done
+            have=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | select(.state == "uploaded") | .name')
+            missing=()
+            for f in models/*; do
+              grep -qxF "$(basename "$f")" <<< "$have" || missing+=("$f")
+            done
+            echo "Try $try: ${#missing[@]} of $n files to upload"
+            if [ "${#missing[@]}" -eq 0 ] || [ "$try" -eq 5 ]; then break; fi
+            if ! gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" "${missing[@]}" && [ "$try" -lt 4 ]; then sleep 600; fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then echo "::error::${#missing[@]} files are still missing. Re-run this job later"; exit 1; fi
           gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
