@@ -42,10 +42,10 @@ Last updated: 2026-11-16
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus` or `M1`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1` or `OPi5Pro`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and attach every file to that release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. GitHub's secondary rate limit can stop an upload of several hundred files part way, so the job uploads only the files the release is still missing, tries up to four times 10 minutes apart, and a re-run of the job picks up where it stopped. Push a tag only when the maintainer asks for a release.
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>`, which follows the latest release. Keep file names stable: renaming a file breaks those links.
-- A release holds at most 1000 files. There are now 799 (264 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
+- A release holds at most 1000 files. There are now 871 (288 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -189,6 +189,7 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `MuLite` | 14.3 mm / 20.6 MPa | 52.1 mm / 34.9 MPa | 14.0 mm / 20.3 MPa | 46.4 mm / 34.5 MPa | 42.6 mm / 30.8 MPa | 10.0 mm / 16.3 MPa |
 | `N2Plus` | 13.3 mm / 22.1 MPa | 9.4 mm / 13.3 MPa | 13.1 mm / 21.9 MPa | 7.2 mm / 12.9 MPa | 8.8 mm / 12.0 MPa | 10.8 mm / 18.1 MPa |
 | `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.1 mm / 18.0 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
+| `OPi5Pro` | 1.4 mm / 4.7 MPa | 13.3 mm / 15.6 MPa | 1.8 mm / 7.8 MPa | 9.3 mm / 15.1 MPa | 12.8 mm / 15.2 MPa | 1.3 mm / 4.3 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
@@ -293,6 +294,22 @@ The maintainer asked for boards to be added without touching the code, so that t
 - **Claude skill (`skills/sbc-frame-brackets/SKILL.md`).** For a supported board it hands over the download links from the README and builds nothing. Otherwise it takes the dimensions from the official drawing or 3D model, writes the definition, builds only the files asked for with `--check`, shows them in the viewer and hands over the 3MF, STL and STEP files.
   It was tried in a fresh `python:3.11-slim` container set up as in the README's "Building from source": following only the skill and `boards/README.md`, a made-up 70 x 50 mm board, described by a text drawing, was added and built in flat portrait for 20x20, and all 24 of its models passed `--check`. What that run found unclear (which edge `frame_edge` is, the heights of parts on top of the board, how deep a notch goes, where the full check writes its files) is now spelled out in the skill and in `boards/README.md`.
 
+### History 15: Orange Pi 5 Pro (2026-11-16)
+
+The maintainer asked for the Orange Pi 5, 5 Pro and 5 Plus. Only the 5 Pro is added.
+
+- **Sources.** Orange Pi puts each board's user manual, schematic and mechanical drawing on the board's service and support page (links in section 7). For the 5 Pro the mechanical drawing is a PDF, `OPi_5_Pro_V1_2_1-dxf.pdf` (board v1.2), with a dimensioned top view and a bottom view.
+- **Orange Pi 5 and 5 Plus not added yet.** Their user manuals give the outline but not the holes, and the mechanical data on their pages is a 3D model (STEP in a RAR archive), which has not been checked yet.
+- **Outline and holes.** 89.1 x 56 mm, four 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges, 7.6 mm from the end with the microSD slot and 23.5 mm from the Ethernet end. That is the Raspberry Pi B's hole pattern, but the board is 4.1 mm longer and the holes are 7.6 mm, not 3.5 mm, from the microSD end, so it does not fit `PiB`. Turned round it would sit on `PiB`'s ports-up set of holes (23.5 and 81.5 mm), but only without standoffs and 4.1 mm past the end of the plate, so it gets its own bracket.
+- **Edges.** `l` = 0 is the microSD end, where the power, MaskROM and reset buttons also are, and `s` = 0 the edge with the two HDMI ports, the audio jack and USB-C. The GPIO header edge (`s` = S) faces the back plate, and Ethernet and USB are at the `l` = L end, as on the Raspberry Pi B, so the README's table of edges applies as it is.
+- **Under the board** (bottom view): an M.2 2280 SSD slot along the whole board, 12.9 to 36.4 mm from the HDMI edge, with its connector at the microSD end; the microSD slot, 0 to 11.7 mm from its end and 36.4 to 48.8 mm from the HDMI edge, with the card sticking out past the end; the eMMC socket, two camera connectors and two small connectors at the HDMI edge. The drawing gives no heights, and no 3D model is published.
+- **Standoffs.** 8 mm tall, for the SSD: how far it reaches below the board is not published, so the height follows the other boards with an M.2 slot underneath (`ROCK5B`, `M2`, `LP3Delta`; on the ODROID-M2 an SSD reaches about 6.5 mm). Not checked with an SSD fitted. 5 mm across, the size of the pad around each hole on the drawing: the nearest parts under the board are 2.8 mm (a connector at the HDMI edge) and 2.9 mm (a slot for a connector's pegs) from a hole centre.
+- **Openings.** The microSD notch runs out past `l` = 0, 15 mm deep and 14 mm wide over the card, 2.5 mm from the nearest standoff. The three windows are written as openings that start 6 mm past the notch. With `windows`, which start at `l` = 6, the notch and the first window left 22.5 mm of the 56 mm plate at the grip end of the long overhangs: a 10 N push at the far edge gave 32.8 MPa in flat landscape (94% of the strength of PETG standing up) and 34.6 MPa in upright landscape. Starting the windows after the notch brought those down to 15.1 and 15.6 MPa.
+- **Parts.** Only the PCB, 1.6 mm thick (its thickness is not published). The connectors that stick out past the edges, 2.5 mm past the HDMI edge and 3.5 mm past the Ethernet end (top view), and the microSD card were added to a copy of the definition as boxes 30 mm tall (the card from 4 mm under the board): none of the 24 models touched them. A box 1 mm into the 4 mm gap at the GPIO edge was reported (8.66 mm3 in upright portrait), so such boxes are seen by the check. They are not in the definition, because their heights are not published.
+- `--check`: no overlap with the frame or the board and no unsupported area in all 24 models, and the DIN leaf springs bend freely in all 8 DIN models.
+- **Beam estimates** (table in history 8). A 10 N push at the far edge gives at most 13.3 mm (upright landscape) and 15.6 MPa, below the strength of PETG in every orientation. The DIN rail versions are within 0.1 mm of these.
+- 288 models, 871 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -346,6 +363,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | Libre Computer AML-S905X-CC (Le Potato) (`PiB`) | [Official 3D model V1.0](https://libre.computer/products/aml-s905x-cc/AML-S905X-CC-V1.0.stp.gz) (STEP, gzipped, from the [product page](https://libre.computer/products/aml-s905x-cc/)). PCB 84 x 56 mm, 3.0 mm holes 58 x 49 mm 3.5 mm from the microSD end and the long edges; microSD at the middle of the short edge on the underside (history 11). No 2D drawing is published | High. Interference checked against the official 3D model |
 | LattePanda 3 Delta (`LP3Delta`) | Official [3D model V1.1](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%203%20Delta/LattePanda%203%20Delta%203D%20Model%20V1.1%20step%2020250221.zip) (STEP) and [KiCad footprint](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%20KiCAD%20Library/footprints/Module_LattePanda.pretty/LattePanda_3_Delta.kicad_mod) in the [LattePanda 3D models repository](https://github.com/LattePandaTeam/LattePanda-3D-Models) (CC BY 3.0); ports from the [specification](https://docs.lattepanda.com/content/3rd_delta_edition/specification/) in the LattePanda documentation. 125 x 78 mm, 3.2 mm holes 118 x 71 mm 3.5 mm from the edges (history 12) | High. Interference checked against the official 3D model |
 | LattePanda Mu Lite Carrier (`MuLite`) | Official KiCad designs of the Lite Carrier [V2](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29) and [V1](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu), the [3D model V2.0.1](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/Carrier-Boards/DFR1142_Lite_Carrier_for_LattePanda_Mu%28V2.0.1%29.zip) (STEP) and the module's [dimension drawing](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/LattePanda_Mu_Dimension_Drawing.pdf), in the [LattePanda Mu repository](https://github.com/LattePandaTeam/LattePanda-Mu) (MIT); ports from the [Lite Carrier page](https://docs.lattepanda.com/content/mu_edition/lite_carrier/) in the LattePanda documentation. 146 x 102 mm, 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm (history 12) | High. Interference checked against the official 3D model of the carrier (the module, cooler and M.2 cards on top are not in it) |
+| Orange Pi 5 Pro (`OPi5Pro`) | Official [mechanical drawing](https://drive.google.com/file/d/10j5W9Dki9KfirN4JE5pp6X2RujavGOyS/view) `OPi_5_Pro_V1_2_1-dxf.pdf` (PDF, top and bottom views, board v1.2), from the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-Pro.html). 89.1 x 56 mm, 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges and 7.6 mm from the microSD end; microSD and an M.2 2280 slot under the board (history 15) | High for the outline and holes. No official 3D model and no heights on the drawing: checked against the outline only, and against the connectors past the edges as tall boxes |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
 ### Checking the DIN rail dimensions (2026-11-14)
@@ -393,6 +411,8 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] ODROID-C4 on `PiB`: the eMMC module and the microSD slot are under the board and no official 3D model is published. Try it on a print, with the board turned round on the ports-up set to reach the card
 - [ ] Print `LP3Delta` and try it with a LattePanda 3 Delta: M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs, and how far the long overhangs bend (history 12)
 - [ ] Print `MuLite` and try it with a LattePanda Mu on the Lite Carrier: switching it on with the Auto_Power jumper where the buttons face the frame, a card in the PCIe slot (not checked), and how far the long overhangs bend (history 12)
+- [ ] Print `OPi5Pro` and try it with an Orange Pi 5 Pro: an M.2 2280 SSD under the board (how far it reaches is not published; the standoffs are 8 mm), the parts under the board (no heights or 3D model are published), and taking the microSD card in and out while mounted (history 15)
+- [ ] Orange Pi 5 and Orange Pi 5 Plus: their holes are only in the official 3D models (STEP in RAR archives on the service and support pages). Check them and add the boards (history 15)
 - [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
@@ -402,7 +422,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and `MuLite` 99% of it in flat landscape (history 12)
 - [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
-- [ ] A release holds at most 1000 files (now 799, 72 per board). At about 13 boards, zip some files together (per board, for example) or split the formats
+- [ ] A release holds at most 1000 files (now 871 for 12 boards, 72 per board). A 14th board would pass it: before that, zip some files together (per board, for example) or split the formats
 - [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
@@ -435,6 +455,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | MuLite | 26.666 | 27.152 | 27.309 | 27.795 | 26.815 | 27.300 |
 | N2Plus | 22.543 | 23.375 | 23.186 | 24.018 | 22.692 | 23.523 |
 | M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.658 | 30.490 |
+| OPi5Pro | 17.013 | 17.564 | 17.657 | 18.207 | 17.162 | 17.712 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -451,6 +472,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | MuLite | 24.728 | 25.213 | 25.371 | 25.857 | 24.877 | 25.362 |
 | N2Plus | 26.836 | 27.668 | 27.479 | 28.311 | 26.985 | 27.816 |
 | M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.542 | 33.373 |
+| OPi5Pro | 17.576 | 18.126 | 18.178 | 18.729 | 17.701 | 18.252 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -467,6 +489,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | MuLite | 29.860 | 30.023 | 29.587 |
 | N2Plus | 23.582 | 23.745 | 23.310 |
 | M1 | 31.350 | 31.513 | 31.077 |
+| OPi5Pro | 17.163 | 17.326 | 17.385 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -483,6 +506,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | MuLite | 30.049 | 30.212 | 29.776 |
 | N2Plus | 24.556 | 24.719 | 24.283 |
 | M1 | 30.802 | 30.965 | 30.529 |
+| OPi5Pro | 15.776 | 15.939 | 15.504 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -499,6 +523,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | MuLite | 27.729 | 28.849 | 28.633 |
 | N2Plus | 27.919 | 29.039 | 28.824 |
 | M1 | 34.146 | 35.267 | 35.051 |
+| OPi5Pro | 17.997 | 19.117 | 18.901 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -515,3 +540,4 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | MuLite | 31.704 | 32.824 | 32.609 |
 | N2Plus | 24.221 | 25.342 | 25.126 |
 | M1 | 31.681 | 32.801 | 32.585 |
+| OPi5Pro | 17.322 | 18.442 | 18.227 |

@@ -1,0 +1,21 @@
+{
+  "title": "Orange Pi 5 Pro",
+  "notes": [
+    "89.1 x 56 mm, four 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges and 7.6 mm from the microSD end (official mechanical drawing of the Orange Pi 5 Pro v1.2, OPi_5_Pro_V1_2_1, top and bottom views). The holes are 58 x 49 mm apart as on the Raspberry Pi B, but the board is 4.1 mm longer and its holes are 7.6 mm, not 3.5 mm, from the microSD end, so it does not fit PiB.",
+    "l = 0 is the microSD end: the slot is under the board, 0 to 11.7 mm from that end and 36.4 to 48.8 mm from the HDMI edge, and the card sticks out past the end. The power, MaskROM and reset buttons are at this end too. s = S is the GPIO-header edge, which faces the back plate. Ethernet and USB are at the l = L end and stick out 3.5 mm past it; the two HDMI ports, the audio jack and USB-C stick out 2.5 mm past the s = 0 edge.",
+    "An M.2 2280 SSD goes under the board, along the whole board between 12.9 and 36.4 mm from the HDMI edge. How far it and the other parts under the board reach is not published, so the standoffs are 8 mm tall like those for the other boards with an M.2 slot underneath (ROCK5B, M2, LP3Delta; on the ODROID-M2 an SSD reaches about 6.5 mm below the board). Not checked with an SSD fitted.",
+    "Standoffs 5 mm across, the size of the pad around each hole on the drawing: the nearest parts under the board are 2.8 mm from a hole centre.",
+    "The opening that runs out past l = 0 is the microSD notch, 15 mm deep. The three windows are clear of the standoffs and start 6 mm past the notch, not at l = 6 as `windows` would put them: there the notch and the first window left 22.5 mm of the 56 mm plate where the long overhangs start, and a 10 N push at the far edge reached 94% of the strength of PETG in flat landscape instead of 43%.",
+    "Parts: only the PCB. The thickness of the board and the heights of its parts are not published; the PCB is shown 1.6 mm thick. No official 3D model is published."
+  ],
+  "size": [89.1, 56.0],
+  "frame_edge": "s=S",
+  "microsd_edge": "l=0",
+  "holes": [[7.6, 3.5], [7.6, 52.5], [65.6, 3.5], [65.6, 52.5]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 8.0, "d": 5.0, "pilot": 2.2, "screw": "M2.5"},
+  "openings": [[-4.0, 15.0, 33.5, 47.5], [21.0, 37.7, 10.0, 29.5], [43.7, 60.4, 10.0, 29.5], [66.4, 83.1, 10.0, 29.5]],
+  "parts": [
+    {"name": "PCB", "box": [0, 89.1, 0, 56.0, 0, 1.6]}
+  ]
+}
