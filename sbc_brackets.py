@@ -12,7 +12,7 @@ Structure
   - spacer=True adds standoffs (bosses) integrated into the front plate (upright orientations only, see SPACER_ORIENTS)
 """
 import glob, json, math, os, sys
-from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Pos, Rot, Plane, RectangleRounded,
+from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Cone, Pos, Rot, Plane, RectangleRounded, Align,
                        extrude, fillet, chamfer, Axis, import_step, Solid, Compound)
 from OCP.StlAPI import StlAPI_Reader
 from OCP.TopoDS import TopoDS, TopoDS_Shape
@@ -361,6 +361,10 @@ STANDOFF_FIELDS = {"h", "d", "pilot", "screw", "foot", "through", "at"}
 MODEL_FIELDS = {"rotate", "centre", "underside", "tilt", "exclude"}
 CRADLE_FIELDS = {"board", "ledge", "stop", "lip"}
 LIP_FIELDS = {"l", "top", "over"}
+# 90-degree flat head screws by thread size (the start of standoffs.screw): (d, head diameter, countersink diameter). The head is
+# the theoretical one of ISO 7046-1 (cross recessed); the countersink is the largest one in ISO 15065, so the head sits flush or
+# just below the face. Hex socket countersunk screws (ISO 10642) have larger heads (4.7 / 5.88 / 6.72 mm) and stand out 0.1 mm or so
+FLAT_HEAD = {"M2": (2.0, 4.4, 4.5), "M2.5": (2.5, 5.5, 5.6), "M3": (3.0, 6.3, 6.5)}
 
 
 class Board:
@@ -379,6 +383,7 @@ class Board:
         self.frame_edge, self.hole_d, self.holes = d["frame_edge"], d["hole_d"], d["holes"]
         self.standoffs = {k: v for k, v in d["standoffs"].items() if k != "at"}   # h, d, pilot, screw[, foot, through]
         self.standoff_at = d["standoffs"].get("at", self.holes)
+        self.thread = self.standoffs["screw"].split()[0]                         # M2, M2.5 or M3 (FLAT_HEAD)
         self.openings, self.windows, self.parts = d.get("openings", []), d.get("windows"), d["parts"]
         self.official_models = d.get("official_models", {})
         self.cradle_def = d.get("cradle")
@@ -409,6 +414,8 @@ class Board:
         for k in ("h", "d", "pilot", "screw"):
             if k not in sp:
                 bad(f"missing standoffs field {k!r}")
+        if sp["screw"].split()[0] not in FLAT_HEAD:
+            bad(f"standoffs screw starts with the thread size, one of {', '.join(FLAT_HEAD)}: {sp['screw']!r}")
         for l, s in d["holes"]:
             if not (0 < l < L and 0 < s < S):
                 bad(f"hole {[l, s]} is off the {L} x {S} board")
@@ -488,6 +495,14 @@ class Board:
             g = b if g is None else g + b
         return g
 
+    def flat_heads(self):
+        """The heads of flat head screws (FLAT_HEAD) in the holes, flush with the underside of the plate (board frame). In the flat
+        orientations that face lies on the frame, so --check measures them against the bracket: a head that does not fit would
+        stand out behind the plate and keep the bracket off the frame"""
+        d, dk, _ = FLAT_HEAD[self.thread]
+        return [Pos(x, y, Z0) * Cone(dk / 2, d / 2, (dk - d) / 2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                for x, y in self.holes_xy()]
+
     def bracket(self, series, spacer=False, orient=None):
         if spacer and orient not in (None,) + SPACER_ORIENTS:
             raise ValueError(f"no integrated standoffs in {orient}: on a standing board plate they cannot print without support")
@@ -542,19 +557,19 @@ def gap(B, orient):
 
 
 def flat_edge(B, orient, series):
-    """Where a flat-mounted board starts along the rail: beside the grip (z = W/2), or further on when one of its holes would
-    otherwise reach the gap that a DIN leaf spring needs above its free end"""
+    """Where a flat-mounted board starts along the rail: beside the grip (z = W/2), or further on when one of its holes (with its
+    countersink, the widest part) would otherwise reach the gap that a DIN leaf spring needs above its free end"""
     if series != "DIN":
         return W / 2
     M = place(B, orient, series, edge=W / 2)
     xl = din_leaf_x(); k0, k1 = xl - DIN_SLIT_IN - 0.5, xl + DIN_LEAF_T + DIN_SLIT_OUT + 0.5
     zc = W / 2 + 1 + (DIN_SLIT_IN + DIN_LEAF_T + DIN_SLIT_OUT) / 2 + 1.0       # top of the gap over the leaf spring + 1 mm
     hit = lambda x, w: abs(x) + w > k0 and abs(x) - w < k1
-    need = 0.0
+    need = 0.0; r = FLAT_HEAD[B.thread][2] / 2
     for x, y in B.holes_xy():
         p = (M * Pos(x, y, Z0)).position
-        if hit(p.X, B.hole_d / 2):
-            need = max(need, zc - (p.Z - B.hole_d / 2))
+        if hit(p.X, r):
+            need = max(need, zc - (p.Z - r))
     return W / 2 + need
 
 
@@ -583,6 +598,14 @@ def _tear(a, b, r):
     """Teardrop (point up) so a sideways hole prints without support"""
     q = r / math.sqrt(2)
     return Pos(a, b) * (Circle(r) + Polygon((-q, q), (0, r * math.sqrt(2)), (q, q), (0, 0), align=None))
+
+
+def countersink(B):
+    """90-degree countersink for the board's flat head screws (FLAT_HEAD), on the y = 0 face of a flat plate (the face on the frame),
+    narrowing along +y. It starts just outside the face and ends inside the hole. The top half is a 45-degree roof when the plate
+    stands up to print, so it needs no support"""
+    rc, rh = FLAT_HEAD[B.thread][2] / 2 + 0.01, B.hole_d / 2 - 0.1
+    return Pos(0, -0.01, 0) * (Rot(-90, 0, 0) * Cone(rc, rh, rc - rh, align=(Align.CENTER, Align.CENTER, Align.MIN)))
 
 
 def _vopen(a0, a1, b0, b1, lo, hi, top):
@@ -676,6 +699,8 @@ def oriented(B, series, spacer, orient):
         Pa = None
     for p in to(B.holes_xy()):
         s -= _vcut(kind, _tear(ac(p), p[2], B.hole_d / 2), n0 - 1, n1 + 1)
+        if kind == "flat":                             # the back of the plate lies on the frame: sink the screw heads into it
+            s -= Pos(p[0], 0, p[2]) * countersink(B)
     for c in map(rect, B.cuts()):
         a0, a1 = (c[0], c[1]) if kind == "flat" else (c[2], c[3])
         if kind == "shelf":

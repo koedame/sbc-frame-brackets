@@ -28,7 +28,7 @@ Ask only for what the user has not said:
   | `shelf-portrait` | `_shelf-portrait` | Lies on a shelf level with the top of the grip, long side pointing away from the frame |
   | `shelf-landscape` | `_shelf-landscape` | Lies on a shelf level with the top of the grip, long side along the rail |
 
-- **Standoffs**: only the two upright orientations come in a version with integrated standoffs (`_spacer`). Flat and shelf have no `_spacer` version, because standoffs growing sideways out of a standing plate cannot print without support; the user brings their own standoffs.
+- **Standoffs**: only the two upright orientations come in a version with integrated standoffs (`_spacer`). Flat and shelf have no `_spacer` version, because standoffs growing sideways out of a standing plate cannot print without support; the user brings their own standoffs. In the flat orientations the back of the plate lies on the frame, so the holes are countersunk on the back and take flat head screws, put in from the back before the bracket goes on.
 - **Format**: 3MF for a slicer (in print orientation on the build plate), STL, or STEP for CAD.
 
 ## 2. Is the board supported? Then hand over the download link
@@ -83,7 +83,7 @@ Copy the closest existing definition (`PiA.json` is the simplest, `VIM1S.json` h
 - **Coordinates** are in mm in the board's top view, right-handed: `l` from 0 to L, `s` from 0 to S, `s` growing upwards when `l` grows to the right. If the drawing's y axis points down (KiCad), use `s = S - y`. Never mirror.
   Lay `l` along the edge that should face the back plate, usually the long side (the orientation names assume it is).
 - **`frame_edge`** (`"s=0"` or `"s=S"`) is the edge along `l` that faces the back plate. Turn the drawing so that this edge is at the bottom: the end on the right is then at the top in upright portrait and faces the frame in upright landscape and shelf portrait.
-- **`standoffs`**: `h` tall enough that the deepest part under the board clears the plate, `d` narrow enough to miss the nearest part around each hole. `pilot` is 1.7 for M2, 2.2 for M2.5, 2.6 for M3 (self-tapping). `--check` reports standoffs that are too short or too wide as a board overlap.
+- **`standoffs`**: `h` tall enough that the deepest part under the board clears the plate, `d` narrow enough to miss the nearest part around each hole. `pilot` is 1.7 for M2, 2.2 for M2.5, 2.6 for M3 (self-tapping). `screw` starts with the thread size (`M2`, `M2.5` or `M3`), which sizes the countersinks of the flat orientations. `--check` reports standoffs that are too short or too wide as a board overlap.
 - **`openings`** and **`windows`** must stay clear of the standoffs. A microSD slot under the board usually needs a notch so that a finger reaches the card: an opening that starts 4 mm outside the edge (`-4`, or `L + 4`), so that it is open there, and reaches 11 to 15 mm in, as in the existing definitions. The same works for a connector under the board.
 - **A board with no mounting holes** gets a `cradle` (`boards/README.md`, `NanoKVMLite.json`); `size`, `holes`, `hole_d` and `standoffs` are then the cradle's.
 - **`parts`**: the PCB itself (`[0, L, 0, S, 0, <thickness>]`) and every part from step 3, as boxes, heights from the board's underside (negative below it): a part 8.5 mm tall on a 1.6 mm board is `1.6, 10.1`. They decide what `--check` tests the bracket against.
@@ -100,14 +100,14 @@ python build_all.py --board <Name> --mount 20 --orient flat-portrait --format 3m
 | `--mount` | `20`, `40`, `DIN`, one or more |
 | `--orient` | `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape`, one or more |
 | `--format` | `3mf`, `stl`, `step`, `viewer`, one or more. The upright orientations get both the version without and the version with standoffs |
-| `--check` | Checks interference with the frame and the board, unsupported area, that the part is one solid, that it is held (moved 0.3 mm forward, up or down it hits the frame), and on DIN rail both a steel and an aluminium rail and that the leaf springs can bend far enough |
+| `--check` | Checks interference with the frame and the board, unsupported area, that the part is one solid, that it is held (moved 0.3 mm forward, up or down it hits the frame), that flat head screws stay below the back of the flat plates, and on DIN rail both a steel and an aluminium rail and that the leaf springs can bend far enough |
 | `--board-step <file>` | Check against the manufacturer's 3D model instead of `parts` (the file's name must be in `official_models`) |
 | `--out <dir>` | Output directory, `models/` by default |
 
 The exit status is the result:
 
 - **0**: every check passed. The last line says `Checks passed for all <n> models`.
-- **1, after a line per model**: a check failed. The last line, `Checks failed for ...`, names the failed models; on each one's line, look for the number that is not 0 (`frame overlap`, `aluminium rail`, `board overlap`, `unsupported ... mm2`, `separate solids`, `leaf spring ... overlap`) or for `not held`. Fix the definition (usually taller or narrower standoffs, or a notch for a part under the board) and build again. Never hand over files from a run that exited 1.
+- **1, after a line per model**: a check failed. The last line, `Checks failed for ...`, names the failed models; on each one's line, look for the number that is not 0 (`frame overlap`, `aluminium rail`, `board overlap`, `flat head screws overlap`, `unsupported ... mm2`, `separate solids`, `leaf spring ... overlap`) or for `not held`. Fix the definition (usually taller or narrower standoffs, or a notch for a part under the board) and build again. Never hand over files from a run that exited 1.
 - **1, with only a line starting `boards/<Name>.json:`**: the definition itself is wrong, before anything was built. Fix what the line names.
 - **2**: an option is wrong; the message lists the valid values.
 

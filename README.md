@@ -89,7 +89,7 @@ The board outlines and mounting holes were taken from the manufacturers' officia
 - **Sipeed NanoKVM-ATX**: goes inside the computer it controls, on a half-height or full-height expansion slot bracket.
 - **Sipeed NanoKVM-PCIe**: a card for a PCIe slot inside the computer it controls.
 - **Sipeed NanoKVM-USB**: a dongle on the cables between two computers.
-- **LattePanda Mu on other carrier boards**: the Mu is a compute module, so the bracket is for the carrier board. On the Mini Carrier (DFR1293) the module and its cooler hang under the carrier, about 29 mm deep, which needs a different design. The Full EVA Carrier (DFR1141) is a 170 x 170 mm Mini-ITX board, and the GPU Carrier (DFR1144) comes as a kit with its graphics card. Not added yet.
+- **LattePanda Mu on other carrier boards**: the Mu is a compute module, so the bracket is for the carrier board. On the Mini Carrier (DFR1293) the module and its cooler hang under the carrier, about 29 mm deep, which needs a different design; it is not planned for now. The Full EVA Carrier (DFR1141) is a 170 x 170 mm Mini-ITX board, and the GPU Carrier (DFR1144) comes as a kit with its graphics card; not added yet.
 
 </details>
 
@@ -158,7 +158,7 @@ File names are `<bracket>_<mount>[_<orientation>][_spacer]`; upright portrait ha
 | Shelf, portrait | `PiB_2020_shelf-portrait` | none |
 | Shelf, landscape | `PiB_2020_shelf-landscape` | none |
 
-- **Without standoffs**: the board plate has 3 mm through holes (2.4 mm on `VIM1S` and `NanoKVMDesk`, for M2). Bring your own standoffs and screws.
+- **Without standoffs**: the board plate has 3 mm through holes (2.4 mm on `VIM1S` and `NanoKVMDesk`, for M2). Bring your own standoffs and screws. In the flat orientations the holes are countersunk on the back for flat head screws (see below).
 - **With standoffs** (`_spacer`, upright orientations only): standoffs are printed as part of the board plate. Screw through the board straight into them (on `N2Plus` and `M1`, from under the plate into the heatsink, on `NanoKVMDesk` into the case, and on `NanoKVMLite` through the cradle; see below).
 - **Fit test coupons**, attached on their own: `fit_test_2020_1.stl` to `_3.stl` and `fit_test_4040_1.stl` to `_3.stl` (clearance 0.00 / 0.05 / 0.10 mm, told apart by the number of notches).
 
@@ -192,7 +192,7 @@ On `LP3Delta`, the 8 mm clears the parts under the board in the official 3D mode
 
 On `MuLite`, the 5 mm clears the pins of the PCIe slot, the deepest part under the carrier in the official 3D model (3.3 mm below the board). Use standoffs at least 5 mm tall with the version without standoffs too. The LattePanda Mu module, its cooler and the M.2 cards go on top of the carrier, inside its outline. The carrier's holes are 3.2 mm, for M3 screws, so the 3 mm holes of the version without standoffs are a tight fit for them.
 
-On `N2Plus` and `M1` the bracket holds the heatsink, not the board. Both boards come screwed to the top of an aluminium heatsink that is also their stand, fins down, so the plate is the size of the heatsink and its holes line up with four M3 threaded holes in the heatsink's base that the board does not use. They open between a side wall and the outermost fin. The 10 mm standoffs keep the heatsink 4 mm off the plate. Their top 6.5 mm goes up between the side wall and the fin, so it is only 5 mm across (0.4 mm from the fin), and 8 mm below that. Put M3 x 16 screws in from under the plate, through the standoffs and into the heatsink: 3 mm of plate, 10 mm of standoff and the 3 mm base, so each screw ends flush with the top of the base, under the board. Do not use longer screws, and leave room for the screw heads under the plate when brackets sit side by side. In the flat orientations the back of the plate lies against the frame, so countersink the four holes on the back and use countersunk M3 x 16 screws, put in before the bracket goes on the frame. The standoffs have not been tried on a real heatsink. With the version without standoffs, use plain (unthreaded) round M3 spacers 10 mm long and no more than 5 mm across, with the same M3 x 16 screws, which are a tight fit in the 3 mm plate holes.
+On `N2Plus` and `M1` the bracket holds the heatsink, not the board. Both boards come screwed to the top of an aluminium heatsink that is also their stand, fins down, so the plate is the size of the heatsink and its holes line up with four M3 threaded holes in the heatsink's base that the board does not use. They open between a side wall and the outermost fin. The 10 mm standoffs keep the heatsink 4 mm off the plate. Their top 6.5 mm goes up between the side wall and the fin, so it is only 5 mm across (0.4 mm from the fin), and 8 mm below that. Put M3 x 16 screws in from under the plate, through the standoffs and into the heatsink: 3 mm of plate, 10 mm of standoff and the 3 mm base, so each screw ends flush with the top of the base, under the board. Do not use longer screws, and leave room for the screw heads under the plate when brackets sit side by side. In the flat orientations the back of the plate lies against the frame, so the four holes are countersunk on the back: use M3 x 16 flat head screws, put in before the bracket goes on the frame. The standoffs have not been tried on a real heatsink. With the version without standoffs, use plain (unthreaded) round M3 spacers 10 mm long and no more than 5 mm across, with the same M3 x 16 screws, which are a tight fit in the 3 mm plate holes.
 
 On `OPi5Pro`, how far the parts under the board reach is not published and there is no official 3D model. The 8 mm is meant to leave room for an M.2 2280 SSD in the slot under the board, as on the other boards with an M.2 slot underneath (on the ODROID-M2 an SSD reaches about 6.5 mm below the board), but it has not been checked with an SSD fitted. Use standoffs at least 8 mm tall with the version without standoffs too, no more than 5.6 mm across, corners included: the nearest parts under the board are 2.8 mm from a hole centre.
 
@@ -202,11 +202,13 @@ On `OPi5Plus`, the bracket uses the four holes near the corners, 87.08 x 49.21 m
 
 On `OrinNano`, take the board off the developer kit's base: the bracket takes its place, on the same four holes 86 x 58 mm apart (the board's other two holes are not used). The 8 mm clears the parts under the board in the official 3D model: the deepest are the Wi-Fi card and the M.2 2230 SSD, 4.8 mm below the board. An SSD in the M.2 2280 slot plugs into the same kind of connector, so it should sit at the same height, but it is not in the model and has not been checked. In the model the two Wi-Fi antennas, on cables from the Wi-Fi card, lie in the base; the bracket has no place for them, and they were left out of the check. Use standoffs at least 8 mm tall with the version without standoffs too, no more than 6.8 mm across, corners included: the nearest parts under the board are 3.4 mm from a hole centre. The board holes are 2.75 mm, for M2.5 screws.
 
-On `NanoKVMDesk` the bracket holds the NanoKVM-Desk by its case, with the two rear screws on its bottom, which Sipeed's quick start guide says can be used for mounting. Peel off the rear rubber feet, take out the two rear screws (M2 x 6, or M2 x 7 on units made after October 2025) and screw the case on from under the plate with M2 x 12 screws through the two rear standoffs: 3 mm of plate and 3 mm of standoff, then 6 mm into the case, as deep as the original screws. Leave the two front screws alone: Sipeed says they are shorter and close to the board inside. The two front standoffs are rests that keep the case from rocking on the two screws; neither case has a screw hole above them, and the front rubber feet can stay. With the version without standoffs, use 3 mm M2 standoffs: two under the rear screws, with the same M2 x 12 screws through them, and two at the front holes, fixed to the plate with short screws from under it. In the flat orientations the screw heads lie against the frame, so use countersunk screws in holes countersunk by hand, as on `N2Plus` and `M1`. Both the current case (plastic front shell) and the earlier one (3D-printed front shell) were checked against Sipeed's official 3D models.
+On `NanoKVMDesk` the bracket holds the NanoKVM-Desk by its case, with the two rear screws on its bottom, which Sipeed's quick start guide says can be used for mounting. Peel off the rear rubber feet, take out the two rear screws (M2 x 6, or M2 x 7 on units made after October 2025) and screw the case on from under the plate with M2 x 12 screws through the two rear standoffs: 3 mm of plate and 3 mm of standoff, then 6 mm into the case, as deep as the original screws. Leave the two front screws alone: Sipeed says they are shorter and close to the board inside. The two front standoffs are rests that keep the case from rocking on the two screws; neither case has a screw hole above them, and the front rubber feet can stay. With the version without standoffs, use 3 mm M2 standoffs: two under the rear screws, with the same M2 x 12 screws through them, and two at the front holes, fixed to the plate with short screws from under it. In the flat orientations the back of the plate lies against the frame, so the holes are countersunk on the back: use M2 flat head screws in all four, M2 x 12 in the two rear ones. Both the current case (plastic front shell) and the earlier one (3D-printed front shell) were checked against Sipeed's official 3D models.
 
 On `NanoKVMLite` the bracket holds a printed cradle, `NanoKVMLite_cradle` (in the same zip), and the NanoKVM Lite snaps into the cradle: the LicheeRV Nano under it has no mounting holes. Print the cradle on its underside, as it is in the files, without supports. Screw it to the standoffs with M2.5 x 8 self-tapping screws through its end plates, then push the board straight down into it until the lips at the middle of the side walls snap over the plastic of the pin headers along both long edges. Pull it straight up to take it out, for example to change the microSD card, which goes in under the board at the USB-C end. The cradle is the same both ways round, and the board fits it either way. Sipeed supplies the Lite with a heatsink for the underside of the board, whose size is not published: the cradle is open under the board, and with the 6 mm standoffs there are 10 mm from the board to the plate, 13 mm at the opening in the plate under it. With the version without standoffs, use 6 mm M2.5 standoffs. The snap fit has not been tried on a printed cradle.
 
 In the flat and shelf orientations the board plate prints standing up, so its holes are teardrop-shaped (a screw that fits the round hole still passes through) and there is no version with integrated standoffs. A standoff sticking out sideways from a standing plate cannot print without support unless its underside slopes up at 45 degrees, and that slope either eats most of the face the board sits on or runs into the parts under the board. Use your own standoffs with these.
+
+In the flat orientations the back of the plate lies against the front of the frame, so nothing can stand out behind it: no screw head, nut or standoff thread. The holes are countersunk on the back, 90 degrees, to the largest size in ISO 15065 for the board's screws: 6.5 mm across for M3, 5.6 mm for M2.5 and 4.5 mm for M2. Put flat head screws in from the back before the bracket goes on the frame, into female-female standoffs or the female end of male-female ones. Their heads sit flush with the back or just below it. A flat head screw is measured with its head, so one 6 mm long reaches 3 mm into the standoff. Use flat head screws to ISO 7046 (cross recessed) or ISO 2009 (slotted). Hex socket countersunk screws (ISO 10642) have larger heads (4.7, 5.88 and 6.72 mm on M2, M2.5 and M3) and stand out 0.1 to 0.15 mm, which keeps the bracket off the frame. Where a hole is 3.5 mm or less from the edge of the board, its countersink comes within 0.16 to 0.7 mm of the edge of the plate. On `BBB`, `MuLite`, `OPi5` and `OPi5Plus`, whose holes are 2.9 to 3.2 mm from an edge, it breaks through that edge by up to 0.25 mm.
 
 <details>
 <summary><b>How the brackets hold on</b></summary>
@@ -229,23 +231,23 @@ Estimated print time of the 20x20 version (upright: without / with standoffs):
 
 | Bracket | Upright, portrait | Upright, landscape | Flat, portrait | Flat, landscape | Shelf, portrait | Shelf, landscape |
 |---|---|---|---|---|---|---|
-| `PiB` | ~43 / 58 min | ~44 / 57 min | ~53 min | ~57 min | ~55 min | ~59 min |
-| `PiA` | ~39 / 53 min | ~43 / 56 min | ~46 min | ~48 min | ~52 min | ~48 min |
-| `PiZero` | ~33 / 41 min | ~34 / 40 min | ~34 min | ~36 min | ~34 min | ~39 min |
-| `VIM1S` | ~44 / 58 min | ~42 / 54 min | ~56 min | ~55 min | ~53 min | ~58 min |
-| `ROCK5B` | ~59 / 81 min | ~57 / 77 min | ~78 min | ~79 min | ~75 min | ~81 min |
-| `BBB` | ~46 / 64 min | ~48 / 63 min | ~56 min | ~59 min | ~57 min | ~62 min |
-| `M2` | ~62 / 85 min | ~62 / 85 min | ~83 min | ~83 min | ~82 min | ~82 min |
-| `LP3Delta` | ~70 / 95 min | ~67 / 89 min | ~94 min | ~95 min | ~89 min | ~100 min |
-| `MuLite` | ~80 / 100 min | ~77 / 94 min | ~120 min | ~124 min | ~116 min | ~128 min |
-| `N2Plus` | ~68 / 88 min | ~76 / 97 min | ~91 min | ~90 min | ~99 min | ~89 min |
-| `M1` | ~85 / 107 min | ~91 / 111 min | ~113 min | ~113 min | ~118 min | ~115 min |
-| `OPi5Pro` | ~52 / 73 min | ~55 / 73 min | ~60 min | ~61 min | ~62 min | ~64 min |
-| `OPi5` | ~55 / 79 min | ~57 / 78 min | ~70 min | ~70 min | ~71 min | ~74 min |
-| `OPi5Plus` | ~66 / 90 min | ~64 / 86 min | ~82 min | ~82 min | ~78 min | ~84 min |
-| `OrinNano` | ~65 / 87 min | ~63 / 84 min | ~83 min | ~83 min | ~80 min | ~84 min |
-| `NanoKVMDesk` | ~47 / 56 min | ~47 / 55 min | ~54 min | ~54 min | ~53 min | ~53 min |
-| `NanoKVMLite` | ~27 / 42 min | ~28 / 40 min | ~28 min | ~28 min | ~27 min | ~31 min |
+| `PiB` | ~43 / 58 min | ~44 / 57 min | ~58 min | ~67 min | ~55 min | ~59 min |
+| `PiA` | ~39 / 53 min | ~43 / 56 min | ~51 min | ~55 min | ~52 min | ~48 min |
+| `PiZero` | ~33 / 41 min | ~34 / 40 min | ~39 min | ~41 min | ~34 min | ~39 min |
+| `VIM1S` | ~44 / 58 min | ~42 / 54 min | ~62 min | ~63 min | ~53 min | ~58 min |
+| `ROCK5B` | ~59 / 81 min | ~57 / 77 min | ~85 min | ~85 min | ~75 min | ~81 min |
+| `BBB` | ~46 / 64 min | ~48 / 63 min | ~61 min | ~68 min | ~57 min | ~62 min |
+| `M2` | ~62 / 85 min | ~62 / 85 min | ~91 min | ~92 min | ~82 min | ~82 min |
+| `LP3Delta` | ~70 / 95 min | ~67 / 89 min | ~102 min | ~103 min | ~89 min | ~100 min |
+| `MuLite` | ~80 / 100 min | ~77 / 94 min | ~128 min | ~133 min | ~116 min | ~128 min |
+| `N2Plus` | ~68 / 88 min | ~76 / 97 min | ~99 min | ~100 min | ~99 min | ~89 min |
+| `M1` | ~85 / 107 min | ~91 / 111 min | ~123 min | ~123 min | ~118 min | ~115 min |
+| `OPi5Pro` | ~52 / 73 min | ~55 / 73 min | ~68 min | ~74 min | ~62 min | ~64 min |
+| `OPi5` | ~55 / 79 min | ~57 / 78 min | ~76 min | ~77 min | ~71 min | ~74 min |
+| `OPi5Plus` | ~66 / 90 min | ~64 / 86 min | ~90 min | ~91 min | ~78 min | ~84 min |
+| `OrinNano` | ~65 / 87 min | ~63 / 84 min | ~91 min | ~92 min | ~80 min | ~84 min |
+| `NanoKVMDesk` | ~47 / 56 min | ~47 / 55 min | ~64 min | ~65 min | ~53 min | ~53 min |
+| `NanoKVMLite` | ~27 / 42 min | ~28 / 40 min | ~33 min | ~32 min | ~27 min | ~31 min |
 
 The cradle of `NanoKVMLite` takes ~11 min more. These times are not slicer results. They are estimates from `checks_time.py`, meant for comparing shapes.
 
@@ -323,7 +325,7 @@ Tested on Linux ARM64 (Python 3.11, 3.13 and 3.14) and Linux x86-64 (Python 3.11
 | `--mount 20 DIN` | Mounts to build: `20`, `40`, `DIN` (default: all) |
 | `--orient flat-portrait shelf-landscape` | Orientations to build: `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape` (default: all) |
 | `--format 3mf step` | What to write: `3mf`, `stl`, `step`, `viewer` (default: all). The upright orientations get both the version without and the version with standoffs |
-| `--check` | Report interference with the frame and the board, unsupported area and estimated print time, and check that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame). For DIN rail, check against both a steel rail and an aluminium rail with 1.5 mm side walls, and report the overlap when the leaf springs bend outwards as far as pushing on needs. Exits with status 1 if any check fails |
+| `--check` | Report interference with the frame and the board, unsupported area and estimated print time, and check that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame). In the flat orientations, also check that flat head screws in the holes stay below the back of the plate. For DIN rail, check against both a steel rail and an aluminium rail with 1.5 mm side walls, and report the overlap when the leaf springs bend outwards as far as pushing on needs. Exits with status 1 if any check fails |
 | `--coupons` | Also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm) |
 | `--board-step <path>` | Check the board interference against a board's official 3D model (STEP, or STL for a model published only as STL) instead of the simplified board. Repeat it for several models (they are not put in the viewer) |
 | `--out <dir>` | Write somewhere other than `models/` |
@@ -424,7 +426,7 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 
 - The fit and retention were tuned with test prints of the upright portrait bracket for the Raspberry Pi 4. The other brackets and orientations use the same grip but have not been printed yet.
 - `PiB` has only been tried with a Raspberry Pi 4. The other B-size boards have the same outline and mounting holes on their official drawings.
-- The pilot holes of the integrated standoffs have not been tried on real parts, nor have the teardrop holes of the flat and shelf orientations.
+- The pilot holes of the integrated standoffs have not been tried on real parts, nor have the teardrop holes of the flat and shelf orientations or the countersinks of the flat ones.
 - The Raspberry Pi boards are checked for interference against simplified board shapes placed from the official mechanical drawings.
 - The Khadas VIM1S / VIM3 / VIM4, Radxa ZERO 3W / 3E, Radxa ROCK 5B / 5B+, Hardkernel ODROID-M2, Libre Computer Le Potato, LattePanda 3 Delta and LattePanda Mu Lite Carrier are checked for interference against their official 3D models, in all six orientations.
 - The Hardkernel ODROID-N2+ is checked against the official 3D model of its heatsink, and the ODROID-M1 against a simplified heatsink drawn from its official drawing (the same extrusion), in all six orientations. The standoffs reach up between a side wall and a fin of the heatsink with 0.4 mm to spare. Neither has been tried on a real heatsink, and the height of the board above the heatsink, shown in the viewer, is an estimate.

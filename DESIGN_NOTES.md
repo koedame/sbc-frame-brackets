@@ -33,6 +33,8 @@ Last updated: 2026-11-17
 | No text on the bottom face (the face on the build plate) | Maintainer's instruction |
 | Standoffs are separate parts by default. Integrated standoffs are offered as an alternative (upright orientations only, history 8) | Maintainer's instruction |
 | Board holes are 3 mm diameter (version without standoffs), 2.4 mm on boards that take M2 screws | Maintainer's instruction (2.4 mm for M2: 2026-11-17, history 18) |
+| In the flat orientations every board hole is countersunk on the back, 90 degrees, for flat head screws | Maintainer's decision (2026-11-17, history 21) |
+| `FIT` 0.05 mm and `HOOK` 1.0 mm are final, without test prints of the coupons | Maintainer's decision (2026-11-17): the maintainer uses the `PiB` bracket with a Raspberry Pi 4 without trouble (section 8) |
 | Width along the rail is 16 mm (the print height) | Reduced from 30 mm after the maintainer pointed it out |
 | Generated files are attached to GitHub releases and not committed, in one zip per board. The README links to `releases/latest/download/<board>.zip` | Maintainer's decisions (release files 2026-11-15, history 8; one zip per board 2026-11-16, history 17) |
 | A release is published after every merged change to the models, the README's download links or the viewer, without asking each time | Maintainer's decision (2026-11-16; until then a release was published only when the maintainer asked for it) |
@@ -159,7 +161,7 @@ The grip had to stay as it is, every model had to print without supports and cle
 
 - **The grip stays on the build plate.** It only prints one way up, so every orientation keeps the grip where it is and changes how the board plate sits relative to it. Holes, openings, standoffs, the simplified board and the official 3D models are defined once, on the upright-portrait plate (the "board frame"), and `place()` moves them to the orientation. The grip is the same in all six, so all of them can be mounted upside down.
 - **Upright landscape**: the board plate still lies on the build plate, with the long side pointing away from the frame. The microSD end of the Raspberry Pi and ZERO boards (`SD_END`) faces the frame, so the gap to the back plate is 17 mm there (`SD_GAP`) for a finger to reach the card, instead of 4 mm.
-- **Flat**: the back plate itself becomes the board plate, and the board sits in front of it beside the grip. On DIN rail the board moves further along the rail when one of its holes would reach the gap that a leaf spring needs above its free end (`flat_edge()`).
+- **Flat**: the back plate itself becomes the board plate, and the board sits in front of it beside the grip. On DIN rail the board moves further along the rail when one of its holes, with its countersink (history 21), would reach the gap that a leaf spring needs above its free end (`flat_edge()`).
 - **Shelf**: a shelf on top of the back plate, level with the top of the grip, with a gusset under its root and a rib along it. On DIN rail it is raised to clear the leaf springs' slits (`shelf_top()`). In shelf portrait the microSD end faces the frame with the 17 mm gap.
 - **Standing board plates (flat and shelf).** The plate prints standing up, so the holes are teardrops (point up), every opening gets a 45-degree roof (`_vopen()`), and only the top corners are rounded. Each opening keeps the rest of its rectangle as a 1 mm pocket in the face under the board (`POCKET`): parts under the ZERO 3E reach 0.64 mm into the plate where the roof of its microSD-end notch would leave material.
 - **Elephant's-foot chamfer only under vertical walls.** `bed_chamfer()` used to chamfer the whole outline on the build plate. On a standing plate some edges on the plate meet a face that leans outwards, and a chamfer there makes an overhang, so those edges are skipped.
@@ -195,27 +197,27 @@ The grip had to stay as it is, every model had to print without supports and cle
 
 | Bracket (20x20) | Upright portrait, side push | Upright landscape, side push | Flat portrait, pull out | Flat landscape, pull out | Shelf portrait, push down | Shelf landscape, push down |
 |---|---|---|---|---|---|---|
-| `PiB` | 3.4 mm / 16.5 MPa | 22.8 mm / 39.0 MPa | 3.4 mm / 16.8 MPa | 11.6 mm / 30.8 MPa | 19.9 mm / 38.1 MPa | 2.5 mm / 12.1 MPa |
-| `PiA` | 3.6 mm / 16.5 MPa | 9.3 mm / 29.4 MPa | 3.7 mm / 16.8 MPa | 4.7 mm / 23.2 MPa | 8.6 mm / 27.4 MPa | 2.7 mm / 12.1 MPa |
-| `PiZero` | 0.5 mm / 7.6 MPa | 14.3 mm / 51.5 MPa | 0.4 mm / 8.2 MPa | 8.0 mm / 41.3 MPa | 13.1 mm / 46.0 MPa | 0.4 mm / 6.1 MPa |
+| `PiB` | 3.4 mm / 16.5 MPa | 22.8 mm / 39.0 MPa | 3.4 mm / 16.8 MPa | 11.7 mm / 32.7 MPa | 19.9 mm / 38.1 MPa | 2.5 mm / 12.1 MPa |
+| `PiA` | 3.6 mm / 16.5 MPa | 9.3 mm / 29.4 MPa | 3.7 mm / 16.8 MPa | 4.8 mm / 24.6 MPa | 8.6 mm / 27.4 MPa | 2.7 mm / 12.1 MPa |
+| `PiZero` | 0.5 mm / 7.6 MPa | 14.3 mm / 51.5 MPa | 0.4 mm / 8.2 MPa | 8.3 mm / 59.1 MPa | 13.1 mm / 46.0 MPa | 0.4 mm / 6.1 MPa |
 | `VIM1S` | 3.1 mm / 13.1 MPa | 12.5 mm / 25.9 MPa | 2.6 mm / 11.4 MPa | 11.0 mm / 26.8 MPa | 11.0 mm / 21.9 MPa | 2.3 mm / 9.1 MPa |
-| `ROCK5B` | 6.4 mm / 17.7 MPa | 16.1 mm / 22.0 MPa | 5.5 mm / 16.2 MPa | 15.3 mm / 21.9 MPa | 13.9 mm / 19.3 MPa | 4.7 mm / 12.6 MPa |
-| `BBB` | 1.8 mm / 7.7 MPa | 16.8 mm / 23.3 MPa | 2.3 mm / 15.2 MPa | 11.3 mm / 22.3 MPa | 15.5 mm / 22.3 MPa | 1.6 mm / 6.5 MPa |
-| `M2` | 12.0 mm / 22.3 MPa | 8.7 mm / 14.6 MPa | 9.1 mm / 19.0 MPa | 8.4 mm / 14.7 MPa | 7.8 mm / 12.8 MPa | 9.2 mm / 18.1 MPa |
-| `LP3Delta` | 5.9 mm / 15.0 MPa | 32.5 mm / 29.6 MPa | 5.7 mm / 14.9 MPa | 31.2 mm / 29.3 MPa | 27.7 mm / 26.5 MPa | 4.6 mm / 12.3 MPa |
-| `MuLite` | 14.3 mm / 20.6 MPa | 52.1 mm / 34.9 MPa | 14.0 mm / 20.3 MPa | 46.4 mm / 34.5 MPa | 42.6 mm / 30.8 MPa | 10.0 mm / 16.3 MPa |
-| `N2Plus` | 13.3 mm / 22.1 MPa | 9.4 mm / 13.3 MPa | 13.1 mm / 21.9 MPa | 7.2 mm / 12.9 MPa | 8.8 mm / 12.0 MPa | 10.8 mm / 18.1 MPa |
-| `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.1 mm / 18.0 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
-| `OPi5Pro` | 1.4 mm / 4.7 MPa | 13.3 mm / 15.6 MPa | 1.8 mm / 7.8 MPa | 9.3 mm / 15.1 MPa | 12.8 mm / 15.2 MPa | 1.3 mm / 4.3 MPa |
-| `OPi5` | 3.4 mm / 14.3 MPa | 21.8 mm / 24.2 MPa | 3.0 mm / 14.3 MPa | 18.0 mm / 24.1 MPa | 19.0 mm / 21.0 MPa | 2.8 mm / 12.0 MPa |
-| `OPi5Plus` | 5.4 mm / 17.1 MPa | 10.8 mm / 15.6 MPa | 3.6 mm / 13.4 MPa | 11.2 mm / 15.1 MPa | 9.8 mm / 13.7 MPa | 4.8 mm / 14.9 MPa |
-| `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 15.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
-| `NanoKVMDesk` | 2.6 mm / 6.5 MPa | 2.8 mm / 6.8 MPa | 2.7 mm / 6.5 MPa | 2.9 mm / 6.8 MPa | 2.8 mm / 6.8 MPa | 2.6 mm / 6.5 MPa |
-| `NanoKVMLite` | 0.4 mm / 7.5 MPa | 9.0 mm / 32.0 MPa | 0.3 mm / 8.5 MPa | 6.3 mm / 32.1 MPa | 7.7 mm / 21.7 MPa | 0.3 mm / 7.0 MPa |
+| `ROCK5B` | 6.4 mm / 17.7 MPa | 16.1 mm / 22.0 MPa | 5.5 mm / 16.2 MPa | 15.4 mm / 22.1 MPa | 13.9 mm / 19.3 MPa | 4.7 mm / 12.6 MPa |
+| `BBB` | 1.8 mm / 7.7 MPa | 16.8 mm / 23.3 MPa | 2.3 mm / 15.2 MPa | 11.6 mm / 26.8 MPa | 15.5 mm / 22.3 MPa | 1.6 mm / 6.5 MPa |
+| `M2` | 12.0 mm / 22.3 MPa | 8.7 mm / 14.6 MPa | 9.1 mm / 19.0 MPa | 8.5 mm / 15.7 MPa | 7.8 mm / 12.8 MPa | 9.2 mm / 18.1 MPa |
+| `LP3Delta` | 5.9 mm / 15.0 MPa | 32.5 mm / 29.6 MPa | 5.7 mm / 14.9 MPa | 31.3 mm / 32.1 MPa | 27.7 mm / 26.5 MPa | 4.6 mm / 12.3 MPa |
+| `MuLite` | 14.3 mm / 20.6 MPa | 52.1 mm / 34.9 MPa | 14.0 mm / 20.3 MPa | 46.4 mm / 36.1 MPa | 42.6 mm / 30.8 MPa | 10.0 mm / 16.3 MPa |
+| `N2Plus` | 13.3 mm / 22.1 MPa | 9.4 mm / 13.3 MPa | 13.2 mm / 21.9 MPa | 7.4 mm / 15.4 MPa | 8.8 mm / 12.0 MPa | 10.8 mm / 18.1 MPa |
+| `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.4 mm / 21.4 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
+| `OPi5Pro` | 1.4 mm / 4.7 MPa | 13.3 mm / 15.6 MPa | 1.8 mm / 7.8 MPa | 9.4 mm / 16.3 MPa | 12.8 mm / 15.2 MPa | 1.3 mm / 4.3 MPa |
+| `OPi5` | 3.4 mm / 14.3 MPa | 21.8 mm / 24.2 MPa | 3.0 mm / 14.3 MPa | 18.1 mm / 24.1 MPa | 19.0 mm / 21.0 MPa | 2.8 mm / 12.0 MPa |
+| `OPi5Plus` | 5.4 mm / 17.1 MPa | 10.8 mm / 15.6 MPa | 3.6 mm / 13.4 MPa | 11.4 mm / 16.8 MPa | 9.8 mm / 13.7 MPa | 4.8 mm / 14.9 MPa |
+| `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 16.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
+| `NanoKVMDesk` | 2.6 mm / 6.5 MPa | 2.8 mm / 6.8 MPa | 2.7 mm / 6.6 MPa | 2.9 mm / 6.8 MPa | 2.8 mm / 6.8 MPa | 2.6 mm / 6.5 MPa |
+| `NanoKVMLite` | 0.4 mm / 7.5 MPa | 9.0 mm / 32.0 MPa | 0.3 mm / 10.9 MPa | 6.4 mm / 32.1 MPa | 7.7 mm / 21.7 MPa | 0.3 mm / 7.0 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
-- Upright landscape, flat landscape and shelf portrait are the long overhangs. On `PiZero` the narrow plate reaches the strength of PETG in upright landscape (51.5 of 51 MPa) and flat landscape (41.3 of 35 MPa), and 90% of it in shelf portrait. Hold the board when plugging in or pulling out a cable in those orientations (the README says so). Stiffening them is an open item (section 9).
+- Upright landscape, flat landscape and shelf portrait are the long overhangs. On `PiZero` the narrow plate reaches the strength of PETG in upright landscape (51.5 of 51 MPa) and flat landscape (59.1 of 35 MPa with the countersinks of history 21, 41.3 MPa before), and 90% of it in shelf portrait. `MuLite` flat landscape reaches 36.1 of 35 MPa. Hold the board when plugging in or pulling out a cable in those orientations (the README says so). Stiffening them is an open item (section 9).
 
 ### History 9: BeagleBoard.org BeagleBone Black (2026-11-16)
 
@@ -281,8 +283,8 @@ The maintainer asked for the LattePanda 3 Delta and the LattePanda Mu in all six
   - Under the carrier (3D model), the deepest part is the pins of the PCIe slot, 3.3 mm below the board. Standoffs are 5 mm tall, as on the Raspberry Pi brackets, and 6 mm across with a 2.6 mm pilot for M3. The 3 mm holes of the version without standoffs are tight for M3.
 - Both brackets have two rows of four lightening windows, clear of the standoffs. The window loop that `ROCK5B` and `M2` each had is now `Board.cuts()`, set by `WIN_S` (the rows) and `WIN_N` (windows per row); the 168 existing models keep their volumes.
 - `--check` with the official 3D models: no overlap with the frame or the board and no unsupported area in all 48 models, and the DIN leaf springs bend freely in all 16 DIN models.
-- **Beam estimates** (table in history 8). These are the longest plates so far. A 10 N push at the far edge bends the long overhangs (upright landscape, flat landscape and shelf portrait) 28 to 52 mm, and `MuLite` flat landscape reaches 34.5 MPa, 99% of the 35 MPa strength across the layers. The other orientations stay within 14.3 mm and 20.6 MPa. With 1 N at the board centre every orientation stays within 1.4 mm and 1.3 MPa. As for `PiZero`, the README says to hold the board when plugging in or pulling out a cable; stiffening is an open item (section 9).
-- **Not added.** The Mu's other carriers. On the Mini Carrier (DFR1293) the module and its cooler hang under the carrier, about 29 mm deep, so its bracket would need standoffs about 30 mm tall or an opening for the cooler (section 9). The Full EVA Carrier (DFR1141) is a 170 x 170 mm Mini-ITX board, and the GPU Carrier (DFR1144) is sold as a kit with its graphics card.
+- **Beam estimates** (table in history 8). These are the longest plates so far. A 10 N push at the far edge bends the long overhangs (upright landscape, flat landscape and shelf portrait) 28 to 52 mm, and `MuLite` flat landscape reaches 34.5 MPa, 99% of the 35 MPa strength across the layers (36.1 MPa with the countersinks of history 21). The other orientations stay within 14.3 mm and 20.6 MPa. With 1 N at the board centre every orientation stays within 1.4 mm and 1.3 MPa. As for `PiZero`, the README says to hold the board when plugging in or pulling out a cable; stiffening is an open item (section 9).
+- **Not added.** The Mu's other carriers. On the Mini Carrier (DFR1293) the module and its cooler hang under the carrier, about 29 mm deep, so its bracket would need standoffs about 30 mm tall or an opening for the cooler. The maintainer decided not to make it for now (2026-11-17, section 9). The Full EVA Carrier (DFR1141) is a 170 x 170 mm Mini-ITX board, and the GPU Carrier (DFR1144) is sold as a kit with its graphics card.
 - **Terms.** The LattePanda 3D models repository puts its models under CC BY 3.0, and the LattePanda Mu repository is under the MIT license. The files are still kept out of the repository and `viewer.html`, as for the other manufacturers (section 7).
 - 216 models, 655 release files.
 
@@ -294,7 +296,7 @@ History 10 left these out because their heatsinks are screwed to the boards thro
 - **The heatsink is the stand.** On both boards the SoC and the DRAM are on the underside (bottom copper of the board drawings), and the heatsink sits under the board with its fins down: a 100 mm wide aluminium extrusion, 19 mm tall, with a 3 mm base, 15 fins 5 mm deep between 17.15 and 82.85 mm across, a side wall along each long edge that reaches 6 mm below the base, and a pad on top for the SoC. The N2+ and M1 drawings have the same profile (and so does the N2+ 3D model); the N2+ heatsink is 91 mm long and the M1 heatsink 123 mm. The board lies on top between the side walls, 0.5 mm in from the open ends.
 - **The bracket holds the heatsink (`HKSink`, with `N2Plus` and `M1`).** The plate is the heatsink's footprint, 91 x 100 and 123 x 100 mm, so it does not stick out beyond the device it holds. `l` runs along the extrusion from the end away from the ports and `s` across it from the side of the GPIO header.
 - **Holes.** The N2+ heatsink has eight M3 threaded holes through its base: the board is screwed to the four 83.5 x 58 mm apart (its mounting holes, the same on the N2 drawing and the N2+ template), and the other four, 71.5 x 71.5 mm apart, 9.75 mm from the ends and 14.25 mm from the sides, are free. The M1 heatsink has twelve ("M3 x 12ea"): four 83.5 x 90 mm apart for the board, and eight 14.25 mm from the sides at 9.75, 41.75, 81.25 and 113.25 mm from the end. The bracket uses the free four of the N2+ and the outer four of the M1's eight (103.5 x 71.5 mm). They open from below between a side wall and the outermost fin, whose root is 2.9 mm from the hole centre.
-- **Standoffs.** 10 mm tall (the maintainer's choice), which keeps the side walls 4 mm and the fins 5 mm off the plate. The top 6.5 mm goes up between the side wall and the fin, so it is 5 mm across around a 3.4 mm through hole (0.8 mm wall); against the N2+ 3D model it is 0.40 mm from the fin, at the fin's root. Under the heatsink it widens to 8 mm for the bottom 3.5 mm (`foot` in `SPACER`, new in `add_spacers()`). M3 x 16 screws go in from under the plate: 3 mm of plate, 10 mm of standoff and the 3 mm base, so the screw ends flush with the top of the base and does not reach the board. The screw heads stand out under the plate: in the upright and shelf orientations that face is free, but in the flat orientations it lies against the frame, so the README asks for countersunk screws in holes countersunk by hand there (on the other boards' flat brackets, too, nothing can stand out behind the plate; section 9). The viewer shows that instead of a pilot hole (`through` in `SPACER`).
+- **Standoffs.** 10 mm tall (the maintainer's choice), which keeps the side walls 4 mm and the fins 5 mm off the plate. The top 6.5 mm goes up between the side wall and the fin, so it is 5 mm across around a 3.4 mm through hole (0.8 mm wall); against the N2+ 3D model it is 0.40 mm from the fin, at the fin's root. Under the heatsink it widens to 8 mm for the bottom 3.5 mm (`foot` in `SPACER`, new in `add_spacers()`). M3 x 16 screws go in from under the plate: 3 mm of plate, 10 mm of standoff and the 3 mm base, so the screw ends flush with the top of the base and does not reach the board. The screw heads stand out under the plate: in the upright and shelf orientations that face is free, but in the flat orientations it lies against the frame, so the README asked for countersunk screws in holes countersunk by hand there. Since history 21 every flat bracket has its holes countersunk on the back, and the README asks for M3 x 16 flat head screws. The viewer shows that instead of a pilot hole (`through` in `SPACER`).
 - **Parts under the board** are inside the heatsink now, so there is nothing of the board left to check against the bracket. The board's height above the heatsink is not published; the simplified board is drawn 13 mm above the bottoms of the side walls (the pad ends at 11.2 mm on the N2+ model and 10.9 mm on the M1 drawing, and the SoC sits on it), for the viewer only.
 - **Edges.** On both boards the Ethernet, USB, HDMI and power ports are at one open end of the heatsink, and the microSD slot, the audio jack and the infrared receiver at the other. `SD_END` puts the microSD end towards the frame with the 17 mm gap in upright landscape and shelf portrait, and `xy()` puts the GPIO header side towards the back plate in upright portrait. On the N2+ the microSD slot is under the board, 10.1 x 15 mm on the bottom mechanical layer, and sticks out 1.8 mm past the board (1.3 mm past the heatsink). On both boards the 40-pin GPIO header runs along the board edge beside one side wall, its two pin rows at `s` = 7.2 and 9.8 mm. The four holes are symmetric, so the heatsink also fits turned round. The README says where each edge ends up.
 - **Version without standoffs.** The same 3 mm holes as every bracket (tight for M3). Own spacers have to fit between the side wall and the fin, so the README asks for round M3 spacers no more than 5 mm across. Flat and shelf have no integrated standoffs, as on every board.
@@ -419,6 +421,21 @@ The maintainer decided the open item of history 17: the NanoKVM Lite is added, w
 - **Beam estimates** (table in history 8). The plate is as narrow as the cradle (25.6 mm), so the long overhangs bend like those of `PiZero`: a 10 N push at the far edge gives 9.0 mm and 32.0 MPa in upright landscape and 6.3 mm and 32.1 MPa in flat landscape, 92% of the 35 MPa across the layers. The other orientations stay within 0.4 mm and 8.6 MPa. The cradle's stiffness is ignored, as the board's is.
 - 408 models and one cradle, 24 release files.
 
+### History 21: countersunk holes in the flat orientations (2026-11-17)
+
+In the flat orientations the board plate lies against the front of the frame, and the grip is made with no gap there (section 2), so nothing can stand out behind the plate: a screw head, a nut or the thread of a male standoff keeps the bracket from seating on the frame. Until now the README asked for flat head screws in holes countersunk by hand only on `N2Plus`, `M1` and `NanoKVMDesk`. The maintainer chose to countersink every hole of every flat bracket on the back, 90 degrees (section 9).
+
+- **Size from the screw.** `FLAT_HEAD` gives the countersink by thread size, taken from the first word of `standoffs.screw` (`M2`, `M2.5` or `M3`, checked when the board is loaded). `hole_d` cannot tell the size: 3.0 mm is used for both M2.5 and M3 boards.
+- **The largest countersink of ISO 15065.** ISO 15065 gives the countersinks for screws with the ISO 7721 head (ISO 7046 cross recessed, ISO 2009 slotted and others): 4.4 to 4.5 mm across for M2, 5.5 to 5.6 mm for M2.5 and 6.3 to 6.5 mm for M3. The smallest is the theoretical head diameter of ISO 7046-1, so with the largest the head sits 0.05 to 0.1 mm below the face. Hex socket countersunk screws (ISO 10642) are not covered by ISO 15065 and have larger heads (4.7, 5.88 and 6.72 mm theoretical), which stand out 0.1 to 0.15 mm; the README says to use ISO 7046 or ISO 2009 screws.
+- **Shape (`countersink()`).** A 90-degree cone that starts 0.01 mm outside the back face and ends inside the hole. The plate prints standing, so the upper half of the cone is a 45-degree roof, and the point of the teardrop hole stays inside it. `--check` finds no unsupported area in any flat model.
+- **New check.** `--check` puts the head of an ISO 7046 flat head screw (`Board.flat_heads()`, a cone of the theoretical head diameter) flush with the back face in every hole of a flat model and measures its overlap with the bracket, which must be 0. Before the countersinks it was, for example, 67.31 mm3 on `M2` flat portrait, 35.58 on `PiB` and 18.22 on `VIM1S` (20x20).
+- **Near the edges.** The plate does not stick out beyond the board outline (section 2), so where a hole is close to the edge of the board, its countersink comes close to the edge of the plate. Measured on the back face of the 20x20 models: holes 3.5 mm from the edge leave 0.7 mm on M2.5 and 0.25 mm on M3 (`LP3Delta`, `M2`, `MuLite`), and the corner holes of `VIM1S` (M2) 0.19 mm. Closer holes break through the edge of the plate: `BBB` (3.17 mm from the edges) by up to 0.08 mm, one `MuLite` hole (3.0 mm from the side of the plate in flat portrait) by 0.25 mm, `OPi5` (2.86 to 3.15 mm) by up to 0.12 mm and two `OPi5Plus` holes (3.11 mm from the end) by 0.14 mm. The holes of `NanoKVMLite` (M2.5), in the cradle's end plates 3.0 mm from the ends, leave 0.16 mm. The README says so.
+- **DIN rail.** `flat_edge()` keeps each hole's countersink, its widest part, 1 mm clear of the gap above a leaf spring, so on six DIN flat models the board moves further along the rail: 1.3 mm on `PiB` and `OPi5Pro` flat portrait and `ROCK5B` flat landscape, 2.9 mm on `NanoKVMLite` flat portrait, 0.93 mm on `BBB` and 2.2 mm on `OrinNano` flat landscape. The leaf springs still bend freely on every DIN model.
+- **Print time and volume.** The estimated print time (`checks_time.py`) of the flat models goes up 4 to 12 minutes, for example from 57.0 to 67.1 minutes on `PiB` 20x20 flat landscape. All of it is in the walls, and the filament stays the same (11.5 g on that model): the estimator charges acceleration by the average segment length of each outline, and the many short segments of the countersinks' curved sections make it treat the whole outline as short moves. A slicer will add much less; no slicer measurements have been taken (section 6). The volumes of all 102 flat models change (tables below); the upright and shelf models are unchanged.
+- **Beam estimates** (table in history 8). In flat landscape the holes at the grip end of the plate are where the bending is largest, and a countersink takes the back face, the outermost layer, around each of them. A 10 N pull at the far edge now gives 59.1 MPa on `PiZero` (41.3 before; its plate is 30 mm high, and the two countersinks take 13 mm of it) and 36.1 MPa on `MuLite` (34.5 before), over the 35 MPa strength across the layers, and up to 4.5 MPa more on the other boards (`BBB`, now 26.8 MPa). Deflections change by 0.3 mm at most. In flat portrait nothing changes by more than 0.1 except the stress on `NanoKVMLite`, 8.5 to 10.9 MPa. The README already asks to hold the board when plugging in a cable in flat landscape; stiffening is an open item (section 9).
+- `--check` passes for all 408 models and the cradle, against the official 3D models of every board that has one (`--board-step`).
+- Not printed: whether the heads sit flush, and the roofs of the countersinks (section 9).
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -438,6 +455,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | Back plate to the microSD end of the board, when that end faces the frame (upright landscape and shelf portrait) | 17 mm | `SD_GAP` |
 | Pocket under each opening of a standing board plate (flat and shelf) | 1.0 mm deep | `POCKET` |
 | Cradle: clearance round the board / end stop thickness / end plate thickness / ledge length / thinnest side wall | 0.15 mm / 1.6 mm / 2.0 mm / 5.0 mm / 1.0 mm | `CRADLE_FIT`, `CRADLE_STOP_T`, `CRADLE_PLATE`, `CRADLE_LEDGE`, `CRADLE_WALL_MIN` |
+| Countersink on the back of each hole of a flat board plate (90 degrees), for M2 / M2.5 / M3 | 4.5 / 5.6 / 6.5 mm across | `FLAT_HEAD` |
 
 ## 6. Checks and caveats
 
@@ -448,6 +466,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 - **DIN leaf spring travel**: `--check` moves each leaf spring outwards by as much as pushing on needs at its top end and reports the overlap with the rest of the bracket. It must be 0; otherwise the spring is stopped before the barb clears the lip (history 4).
 - **Print time**: `checks_time.py` is a home-made estimate, not a slicer measurement. Use it only to compare shapes. No slicer measurements have been taken yet.
 - **One solid**: `--check` also fails a model that comes out as more than one solid (a loose piece would print as a separate part).
+- **Flat head screws (flat orientations)**: `--check` puts the head of an ISO 7046 flat head screw flush with the back of the plate in every hole and measures its overlap with the bracket. It must be 0; otherwise the head would stand out behind the plate, which lies on the frame (history 21).
 - **Exit status**: `build_all.py --check` exits with status 1 if any model fails any of the checks above. The workflow runs `--check` on every pull request that changes the generator, and again before attaching files to a release.
 - **Regression check**: after changing the script, confirm the models you did not mean to change still have the same volume (the tables at the end of these notes).
 
@@ -506,14 +525,14 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 |---|---|---|---|
 | 2026-11-14 | Folded spring version (version 2) | Too loose; did not stay on the frame | Dropped the spring, switched to stiff arms with no gap |
 | 2026-11-14 | No-gap version (0.6 mm barb) | Weak engagement | Raised the barb to 1.0 mm and tapered the arms |
-| Not yet | Current version (1.0 mm barb) | Waiting for results | — |
-| Not yet | Fit coupons (clearance 0.00 / 0.05 / 0.10 mm) | Waiting for results | Put the best value into `FIT` |
+| By 2026-11-17 | Current version (1.0 mm barb), `PiB` with a Raspberry Pi 4 | In everyday use without trouble (reported by the maintainer) | Kept `FIT` 0.05 mm and `HOOK` 1.0 mm as final |
+| — | Fit coupons (clearance 0.00 / 0.05 / 0.10 mm) | Not printed: the maintainer decided not to (2026-11-17) | `FIT` stays 0.05 mm |
 
 The material used for the prints and which direction was loose (front-back, up-down, rotation) have not been recorded yet.
 
 ## 9. Open items
 
-- [ ] Get the results of printing the current version and the coupons, then settle `FIT` and `HOOK`
+- [x] Get the results of printing the current version and the coupons, then settle `FIT` and `HOOK` → no test prints: the maintainer uses the `PiB` bracket with a Raspberry Pi 4 without trouble, so `FIT` 0.05 mm and `HOOK` 1.0 mm are final (the maintainer's decision, 2026-11-17)
 - [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2, 2.6 mm for M3) on real parts
 - [ ] Print and test the DIN rail version on steel and aluminium rails (how easily the leaf springs push on, whether the softer springs of 2026-11-17 hold the bracket firmly enough, centre key vs channel width, and whether the roots of the leaf springs whiten or crack)
 - [x] Lower the strain at the roots of the DIN leaf springs (about 2.9%)? → a 3.0 mm hook at the tip end and a 0.8 mm spring: 0.77% (FEA 0.75%), under the 0.96% allowed for a part snapped on once; the springs push about 12 times more softly (section 4 history 4). Not tried on a print
@@ -532,7 +551,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `NanoKVMDesk` and try it with a NanoKVM-Desk, the current case and, if one is at hand, the earlier one: M2 x 12 screws through the 2.4 mm holes into the case's rear holes, whether the case sits flat on the 3 mm rests with the front rubber feet on (their thickness is not published), and 3 mm M2 standoffs with the version without standoffs (history 17)
 - [ ] Print `NanoKVMLite` and its cradle and try them with a NanoKVM Lite: how hard the board snaps in and comes out, whether the lips hold it upside down and in the flat orientations, whether Sipeed's heatsink fits under the board, and right-angle plugs at the end that faces the frame in upright landscape and shelf portrait (history 20)
 - [ ] Sipeed NanoKVM Full: add it if Sipeed publishes a 3D model or drawing of its case (history 17)
-- [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
+- [x] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? → not made for now, the maintainer's decision (2026-11-17, history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
 - [x] Reduce the `PiB` board holes from two sets (8 holes) to one set? → one set, the maintainer's decision (history 18). Mounting the bracket upside down puts the ports the other way
 - [x] Make the `VIM1S` screw holes smaller for M2? → 2.4 mm, the maintainer's decision (history 18)
@@ -541,8 +560,9 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
 - [x] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? → the key is 23.6 mm wide and fits both; the vertical play is set by the roots of the leaf springs, so it does not grow on steel rails (section 4 history 4, section 7)
 - [ ] Print the new orientations (history 8): the teardrop holes and pockets of the flat and shelf plates, the shelf under a board, and how far the long overhangs (upright landscape, flat landscape, shelf portrait) bend when a cable is plugged in
-- [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and `MuLite` 99% of it in flat landscape (history 12)
-- [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
+- [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and so does `MuLite` in flat landscape since the countersinks (history 21)
+- [x] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? → every hole countersunk on the back for flat head screws, the maintainer's decision (history 21)
+- [ ] Print a flat bracket and try flat head screws in its countersinks: whether the heads sit flush with the back, and the 45-degree roofs of the countersinks (history 21)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
 - [x] A release holds at most 1000 files (943 for 13 boards, 72 per board), and the next board would pass it → one zip per board, the maintainer's choice (history 17): 21 files for 14 boards
 - [x] Sipeed NanoKVM Lite: no mounting holes → a printed cradle that holds the LicheeRV Nano and the HDMI board by their edges, the maintainer's choice (history 20)
@@ -556,7 +576,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 3. Run `python build_all.py --check` (or only the boards, mounts and orientations you work on, with `--board`, `--mount` and `--orient`) and confirm that it exits with status 0, and that the volumes match the tables below.
 4. Of the open items in section 9, check the ones that need the maintainer's decision.
 5. After changes, open a pull request. The workflow checks every model again.
-6. To publish the files, push the next version tag on `main` once the pull request is merged (`git tag v0.5.0 && git push origin v0.5.0`); the workflow builds every model, packs them into one zip per board and attaches the zips to that release. Then check that every file the README links to is in the release.
+6. To publish the files, push the next version tag on `main` once the pull request is merged (one minor version up from the latest release, which `gh release view` shows: `git tag v0.<n>.0 && git push origin v0.<n>.0`); the workflow builds every model, packs them into one zip per board and attaches the zips to that release. Then check that every file the README links to is in the release.
 7. Update sections 8 and 9 and the "last updated" date of these notes.
 
 ### Reference volumes (as of 2026-11-17, cm3)
@@ -611,45 +631,45 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.095 | 13.258 | 13.167 |
-| PiA | 10.458 | 10.621 | 10.173 |
-| PiZero | 8.208 | 8.371 | 7.923 |
-| VIM1S | 13.172 | 13.335 | 12.887 |
-| ROCK5B | 19.195 | 19.358 | 18.909 |
-| BBB | 14.450 | 14.613 | 14.164 |
-| M2 | 20.645 | 20.808 | 20.360 |
-| LP3Delta | 23.865 | 24.028 | 23.580 |
-| MuLite | 29.860 | 30.023 | 29.575 |
-| N2Plus | 23.582 | 23.745 | 23.297 |
-| M1 | 31.350 | 31.513 | 31.065 |
-| OPi5Pro | 17.163 | 17.326 | 17.253 |
-| OPi5 | 17.958 | 18.121 | 17.673 |
-| OPi5Plus | 23.457 | 23.620 | 23.172 |
-| OrinNano | 22.639 | 22.802 | 22.354 |
-| NanoKVMDesk | 16.204 | 16.367 | 15.919 |
-| NanoKVMLite | 6.083 | 6.246 | 5.797 |
+| PiB | 13.056 | 13.219 | 13.460 |
+| PiA | 10.419 | 10.582 | 10.134 |
+| PiZero | 8.169 | 8.332 | 7.884 |
+| VIM1S | 13.152 | 13.315 | 12.866 |
+| ROCK5B | 19.156 | 19.319 | 18.870 |
+| BBB | 14.372 | 14.535 | 14.087 |
+| M2 | 20.568 | 20.731 | 20.283 |
+| LP3Delta | 23.788 | 23.951 | 23.502 |
+| MuLite | 29.783 | 29.946 | 29.498 |
+| N2Plus | 23.505 | 23.668 | 23.220 |
+| M1 | 31.273 | 31.436 | 30.988 |
+| OPi5Pro | 17.125 | 17.288 | 17.561 |
+| OPi5 | 17.919 | 18.082 | 17.634 |
+| OPi5Plus | 23.380 | 23.543 | 23.095 |
+| OrinNano | 22.600 | 22.763 | 22.315 |
+| NanoKVMDesk | 16.183 | 16.346 | 15.898 |
+| NanoKVMLite | 6.044 | 6.207 | 6.203 |
 
 **Flat landscape (`_flat-landscape`)**
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 12.372 | 12.535 | 12.086 |
-| PiA | 10.920 | 11.083 | 10.634 |
-| PiZero | 6.526 | 7.518 | 6.926 |
-| VIM1S | 12.781 | 12.944 | 12.496 |
-| ROCK5B | 18.319 | 18.483 | 18.335 |
-| BBB | 13.406 | 13.569 | 13.121 |
-| M2 | 21.270 | 21.433 | 20.985 |
-| LP3Delta | 21.966 | 22.129 | 21.681 |
-| MuLite | 30.049 | 30.212 | 29.764 |
-| N2Plus | 24.556 | 24.719 | 24.271 |
-| M1 | 30.802 | 30.965 | 30.516 |
-| OPi5Pro | 15.776 | 15.939 | 15.491 |
-| OPi5 | 15.148 | 15.311 | 14.863 |
-| OPi5Plus | 20.940 | 21.103 | 20.655 |
-| OrinNano | 20.772 | 20.936 | 20.487 |
-| NanoKVMDesk | 16.116 | 16.279 | 15.831 |
-| NanoKVMLite | 4.568 | 5.689 | 5.097 |
+| PiB | 12.333 | 12.496 | 12.047 |
+| PiA | 10.881 | 11.044 | 10.595 |
+| PiZero | 6.487 | 7.479 | 6.887 |
+| VIM1S | 12.761 | 12.924 | 12.476 |
+| ROCK5B | 18.281 | 18.444 | 18.586 |
+| BBB | 13.329 | 13.492 | 13.128 |
+| M2 | 21.193 | 21.356 | 20.908 |
+| LP3Delta | 21.889 | 22.052 | 21.604 |
+| MuLite | 29.972 | 30.135 | 29.687 |
+| N2Plus | 24.479 | 24.642 | 24.194 |
+| M1 | 30.724 | 30.888 | 30.439 |
+| OPi5Pro | 15.737 | 15.901 | 15.452 |
+| OPi5 | 15.109 | 15.272 | 14.824 |
+| OPi5Plus | 20.863 | 21.026 | 20.577 |
+| OrinNano | 20.734 | 20.897 | 20.970 |
+| NanoKVMDesk | 16.096 | 16.259 | 15.811 |
+| NanoKVMLite | 4.529 | 5.650 | 5.058 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
