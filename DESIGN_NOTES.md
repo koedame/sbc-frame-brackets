@@ -42,10 +42,10 @@ Last updated: 2026-11-17
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OrinNano` or `NanoKVMDesk`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano` or `NanoKVMDesk`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons, put each board's 3MF, STL and STEP files into `<board>.zip` (in a folder named after the board), and attach the zips, `viewer.html` and the coupons to that release. It stops if a file in `models/` would not be in the release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. The job uploads only the files the release is still missing and tries up to four times 10 minutes apart (GitHub's secondary rate limit stopped uploads of several hundred files part way before the zips), and a re-run of the job picks up where it stopped. Push the next `v0.x.0` tag on `main` after each merged change to the models, the README's download links or the viewer (section 2).
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<board>.zip`, which follows the latest release. Keep board names and file names stable: renaming a board breaks its link, and people look for a file in the zip by its name.
-- A release holds at most 1000 files. With one zip per board there are 21 (14 zips, `viewer.html` and 6 coupons) for 336 models in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
+- A release holds at most 1000 files. With one zip per board there are 23 (16 zips, `viewer.html` and 6 coupons) for 384 models in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -207,6 +207,8 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `N2Plus` | 13.3 mm / 22.1 MPa | 9.4 mm / 13.3 MPa | 13.1 mm / 21.9 MPa | 7.2 mm / 12.9 MPa | 8.8 mm / 12.0 MPa | 10.8 mm / 18.1 MPa |
 | `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.1 mm / 18.0 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
 | `OPi5Pro` | 1.4 mm / 4.7 MPa | 13.3 mm / 15.6 MPa | 1.8 mm / 7.8 MPa | 9.3 mm / 15.1 MPa | 12.8 mm / 15.2 MPa | 1.3 mm / 4.3 MPa |
+| `OPi5` | 3.4 mm / 14.3 MPa | 21.8 mm / 24.2 MPa | 3.0 mm / 14.3 MPa | 18.0 mm / 24.1 MPa | 19.0 mm / 21.0 MPa | 2.8 mm / 12.0 MPa |
+| `OPi5Plus` | 5.4 mm / 17.1 MPa | 10.8 mm / 15.6 MPa | 3.6 mm / 13.4 MPa | 11.2 mm / 15.1 MPa | 9.8 mm / 13.7 MPa | 4.8 mm / 14.9 MPa |
 | `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 15.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
 | `NanoKVMDesk` | 2.6 mm / 6.5 MPa | 2.8 mm / 6.8 MPa | 2.7 mm / 6.5 MPa | 2.9 mm / 6.8 MPa | 2.8 mm / 6.8 MPa | 2.6 mm / 6.5 MPa |
 
@@ -318,7 +320,7 @@ The maintainer asked for boards to be added without touching the code, so that t
 The maintainer asked for the Orange Pi 5, 5 Pro and 5 Plus. Only the 5 Pro is added.
 
 - **Sources.** Orange Pi puts each board's user manual, schematic and mechanical drawing on the board's service and support page (links in section 7). For the 5 Pro the mechanical drawing is a PDF, `OPi_5_Pro_V1_2_1-dxf.pdf` (board v1.2), with a dimensioned top view and a bottom view.
-- **Orange Pi 5 and 5 Plus not added yet.** Their user manuals give the outline but not the holes, and the mechanical data on their pages is a 3D model (STEP in a RAR archive), which has not been checked yet.
+- **Orange Pi 5 and 5 Plus not added yet.** Their user manuals give the outline but not the holes, and the mechanical data on their pages is a 3D model (STEP in a RAR archive), which had not been checked yet. They were added from those models in history 19.
 - **Outline and holes.** 89.1 x 56 mm, four 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges, 7.6 mm from the end with the microSD slot and 23.5 mm from the Ethernet end. That is the Raspberry Pi B's hole pattern, but the board is 4.1 mm longer and the holes are 7.6 mm, not 3.5 mm, from the microSD end, so it does not fit `PiB`. Turned round it would sit on `PiB`'s ports-up set of holes (23.5 and 81.5 mm, removed in history 18), but only without standoffs and 4.1 mm past the end of the plate, so it gets its own bracket.
 - **Edges.** `l` = 0 is the microSD end, where the power, MaskROM and reset buttons also are, and `s` = 0 the edge with the two HDMI ports, the audio jack and USB-C. The GPIO header edge (`s` = S) faces the back plate, and Ethernet and USB are at the `l` = L end, as on the Raspberry Pi B, so the README's table of edges applies as it is.
 - **Under the board** (bottom view): an M.2 2280 SSD slot along the whole board, 12.9 to 36.4 mm from the HDMI edge, with its connector at the microSD end; the microSD slot, 0 to 11.7 mm from its end and 36.4 to 48.8 mm from the HDMI edge, with the card sticking out past the end; the eMMC socket, two camera connectors and two small connectors at the HDMI edge. The drawing gives no heights, and no 3D model is published.
@@ -379,6 +381,28 @@ The maintainer decided two open items of section 9.
 - **The elephant's-foot chamfer of the upright `VIM1S` brackets.** With 3 mm holes, the two holes 2.5 mm from the end of the plate left 1.0 mm of wall, too little for the 0.5 mm chamfer on both sides of it, so `bed_chamfer()` fell back to 0.3 mm on the whole outline of the upright `VIM1S` brackets (the "chamfer 0.5 failed" message on every build). With 2.4 mm holes the 0.5 mm chamfer fits. It takes a little more off the bottom edge, so in the beam estimates the upright `VIM1S` brackets bend 1 to 2% more under the side push, with about 3% more stress (3.05 to 3.10 mm and 13.1 to 13.5 MPa in upright portrait). The flat and shelf ones bend slightly less.
 - `--check` passes for all 24 `PiB` models against the official 3D model of the Le Potato and all 24 `VIM1S` models against those of the VIM1S, VIM3 and VIM4. The other boards are unchanged.
 
+### History 19: Orange Pi 5 and Orange Pi 5 Plus (2026-11-17)
+
+The two boards left out in history 15 are added, from their official 3D models.
+
+- **Sources.** The "Mechanical" download on each board's service and support page (links in section 7) is a RAR archive holding the board's 3D model: `OPi5_pcb_asm-0809.stp` for the Orange Pi 5 and `OPI-5PLUS-PCBA.stp` for the Orange Pi 5 Plus. Neither the files nor shapes made from them are in this repository or the viewer (section 7).
+- **Orange Pi 5 → `OPi5`.** 100 x 61.8 mm (the product page gives 62 x 100 mm) and 1.2 mm thick, with four 2.9 mm holes 93.86 x 55.89 mm apart, 2.86 to 3.15 mm from the edges. No other board has this pattern, so it gets its own bracket.
+  - **Edges.** `l` = 0 is the microSD end: the slot is on top of the board and the card sticks out 2.3 mm past the end, and the power button next to it 1.1 mm. Ethernet and the three USB-A ports are at the `l` = L end, up to 2.6 mm out. The USB-C power input, the audio jack, HDMI and the other USB-C port are along `s` = 0, up to 2.7 mm out. The 26-pin header is along `s` = S, which faces the back plate, and nothing sticks out past that edge. So the README's table of edges applies as it is. The header is not in the official 3D model.
+  - **Under the board.** The M.2 Key M slot. In the model it holds a 2230 card, 4.9 mm below the board; the other parts under the board reach 2.8 mm at most (the screw holding the card). The slot also has a standoff hole for a 2242 card, and its box reaches as far as such a card would.
+  - **Standoffs.** 8 mm tall, leaving 3.1 mm under the card. 6 mm across: the nearest parts under the board are 4.6 mm from a hole centre. 2.2 mm pilot holes, for M2.5 self-tapping screws.
+  - **Openings.** Two rows of three windows (`windows`), 4 mm clear of the standoffs, with a 6 mm rib between the rows. No notch, as the microSD slot is on top of the board.
+  - **Cables in the model.** The official 3D model has cables plugged into both USB-C ports, the audio jack and the upper USB-A port. They were left in the check and do not touch the bracket in any orientation.
+- **Orange Pi 5 Plus → `OPi5Plus`.** 100 x 75 mm and 1.6 mm thick. It has six 3.2 mm holes, and the bracket uses the four near the corners, 87.08 x 49.21 mm apart: 9.81 mm from the `l` = 0 end, 3.11 mm from the `l` = L end, 19.63 mm from the `s` = 0 edge and 6.16 mm from the `s` = S edge. The other two (at `l` = 15.59, `s` = 22.96 and `l` = 55.59, `s` = 66.59) are not on a rectangle with them and are not used; the board's other holes of 3 mm and more hold the pegs of the Ethernet jacks and the standoffs of the M.2 slots. The outline is close to `ROCK5B`'s, but the holes are 87.08 mm apart, not 93.15 mm, so it gets its own bracket.
+  - **Edges.** `s` = 0 has two USB 2.0 ports, three HDMI ports, two Ethernet ports and a USB-C port, up to 4.1 mm out: more than the 4 mm gap to the back plate, so that edge cannot face it and `s` = S does. Along `s` = S are the microSD slot (under the board; the card sticks out 2.3 mm), the audio jack, the infrared receiver, two buttons, the two USB 3.0 ports and the other USB-C port (up to 1.7 mm out). In upright portrait and shelf landscape they are 4 mm from the frame: they cannot be used there, and the card can only be changed with the board off (README). The 40-pin header is along the `l` = 0 end, which gets the 4 mm gap, and the M.2 Key E slot with the Wi-Fi card is on top of the board at the `l` = L end.
+  - **Under the board.** The M.2 Key M slot. In the model it holds a 2280 SSD, 6.4 mm below the board, and the screw holding it reaches 6.1 mm; the other parts under the board reach 2.1 mm at most (the microSD slot).
+  - **Standoffs.** 8 mm tall, leaving 1.6 mm under the SSD. 6 mm across: the nearest parts under the board are 4.3 mm from a hole centre (a button and the microSD slot). 2.6 mm pilot holes, for M3 self-tapping screws.
+  - **Openings.** Two rows of three windows (`windows`) between the two pairs of holes, 4 mm clear of the standoffs, with a 6 mm rib between the rows.
+- **Placement checked.** On the upright portrait bracket with standoffs, the underside of each official model's board sits on the tops of the standoffs, and the four holes used are on the standoff axes, within 0.01 mm.
+- **Parts.** Boxes round the parts in the official 3D models, rounded to 0.01 mm: the PCB, the connectors and buttons at the edges, the microSD card or slot and the M.2 slots with their cards (and on `OPi5Plus` the 40-pin header).
+- `--check`: no overlap with the frame or with the official 3D model, no unsupported area and held on the frame in all 24 models of each board; the 8 DIN models of each fit both steel and aluminium rails and their leaf springs bend freely. The same with the parts boxes in place of the 3D models.
+- **Beam estimates** (table in history 8). `OPi5`: a 10 N push at the far edge gives at most 21.8 mm and 24.2 MPa (upright landscape), and 24.1 MPa in flat landscape, 69% of the strength of PETG across the layers. `OPi5Plus`: at most 11.2 mm (flat landscape) and 17.1 MPa (upright portrait). Both stay below the strength of PETG in every orientation, and the DIN rail versions are within 0.1 mm of these.
+- 384 models, 23 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -433,6 +457,8 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | LattePanda 3 Delta (`LP3Delta`) | Official [3D model V1.1](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%203%20Delta/LattePanda%203%20Delta%203D%20Model%20V1.1%20step%2020250221.zip) (STEP) and [KiCad footprint](https://github.com/LattePandaTeam/LattePanda-3D-Models/blob/21b34cd724e307b9999a78cb67b6f41934f9b5f4/LattePanda%20KiCAD%20Library/footprints/Module_LattePanda.pretty/LattePanda_3_Delta.kicad_mod) in the [LattePanda 3D models repository](https://github.com/LattePandaTeam/LattePanda-3D-Models) (CC BY 3.0); ports from the [specification](https://docs.lattepanda.com/content/3rd_delta_edition/specification/) in the LattePanda documentation. 125 x 78 mm, 3.2 mm holes 118 x 71 mm 3.5 mm from the edges (history 12) | High. Interference checked against the official 3D model |
 | LattePanda Mu Lite Carrier (`MuLite`) | Official KiCad designs of the Lite Carrier [V2](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29) and [V1](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu), the [3D model V2.0.1](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/Carrier-Boards/DFR1142_Lite_Carrier_for_LattePanda_Mu%28V2.0.1%29.zip) (STEP) and the module's [dimension drawing](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/LattePanda_Mu_Dimension_Drawing.pdf), in the [LattePanda Mu repository](https://github.com/LattePandaTeam/LattePanda-Mu) (MIT); ports from the [Lite Carrier page](https://docs.lattepanda.com/content/mu_edition/lite_carrier/) in the LattePanda documentation. 146 x 102 mm, 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm (history 12) | High. Interference checked against the official 3D model of the carrier (the module, cooler and M.2 cards on top are not in it) |
 | Orange Pi 5 Pro (`OPi5Pro`) | Official [mechanical drawing](https://drive.google.com/file/d/10j5W9Dki9KfirN4JE5pp6X2RujavGOyS/view) `OPi_5_Pro_V1_2_1-dxf.pdf` (PDF, top and bottom views, board v1.2), from the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-Pro.html). 89.1 x 56 mm, 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges and 7.6 mm from the microSD end; microSD and an M.2 2280 slot under the board (history 15) | High for the outline and holes. No official 3D model and no heights on the drawing: checked against the outline only, and against the connectors past the edges as tall boxes |
+| Orange Pi 5 (`OPi5`) | Official 3D model `OPi5_pcb_asm-0809.stp` (STEP in `OPi5_pcb_asm-0809.rar`, the "Mechanical" download on the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-pi-5.html)). 100 x 61.8 x 1.2 mm, 2.9 mm holes 93.86 x 55.89 mm apart; microSD on top of the board at one short end, an M.2 slot under the board (history 19) | High. Interference checked against the official 3D model, which has no 26-pin header |
+| Orange Pi 5 Plus (`OPi5Plus`) | Official 3D model `OPI-5PLUS-PCBA.stp` (STEP in `OPI-5PLUS-PCBA.rar`, the "Mechanical" download on the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus.html)). 100 x 75 x 1.6 mm, the four 3.2 mm holes near the corners 87.08 x 49.21 mm apart; microSD under the board at a long edge, an M.2 2280 slot under the board (history 19) | High. Interference checked against the official 3D model |
 | NVIDIA Jetson Orin Nano Developer Kit / Super (`OrinNano`) | Official [carrier board specification SP-11324-001 v1.3](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_specification_sp.pdf) (PDF, figure 4-1), [3D model](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_3d_step_model.zip/) `P3766-P3768SKU4-P3767ENVELOPE.stp` (STEP, the developer kit on its base) and [carrier board reference design files A04](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_reference_design_files_a04_20230320.zip/) (outline and drill layers), from the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads); Super from the [user guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/index.html). 100 x 79 mm, 2.75 mm holes 86 x 58 mm apart, 4 mm from the `l` = 0 end and 4 mm from the `s` = S edge (history 16) | High. Interference checked against the official 3D model, with the base, its screws and the antennas left out. No SSD in the 2280 slot in the model |
 | Sipeed NanoKVM-Desk (NanoKVM Pro) (`NanoKVMDesk`) | Official 3D models of the Desk unit from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/KVM_Pro/1_3D): [`3D_KVM_PRO_DESK_plastic_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_plastic_20260508.step) (current units, plastic front shell) and [`3D_KVM_PRO_DESK_print_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_print_20260508.step) (earlier units, 3D-printed front shell); which bottom screws may be used for mounting, and their sizes, from the [NanoKVM-Desk quick start guide](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/desk_start.html) (rack mounting). Case 67.1 x 65.4 x 27.0 mm, rear screw holes (M2) 13.57 mm from the back and 22.55 and 42.38 mm from the side away from the thumbwheel (history 17) | High. Interference checked against both official 3D models. The thickness of the rubber feet is not published |
 | Sipeed NanoKVM Lite, NanoKVM Full (not added) | Lite: the official [3D model](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_NanoKVM_Lite.zip) and the LicheeRV Nano's dimension drawing (`LICHEE/LicheeRV_Nano` on the download site). Full: the official [3D model of its boards](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_RV_Nano_KVM_V1.rar), with no case. Both from the [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file), linked from the [NanoKVM wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html) (history 17) | The Lite has no mounting holes; no 3D model or drawing of the Full's case is published |
@@ -453,8 +479,8 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 - **Since 2026-11-17 the key is 23.6 mm wide and fits both** (history 4): 0.2 mm to spare on each side on aluminium, 0.7 mm on steel. `--check` measures every DIN model against both rails.
 
 - Take dimensions for new boards from the manufacturer's official 3D model or drawing. Do not place holes from memory or guesswork: for the VIM1S, the first guess ("rectangular pattern") was wrong.
-- Official 3D models and drawings are not included (`*.stp`, and `*.step` and `*.stl` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`). The file name tells which bracket it belongs to (`official_models` in the board's definition).
-- Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15; Libre Computer as of 2026-11-16). BeagleBoard.org publishes no 3D model, and its design files have no license file (as of 2026-11-16), so only dimensions read from them are used. The LattePanda 3D models are under CC BY 3.0 and the LattePanda Mu repository under the MIT license (as of 2026-11-16), which would allow redistribution with attribution; they are kept out all the same, so every board is handled the same way.
+- Official 3D models and drawings are not included (`*.stp`, and `*.step` and `*.stl` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`, and the Orange Pi 5 and 5 Plus RAR archives). The file name tells which bracket it belongs to (`official_models` in the board's definition).
+- Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15; Libre Computer as of 2026-11-16; Orange Pi as of 2026-11-17). BeagleBoard.org publishes no 3D model, and its design files have no license file (as of 2026-11-16), so only dimensions read from them are used. The LattePanda 3D models are under CC BY 3.0 and the LattePanda Mu repository under the MIT license (as of 2026-11-16), which would allow redistribution with attribution; they are kept out all the same, so every board is handled the same way.
 
 ## 8. Test print log
 
@@ -482,7 +508,8 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `LP3Delta` and try it with a LattePanda 3 Delta: M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs, and how far the long overhangs bend (history 12)
 - [ ] Print `MuLite` and try it with a LattePanda Mu on the Lite Carrier: switching it on with the Auto_Power jumper where the buttons face the frame, a card in the PCIe slot (not checked), and how far the long overhangs bend (history 12)
 - [ ] Print `OPi5Pro` and try it with an Orange Pi 5 Pro: an M.2 2280 SSD under the board (how far it reaches is not published; the standoffs are 8 mm), the parts under the board (no heights or 3D model are published), and taking the microSD card in and out while mounted (history 15)
-- [ ] Orange Pi 5 and Orange Pi 5 Plus: their holes are only in the official 3D models (STEP in RAR archives on the service and support pages). Check them and add the boards (history 15)
+- [ ] Print `OPi5` and try it with an Orange Pi 5: M2.5 screws in the 2.2 mm pilot holes and in the 3 mm holes of the version without standoffs, and a 2242 card in the M.2 slot (the official model has a 2230 card) (history 19)
+- [ ] Print `OPi5Plus` and try it with an Orange Pi 5 Plus: M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs (a tight fit), and the M.2 2280 SSD under the board, 1.6 mm above the plate (history 19)
 - [ ] Print `OrinNano` and try it with a Jetson Orin Nano Developer Kit off its base: M2.5 screws in the 2.2 mm pilot holes and in the 3 mm holes of the version without standoffs, an M.2 2280 SSD under the board (not in the official model), and where to put the Wi-Fi antennas (history 16)
 - [ ] Print `NanoKVMDesk` and try it with a NanoKVM-Desk, the current case and, if one is at hand, the earlier one: M2 x 12 screws through the 2.4 mm holes into the case's rear holes, whether the case sits flat on the 3 mm rests with the front rubber feet on (their thickness is not published), and 3 mm M2 standoffs with the version without standoffs (history 17)
 - [ ] Sipeed NanoKVM Lite: no mounting holes, so it would need a cradle round the LicheeRV Nano and the HDMI board stacked on it, a new kind of board plate. Needs the maintainer's decision (history 17)
@@ -491,6 +518,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
 - [x] Reduce the `PiB` board holes from two sets (8 holes) to one set? → one set, the maintainer's decision (history 18). Mounting the bracket upside down puts the ports the other way
 - [x] Make the `VIM1S` screw holes smaller for M2? → 2.4 mm, the maintainer's decision (history 18)
+- [x] Orange Pi 5 and Orange Pi 5 Plus: their holes are only in the official 3D models (STEP in RAR archives on the service and support pages). Check them and add the boards → added as `OPi5` and `OPi5Plus` from those models; `--check` passes against them (history 19). Not tried on a print
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
 - [x] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? → the key is 23.6 mm wide and fits both; the vertical play is set by the roots of the leaf springs, so it does not grow on steel rails (section 4 history 4, section 7)
@@ -532,6 +560,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 22.543 | 23.375 | 23.186 | 24.018 | 22.636 | 23.467 |
 | M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.603 | 30.434 |
 | OPi5Pro | 17.013 | 17.564 | 17.657 | 18.207 | 17.106 | 17.657 |
+| OPi5 | 16.461 | 17.292 | 17.104 | 17.935 | 16.554 | 17.385 |
+| OPi5Plus | 21.962 | 22.723 | 22.605 | 23.366 | 22.055 | 22.816 |
 | OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.229 | 21.780 |
 | NanoKVMDesk | 16.555 | 16.844 | 17.198 | 17.487 | 16.648 | 16.937 |
 
@@ -551,6 +581,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 26.836 | 27.668 | 27.479 | 28.311 | 26.929 | 27.760 |
 | M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.487 | 33.318 |
 | OPi5Pro | 17.576 | 18.126 | 18.178 | 18.729 | 17.658 | 18.209 |
+| OPi5 | 17.186 | 18.021 | 17.827 | 18.662 | 17.278 | 18.113 |
+| OPi5Plus | 20.861 | 21.622 | 21.504 | 22.265 | 20.954 | 21.715 |
 | OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.304 | 20.855 |
 | NanoKVMDesk | 16.480 | 16.769 | 17.123 | 17.412 | 16.573 | 16.862 |
 
@@ -570,6 +602,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 23.582 | 23.745 | 23.297 |
 | M1 | 31.350 | 31.513 | 31.065 |
 | OPi5Pro | 17.163 | 17.326 | 17.253 |
+| OPi5 | 17.958 | 18.121 | 17.673 |
+| OPi5Plus | 23.457 | 23.620 | 23.172 |
 | OrinNano | 22.639 | 22.802 | 22.354 |
 | NanoKVMDesk | 16.204 | 16.367 | 15.919 |
 
@@ -589,6 +623,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 24.556 | 24.719 | 24.271 |
 | M1 | 30.802 | 30.965 | 30.516 |
 | OPi5Pro | 15.776 | 15.939 | 15.491 |
+| OPi5 | 15.148 | 15.311 | 14.863 |
+| OPi5Plus | 20.940 | 21.103 | 20.655 |
 | OrinNano | 20.772 | 20.936 | 20.487 |
 | NanoKVMDesk | 16.116 | 16.279 | 15.831 |
 
@@ -608,6 +644,8 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 27.919 | 29.039 | 28.711 |
 | M1 | 34.146 | 35.267 | 34.938 |
 | OPi5Pro | 17.997 | 19.117 | 18.789 |
+| OPi5 | 18.923 | 20.043 | 19.715 |
+| OPi5Plus | 22.515 | 23.636 | 23.307 |
 | OrinNano | 21.849 | 22.970 | 22.641 |
 | NanoKVMDesk | 16.481 | 17.602 | 17.273 |
 
@@ -627,5 +665,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | N2Plus | 24.221 | 25.342 | 25.013 |
 | M1 | 31.681 | 32.801 | 32.472 |
 | OPi5Pro | 17.322 | 18.442 | 18.114 |
+| OPi5 | 16.993 | 18.114 | 17.785 |
+| OPi5Plus | 22.149 | 23.270 | 22.941 |
 | OrinNano | 21.790 | 22.910 | 22.581 |
 | NanoKVMDesk | 16.540 | 17.660 | 17.332 |
