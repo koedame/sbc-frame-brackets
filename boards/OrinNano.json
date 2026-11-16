@@ -1,0 +1,35 @@
+{
+  "title": "NVIDIA Jetson Orin Nano Developer Kit / Super",
+  "notes": [
+    "The carrier board is 100 x 79 mm and 1.57 mm thick, with six 2.75 mm unplated holes (official Jetson Orin Nano Developer Kit Carrier Board Specification SP-11324-001 v1.3, figure 4-1, and the outline and drill layers of the official P3768 A04 reference design files). The four used here are 86 x 58 mm apart, 4 mm from the l = 0 end, 17 mm from the s = 0 edge and 4 mm from the s = S edge; the developer kit's base is screwed to these four. The other two are 6 mm further towards l = L and are not used.",
+    "The Jetson Orin Nano Super Developer Kit is the same hardware: the official user guide says the existing developer kit gets the Super performance with a software upgrade.",
+    "s = 0 is the front edge with the power jack, DisplayPort, four USB-A, Ethernet and USB-C, which stick out 1.9 mm past it. s = S, where the microSD card goes into the slot under the module, faces the back plate. The 40-pin header runs along the l = L end and the two camera connectors are at the l = 0 end.",
+    "Under the board are the M.2 Key E slot with the Wi-Fi card and two M.2 Key M slots, 2230 and 2280. In the official 3D model (P3766-P3768SKU4-P3767ENVELOPE.stp) the deepest are the Wi-Fi card and the 2230 SSD, 4.8 mm below the board; the specification gives 4.30 mm for the carrier board's own parts. The 8 mm standoffs leave 3.2 mm below them. The 2280 slot is empty in the model; its box puts an SSD at the height of the 2230 SSD, reaching the slot's standoff.",
+    "Standoffs 5 mm across: the nearest parts under the board are 3.4 mm from a hole centre (the pins of the fan connector next to the hole at l = 90, s = 75).",
+    "Parts: boxes round the parts in the official 3D model, rounded to 0.01 mm: the PCB, the module with its heatsink and fan, the connectors at the front edge, and under the board the M.2 slots with the Wi-Fi card and the SSDs.",
+    "The official 3D model is the developer kit on its base. exclude leaves out the base (375-0137-000), its four screws (155-0900-000) and the two Wi-Fi antennas, which the model puts in the base past the s = S edge, on cables from the Wi-Fi card."
+  ],
+  "size": [100.0, 79.0],
+  "frame_edge": "s=S",
+  "microsd_edge": "s=S",
+  "holes": [[4.0, 17.0], [90.0, 17.0], [4.0, 75.0], [90.0, 75.0]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 8.0, "d": 5.0, "pilot": 2.2, "screw": "M2.5"},
+  "windows": {"rows": [[24.0, 43.0], [49.0, 68.0]], "per_row": 3},
+  "parts": [
+    {"name": "PCB", "box": [0, 100.0, 0, 79.0, 0, 1.57]},
+    {"name": "Module, heatsink and fan", "box": [13.2, 91.14, 33.5, 78.51, 1.67, 29.87]},
+    {"name": "Power jack", "box": [1.35, 11.58, -1.65, 13.13, -1.93, 12.57]},
+    {"name": "DisplayPort", "box": [13.68, 31.84, -1.86, 13.18, -0.36, 8.46]},
+    {"name": "USB-A x4", "box": [34.11, 68.09, -1.84, 17.06, -0.81, 18.5]},
+    {"name": "Ethernet", "box": [68.05, 85.85, -1.88, 19.98, -2.23, 15.22]},
+    {"name": "USB-C", "box": [86.93, 97.02, -1.64, 9.23, -0.25, 5.08]},
+    {"name": "M.2 Key E slot and Wi-Fi card (under)", "box": [43.12, 77.42, 44.67, 66.7, -4.81, 0]},
+    {"name": "M.2 Key M 2230 slot and SSD (under)", "box": [1.89, 39.4, 44.69, 66.71, -4.76, 0]},
+    {"name": "M.2 Key M 2280 slot and SSD (under)", "box": [1.89, 89.4, 21.49, 43.51, -4.76, 0]}
+  ],
+  "official_models": {
+    "P3766-P3768SKU4-P3767ENVELOPE.stp": {"rotate": 0, "centre": [46.0, 22.5], "underside": 0.0,
+                                          "exclude": ["375-0137-000", "155-0900-000", "P3526_WIFI_ANT_MODULE_ASM", "P3526_WIFI_ANT_LEFT_ASM"]}
+  }
+}
