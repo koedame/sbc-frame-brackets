@@ -42,10 +42,10 @@ Last updated: 2026-11-17
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano` or `NanoKVMDesk`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano`, `NanoKVMDesk` or `NanoKVMLite`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only. A board held in a cradle also has `<board>_cradle`, the same for every bracket of that board (history 20).
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons, put each board's 3MF, STL and STEP files into `<board>.zip` (in a folder named after the board), and attach the zips, `viewer.html` and the coupons to that release. It stops if a file in `models/` would not be in the release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. The job uploads only the files the release is still missing and tries up to four times 10 minutes apart (GitHub's secondary rate limit stopped uploads of several hundred files part way before the zips), and a re-run of the job picks up where it stopped. Push the next `v0.x.0` tag on `main` after each merged change to the models, the README's download links or the viewer (section 2).
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<board>.zip`, which follows the latest release. Keep board names and file names stable: renaming a board breaks its link, and people look for a file in the zip by its name.
-- A release holds at most 1000 files. With one zip per board there are 23 (16 zips, `viewer.html` and 6 coupons) for 384 models in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
+- A release holds at most 1000 files. With one zip per board there are 24 (17 zips, `viewer.html` and 6 coupons) for 408 models and one cradle in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -211,6 +211,7 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `OPi5Plus` | 5.4 mm / 17.1 MPa | 10.8 mm / 15.6 MPa | 3.6 mm / 13.4 MPa | 11.2 mm / 15.1 MPa | 9.8 mm / 13.7 MPa | 4.8 mm / 14.9 MPa |
 | `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 15.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
 | `NanoKVMDesk` | 2.6 mm / 6.5 MPa | 2.8 mm / 6.8 MPa | 2.7 mm / 6.5 MPa | 2.9 mm / 6.8 MPa | 2.8 mm / 6.8 MPa | 2.6 mm / 6.5 MPa |
+| `NanoKVMLite` | 0.4 mm / 7.5 MPa | 9.0 mm / 32.0 MPa | 0.3 mm / 8.5 MPa | 6.3 mm / 32.1 MPa | 7.7 mm / 21.7 MPa | 0.3 mm / 7.0 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
@@ -354,7 +355,7 @@ The maintainer asked for the Jetson Orin Nano Developer Kit.
 The maintainer asked for the Sipeed NanoKVM Lite, the NanoKVM Full and the NanoKVM Pro (Desk and ATX); the NanoKVM-PCIe and NanoKVM-USB were left out from the start (README "Not covered"). Only the NanoKVM-Desk is added.
 
 - **Sources.** Sipeed's wiki (the NanoKVM and NanoKVM Pro pages, the NanoKVM-Desk quick start guide and the NanoKVM Pro FAQ) and Sipeed's download site, which the wiki links to: `KVM/nanoKVM/HDK/04_3D_file` (3D models of the Lite and of the boards inside the Full), `KVM/KVM_Pro/1_3D` (3D models of the Desk unit and of Sipeed's rack adapter for it) and `LICHEE/LicheeRV_Nano` (the LicheeRV Nano's dimension drawing). Links in section 7. Neither the files nor shapes made from them are in this repository or the viewer.
-- **NanoKVM Lite not added.** It is a LicheeRV Nano (22.86 x 35.56 mm) with the HDMI board stacked on it and no case. Neither board has mounting holes: the only two round holes in the LicheeRV Nano that are big enough for a screw (3.2 mm, 12.52 mm apart) hold the pegs of its Ethernet jack, in the official 3D model of the Lite and the LicheeRV Nano's drawing. Holding it would need a cradle round the board stack, a new kind of board plate, so that is left to the maintainer (section 9).
+- **NanoKVM Lite not added.** It is a LicheeRV Nano (22.86 x 35.56 mm) with the HDMI board stacked on it and no case. Neither board has mounting holes: the only two round holes in the LicheeRV Nano that are big enough for a screw (3.2 mm, 12.52 mm apart) hold the pegs of its Ethernet jack, in the official 3D model of the Lite and the LicheeRV Nano's drawing. Holding it would need a cradle round the board stack, a new kind of board plate, so that was left to the maintainer, who later asked for the cradle (history 20).
 - **NanoKVM Full not added.** Sipeed publishes 3D models of the boards inside it, but no 3D model or drawing of its case, only the case's size. The case is what a bracket would hold, and its screw holes and ports cannot be checked from the size alone (section 9).
 - **NanoKVM-ATX not added.** It goes inside the computer it controls, on a half-height or full-height expansion slot bracket, like the NanoKVM-PCIe, so there is nothing to put on a frame.
 - **Desk: held by its case, with the case's own screw holes.** The Desk is a closed case, so the case is what the bracket holds. Sipeed's official 3D models of the Desk have the case's screw holes, and Sipeed's quick start guide (rack mounting) says which may be used: the four screws under the rubber feet on the bottom, of which the two rear ones can be used for mounting and the two front ones cannot, because they are shorter and close to the board inside. The rear ones are M2 x 6 (M2 x 7 on units made after October 2025), and Sipeed's rack adapter replaces them with M2 x 7 through its 1.5 mm floor. So the bracket uses the two rear holes rather than a form that hugs the case: a screw holds the case in every orientation, including upside down, which a hugging form would have to do with clips, and the case's outline does not have to be matched to a tolerance.
@@ -403,6 +404,21 @@ The two boards left out in history 15 are added, from their official 3D models.
 - **Beam estimates** (table in history 8). `OPi5`: a 10 N push at the far edge gives at most 21.8 mm and 24.2 MPa (upright landscape), and 24.1 MPa in flat landscape, 69% of the strength of PETG across the layers. `OPi5Plus`: at most 11.2 mm (flat landscape) and 17.1 MPa (upright portrait). Both stay below the strength of PETG in every orientation, and the DIN rail versions are within 0.1 mm of these.
 - 384 models, 23 release files.
 
+### History 20: Sipeed NanoKVM Lite, in a printed cradle (2026-11-17)
+
+The maintainer decided the open item of history 17: the NanoKVM Lite is added, with a new part that holds the LicheeRV Nano and the HDMI board stacked on it by their edges, in all six orientations.
+
+- **Sources.** Sipeed's official 3D model of the Lite, `NanoKVM Lite.step` in `3D_NanoKVM_Lite.zip`, and the official dimension drawing of the LicheeRV Nano, `LicheeRV_Nano_70405_Dimension` (section 7). The board is 35.6 x 22.9 mm in the drawing and 35.54 x 22.84 x 1.59 mm in the 3D model. Neither the files nor shapes made from them are in this repository or the viewer.
+- **A cradle as a separate part.** The cradle (`NanoKVMLite_cradle`, 51.1 x 25.6 mm) takes the place of a board: it has four 3 mm holes in its end plates and is screwed onto the bracket like any other board, so the brackets are made the usual way (`size`, `holes`, `standoffs` and `openings` of the definition are the cradle's) and the grip, the plates and their checks did not change. It prints on its underside without supports, one file for all six orientations and every mount. Holding the board in the board plate itself would have needed a different plate for each orientation, with walls and a lip sticking out sideways from the standing plates of flat and shelf (history 8). The bracket itself is still one piece (section 2); the cradle is to the Lite what separate standoffs are to the other boards. Defined by the `cradle` field (`boards/README.md`), made by `cradle()` in `sbc_brackets.py`.
+- **How it holds the board.** Two side walls 1.2 mm thick along the long edges, with 0.15 mm (`CRADLE_FIT`) clear of the board all round. Ledges 0.8 mm wide and 5 mm long under the four corners of the board: nothing is under its long edges there (the header pins under the board end 0.95 mm in from the edge). End stops 1.6 mm thick beyond both short ends, reaching 3.45 mm in from each long edge, clear of the USB-C port and the Ethernet jack, and ending 0.1 mm below the top of the board, under the female headers and the HDMI board, which stand out past the end. A lip 6 mm long at the middle of each wall, 45 degrees above and below, reaches 0.6 mm over the board's edge onto the plastic of the 10-pin header along that edge, 2.57 mm above the board. The HDMI board ends 12.7 mm from the USB-C end of the board, so it is not above the lips. The underside of the board is 4 mm above the cradle's, and the cradle is open under the board, for the heatsink Sipeed supplies (its size is not published; 10 mm from the board's underside to the plate with the 6 mm standoffs, 13 mm at the plate's opening).
+- **Snap force.** The walls bend outwards between the end stops to let the board in. Taken as a beam 1.2 x 9.6 mm over the 35.9 mm between the end stops, pushing the lip 0.6 mm out takes 2.4 N per wall if the ends were free to turn and 9.5 N if they were fixed, and strains the wall 0.34 to 0.67%, well under the 1.8% at which PETG reaches its strength (51 MPa / 2780 MPa). Not tried on a print (section 9).
+- **Checked against the official 3D model.** The cradle has no overlap with the board in the 3D model, and moving the board 0.05 mm down, 0.12 mm up, 0.2 mm across or 0.25 mm along makes it overlap the ledges, the lips, the walls or the end stops, so the board is located in every direction. The cradle is symmetric, so the board goes in either way round.
+- **Edges.** The USB-C port, the HDMI port and the microSD slot are at one short end. That end faces the frame in upright landscape and shelf portrait, 17 mm (`SD_GAP`) plus the cradle's 7.75 mm from the back plate to the end of the board: right-angle plugs fit there, straight ones do not (README). The microSD card goes in under the board, so it can only be changed with the board out of the cradle. In upright portrait and shelf landscape a long edge faces the frame, 4 mm plus the cradle's 1.35 mm away.
+- **Standoffs.** 6 mm tall under the cradle's end plates, 9.5 mm either side of the centre line, so that the screw heads are beside a USB-C plug's overmould rather than under it. M2.5 x 8 self-tapping screws go through the 2 mm end plates into the integrated standoffs.
+- **`--check` with a cradle.** `build_all.py` builds the cradle once, checks it against the board's official 3D model (or the simplified board), and checks every bracket against the board and the cradle placed on it. No overlap and no unsupported area in the cradle and all 24 models, and the DIN leaf springs bend freely in all 8 DIN models. `viewer.html` shows the cradle on each Lite bracket.
+- **Beam estimates** (table in history 8). The plate is as narrow as the cradle (25.6 mm), so the long overhangs bend like those of `PiZero`: a 10 N push at the far edge gives 9.0 mm and 32.0 MPa in upright landscape and 6.3 mm and 32.1 MPa in flat landscape, 92% of the 35 MPa across the layers. The other orientations stay within 0.4 mm and 8.6 MPa. The cradle's stiffness is ignored, as the board's is.
+- 408 models and one cradle, 24 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -421,11 +437,12 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | Back plate to the rear edge of the board | 4 mm | `BOARD_Y0` |
 | Back plate to the microSD end of the board, when that end faces the frame (upright landscape and shelf portrait) | 17 mm | `SD_GAP` |
 | Pocket under each opening of a standing board plate (flat and shelf) | 1.0 mm deep | `POCKET` |
+| Cradle: clearance round the board / end stop thickness / end plate thickness / ledge length / thinnest side wall | 0.15 mm / 1.6 mm / 2.0 mm / 5.0 mm / 1.0 mm | `CRADLE_FIT`, `CRADLE_STOP_T`, `CRADLE_PLATE`, `CRADLE_LEDGE`, `CRADLE_WALL_MIN` |
 
 ## 6. Checks and caveats
 
 - **Printability (supports needed or not)**: use `checks_print.py`. It slices the part layer by layer and checks that each layer stays within 45 degrees of the outline of the layer below. **Do not rely on face angles alone**: that misses shapes that start in mid-air (history 2).
-- **Interference**: measure the volume of the intersection between the bracket and the frame, and between the bracket and the board. Use the board's official 3D model when there is one. DIN models are measured against both a steel rail (1 mm sheet, 7.5 deep) and an aluminium rail (1.5 mm side walls, 7.3 deep; `mount_frames()`), and must fit both.
+- **Interference**: measure the volume of the intersection between the bracket and the frame, and between the bracket and the board. Use the board's official 3D model when there is one. DIN models are measured against both a steel rail (1 mm sheet, 7.5 deep) and an aluminium rail (1.5 mm side walls, 7.3 deep; `mount_frames()`), and must fit both. A board in a cradle: the cradle against the board, and the bracket against the board and the cradle (history 20).
 - **Retention**: `--check` moves the bracket 0.3 mm forward, up and down and confirms it then overlaps the frame (i.e. it is hooked on), on both rails for DIN models. A model that does not is reported as `not held` (until 2026-11-17 this was done by hand).
 - **Upside down**: confirm zero interference in the flipped position too.
 - **DIN leaf spring travel**: `--check` moves each leaf spring outwards by as much as pushing on needs at its top end and reports the overlap with the rest of the bracket. It must be 0; otherwise the spring is stopped before the barb clears the lip (history 4).
@@ -461,7 +478,8 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | Orange Pi 5 Plus (`OPi5Plus`) | Official 3D model `OPI-5PLUS-PCBA.stp` (STEP in `OPI-5PLUS-PCBA.rar`, the "Mechanical" download on the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus.html)). 100 x 75 x 1.6 mm, the four 3.2 mm holes near the corners 87.08 x 49.21 mm apart; microSD under the board at a long edge, an M.2 2280 slot under the board (history 19) | High. Interference checked against the official 3D model |
 | NVIDIA Jetson Orin Nano Developer Kit / Super (`OrinNano`) | Official [carrier board specification SP-11324-001 v1.3](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_specification_sp.pdf) (PDF, figure 4-1), [3D model](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_3d_step_model.zip/) `P3766-P3768SKU4-P3767ENVELOPE.stp` (STEP, the developer kit on its base) and [carrier board reference design files A04](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_reference_design_files_a04_20230320.zip/) (outline and drill layers), from the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads); Super from the [user guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/index.html). 100 x 79 mm, 2.75 mm holes 86 x 58 mm apart, 4 mm from the `l` = 0 end and 4 mm from the `s` = S edge (history 16) | High. Interference checked against the official 3D model, with the base, its screws and the antennas left out. No SSD in the 2280 slot in the model |
 | Sipeed NanoKVM-Desk (NanoKVM Pro) (`NanoKVMDesk`) | Official 3D models of the Desk unit from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/KVM_Pro/1_3D): [`3D_KVM_PRO_DESK_plastic_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_plastic_20260508.step) (current units, plastic front shell) and [`3D_KVM_PRO_DESK_print_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_print_20260508.step) (earlier units, 3D-printed front shell); which bottom screws may be used for mounting, and their sizes, from the [NanoKVM-Desk quick start guide](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/desk_start.html) (rack mounting). Case 67.1 x 65.4 x 27.0 mm, rear screw holes (M2) 13.57 mm from the back and 22.55 and 42.38 mm from the side away from the thumbwheel (history 17) | High. Interference checked against both official 3D models. The thickness of the rubber feet is not published |
-| Sipeed NanoKVM Lite, NanoKVM Full (not added) | Lite: the official [3D model](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_NanoKVM_Lite.zip) and the LicheeRV Nano's dimension drawing (`LICHEE/LicheeRV_Nano` on the download site). Full: the official [3D model of its boards](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_RV_Nano_KVM_V1.rar), with no case. Both from the [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file), linked from the [NanoKVM wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html) (history 17) | The Lite has no mounting holes; no 3D model or drawing of the Full's case is published |
+| Sipeed NanoKVM Lite (`NanoKVMLite`) | The official [3D model of the Lite](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_NanoKVM_Lite.zip) (`NanoKVM Lite.step`) from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file), linked from the [NanoKVM wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html), and the LicheeRV Nano's dimension drawing `LicheeRV_Nano_70405_Dimension` (`LICHEE/LicheeRV_Nano` on the download site). Board 35.6 x 22.9 mm, held in a printed cradle (history 20) | High. Interference checked against the official 3D model of the Lite. The heatsink is not in it and its size is not published |
+| Sipeed NanoKVM Full (not added) | The official [3D model of its boards](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_RV_Nano_KVM_V1.rar), with no case, from the same [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file) (history 17) | No 3D model or drawing of the case is published |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below), as are the 1.5 mm side walls and 7.3 mm depth of the aluminium rails | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
 ### Checking the DIN rail dimensions (2026-11-14)
@@ -512,7 +530,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `OPi5Plus` and try it with an Orange Pi 5 Plus: M3 screws in the 2.6 mm pilot holes and in the 3 mm holes of the version without standoffs (a tight fit), and the M.2 2280 SSD under the board, 1.6 mm above the plate (history 19)
 - [ ] Print `OrinNano` and try it with a Jetson Orin Nano Developer Kit off its base: M2.5 screws in the 2.2 mm pilot holes and in the 3 mm holes of the version without standoffs, an M.2 2280 SSD under the board (not in the official model), and where to put the Wi-Fi antennas (history 16)
 - [ ] Print `NanoKVMDesk` and try it with a NanoKVM-Desk, the current case and, if one is at hand, the earlier one: M2 x 12 screws through the 2.4 mm holes into the case's rear holes, whether the case sits flat on the 3 mm rests with the front rubber feet on (their thickness is not published), and 3 mm M2 standoffs with the version without standoffs (history 17)
-- [ ] Sipeed NanoKVM Lite: no mounting holes, so it would need a cradle round the LicheeRV Nano and the HDMI board stacked on it, a new kind of board plate. Needs the maintainer's decision (history 17)
+- [ ] Print `NanoKVMLite` and its cradle and try them with a NanoKVM Lite: how hard the board snaps in and comes out, whether the lips hold it upside down and in the flat orientations, whether Sipeed's heatsink fits under the board, and right-angle plugs at the end that faces the frame in upright landscape and shelf portrait (history 20)
 - [ ] Sipeed NanoKVM Full: add it if Sipeed publishes a 3D model or drawing of its case (history 17)
 - [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
@@ -527,6 +545,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
 - [x] A release holds at most 1000 files (943 for 13 boards, 72 per board), and the next board would pass it → one zip per board, the maintainer's choice (history 17): 21 files for 14 boards
+- [x] Sipeed NanoKVM Lite: no mounting holes → a printed cradle that holds the LicheeRV Nano and the HDMI board by their edges, the maintainer's choice (history 20)
 - [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
@@ -542,7 +561,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 
 ### Reference volumes (as of 2026-11-17, cm3)
 
-Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version.
+Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version. The NanoKVM Lite's cradle, `NanoKVMLite_cradle`, is 1.664.
 
 **Upright portrait (no suffix)**
 
@@ -564,6 +583,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OPi5Plus | 21.962 | 22.723 | 22.605 | 23.366 | 22.055 | 22.816 |
 | OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.229 | 21.780 |
 | NanoKVMDesk | 16.555 | 16.844 | 17.198 | 17.487 | 16.648 | 16.937 |
+| NanoKVMLite | 6.201 | 6.834 | 6.731 | 7.364 | 6.237 | 6.870 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -585,6 +605,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OPi5Plus | 20.861 | 21.622 | 21.504 | 22.265 | 20.954 | 21.715 |
 | OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.304 | 20.855 |
 | NanoKVMDesk | 16.480 | 16.769 | 17.123 | 17.412 | 16.573 | 16.862 |
+| NanoKVMLite | 5.919 | 6.552 | 7.040 | 7.672 | 6.448 | 7.080 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -606,6 +627,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OPi5Plus | 23.457 | 23.620 | 23.172 |
 | OrinNano | 22.639 | 22.802 | 22.354 |
 | NanoKVMDesk | 16.204 | 16.367 | 15.919 |
+| NanoKVMLite | 6.083 | 6.246 | 5.797 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -627,6 +649,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OPi5Plus | 20.940 | 21.103 | 20.655 |
 | OrinNano | 20.772 | 20.936 | 20.487 |
 | NanoKVMDesk | 16.116 | 16.279 | 15.831 |
+| NanoKVMLite | 4.568 | 5.689 | 5.097 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -648,6 +671,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OPi5Plus | 22.515 | 23.636 | 23.307 |
 | OrinNano | 21.849 | 22.970 | 22.641 |
 | NanoKVMDesk | 16.481 | 17.602 | 17.273 |
+| NanoKVMLite | 6.616 | 7.736 | 7.407 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -669,3 +693,4 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OPi5Plus | 22.149 | 23.270 | 22.941 |
 | OrinNano | 21.790 | 22.910 | 22.581 |
 | NanoKVMDesk | 16.540 | 17.660 | 17.332 |
+| NanoKVMLite | 6.219 | 7.339 | 7.011 |
