@@ -1,6 +1,6 @@
 ---
 name: sbc-frame-brackets
-description: Get or make a screwless, support-free 3D-printed bracket that clips a single-board computer (Raspberry Pi, Radxa, Khadas, Hardkernel ODROID, Orange Pi, NVIDIA Jetson Orin Nano, BeagleBone, LattePanda and others) onto 20x20 or 40x40 aluminium extrusion or a TS35 DIN rail, as 3MF, STL and STEP. Use when someone wants to mount a board on an extrusion frame or a DIN rail, asks for a bracket, holder or mount for a single-board computer, or wants a board added to sbc-frame-brackets.
+description: Get or make a screwless, support-free 3D-printed bracket that clips a single-board computer (Raspberry Pi, Radxa, Khadas, Hardkernel ODROID, Orange Pi, NVIDIA Jetson Orin Nano, BeagleBone, LattePanda, Sipeed NanoKVM-Desk and others) onto 20x20 or 40x40 aluminium extrusion or a TS35 DIN rail, as 3MF, STL and STEP. Use when someone wants to mount a board on an extrusion frame or a DIN rail, asks for a bracket, holder or mount for a single-board computer, or wants a board added to sbc-frame-brackets.
 license: MIT
 ---
 
@@ -31,16 +31,16 @@ Ask only for what the user has not said:
 - **Standoffs**: only the two upright orientations come in a version with integrated standoffs (`_spacer`). Flat and shelf have no `_spacer` version, because standoffs growing sideways out of a standing plate cannot print without support; the user brings their own standoffs.
 - **Format**: 3MF for a slicer (in print orientation on the build plate), STL, or STEP for CAD.
 
-## 2. Is the board supported? Then hand over the download links
+## 2. Is the board supported? Then hand over the download link
 
 Read "Supported boards" in the README: `README.md` two directories above this file when the skill comes with the repository, otherwise <https://github.com/koedame/sbc-frame-brackets#supported-boards>.
-If the board is listed, **do not build anything**. Give the links for the bracket the table names, from the README's "Download" tables:
+If the board is listed, **do not build anything**. Give the link to the zip of the bracket the table names, from the README's "Download" table:
 
 ```
-https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>
+https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<bracket>.zip
 ```
 
-File names are `<bracket>_<2020|4040|DIN35>[_<orientation suffix>][_spacer].<3mf|stl|step>`, for example `PiB_2020.3mf`, `PiB_2020_upright-landscape_spacer.3mf` or `PiB_DIN35_flat-portrait.step`.
+The zip holds every mount, orientation and format of that bracket in a folder named after it, so also tell the user which file in it to use. File names are `<bracket>_<2020|4040|DIN35>[_<orientation suffix>][_spacer].<3mf|stl|step>`, for example `PiB_2020.3mf`, `PiB_2020_upright-landscape_spacer.3mf` or `PiB_DIN35_flat-portrait.step`.
 Point the user to "Printing" (PETG, no supports) and "Mounting" in the README, and to "Where the edges of the board end up" if they care which connector ends up where.
 
 A board that is not listed may still share its outline, mounting holes and microSD position with a listed bracket; many boards copy the Raspberry Pi B layout. Only say so after comparing with the official drawing (step 3), and say which drawing you compared.
