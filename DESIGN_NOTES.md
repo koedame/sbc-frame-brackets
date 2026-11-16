@@ -34,18 +34,18 @@ Last updated: 2026-11-16
 | Standoffs are separate parts by default. Integrated standoffs are offered as an alternative (upright orientations only, history 8) | Maintainer's instruction |
 | Board holes are 3 mm diameter (version without standoffs) | Maintainer's instruction |
 | Width along the rail is 16 mm (the print height) | Reduced from 30 mm after the maintainer pointed it out |
-| Generated files are attached to GitHub releases and not committed. The README links to `releases/latest/download/<file name>` | Maintainer's decision (2026-11-15, history 8) |
-| A release is published only when the maintainer asks for it, every time | Maintainer's instruction |
+| Generated files are attached to GitHub releases and not committed, in one zip per board. The README links to `releases/latest/download/<board>.zip` | Maintainer's decisions (release files 2026-11-15, history 8; one zip per board 2026-11-16, history 17) |
+| A release is published after every merged change to the models, the README's download links or the viewer, without asking each time | Maintainer's decision (2026-11-16; until then a release was published only when the maintainer asked for it) |
 | Scripts and documentation are MIT. Models (3MF, STL, STEP, the models in `viewer.html`) and images are CC BY 4.0. Credit is all that is asked; commercial use is allowed | Maintainer's decision (2026-11-16). CC BY rather than CC BY-NC because these are small mounting parts, and "non-commercial" is hard for users to judge |
 
 ## 3. Output format (keep it the same every time)
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro` or `OrinNano`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
-- **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and attach every file to that release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. GitHub's secondary rate limit can stop an upload of several hundred files part way, so the job uploads only the files the release is still missing, tries up to four times 10 minutes apart, and a re-run of the job picks up where it stopped. Push a tag only when the maintainer asks for a release.
-- The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>`, which follows the latest release. Keep file names stable: renaming a file breaks those links.
-- A release holds at most 1000 files. There are now 943 (312 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OrinNano` or `NanoKVMDesk`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons, put each board's 3MF, STL and STEP files into `<board>.zip` (in a folder named after the board), and attach the zips, `viewer.html` and the coupons to that release. It stops if a file in `models/` would not be in the release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. The job uploads only the files the release is still missing and tries up to four times 10 minutes apart (GitHub's secondary rate limit stopped uploads of several hundred files part way before the zips), and a re-run of the job picks up where it stopped. Push the next `v0.x.0` tag on `main` after each merged change to the models, the README's download links or the viewer (section 2).
+- The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<board>.zip`, which follows the latest release. Keep board names and file names stable: renaming a board breaks its link, and people look for a file in the zip by its name.
+- A release holds at most 1000 files. With one zip per board there are 21 (14 zips, `viewer.html` and 6 coupons) for 336 models in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -152,7 +152,7 @@ The grip had to stay as it is, every model had to print without supports and cle
   - So flat and shelf come only without standoffs (`SPACER_ORIENTS`; `bracket()` refuses `spacer=True` for them). The upright orientations keep both versions.
 - **Release files instead of committed models (maintainer's decision).** Six orientations made 180 models at first (120 after dropping the standoffs above), 3 files each. Committing them would add every regenerated file to the history again. The outputs (3MF, STL, STEP, `viewer.html` and the coupons) are now attached to GitHub releases by CI when a version tag is pushed, and `models/` is no longer in the repository (section 3).
   - Users should not have to build anything to get an existing model. The maintainer measured the build on 2026-11-15: for the 30 upright-portrait models, 854 MB of dependencies, 23 s to install and 46 s to build, so all six orientations take about 5 minutes. People who only want a file download it from the release; only people who change a shape build, and `build_all.py` builds just the boards, mounts, orientations and formats they ask for (`--board`, `--mount`, `--orient`, `--format`).
-  - The README links point at `releases/latest/download/<file name>`, so they stay the same from release to release.
+  - The README links point at `releases/latest/download/<file name>`, so they stay the same from release to release. Since history 17 they point at one zip per board.
   - A release is published only when the maintainer asks for it.
 
 **Using each orientation.** Edges of a Raspberry Pi B or A+ board (microSD at one short end, USB and Ethernet at the other). Upside down, top and bottom swap.
@@ -191,6 +191,7 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `M1` | 10.4 mm / 17.7 MPa | 21.9 mm / 18.6 MPa | 10.2 mm / 17.5 MPa | 18.1 mm / 18.0 MPa | 20.2 mm / 16.6 MPa | 8.3 mm / 14.4 MPa |
 | `OPi5Pro` | 1.4 mm / 4.7 MPa | 13.3 mm / 15.6 MPa | 1.8 mm / 7.8 MPa | 9.3 mm / 15.1 MPa | 12.8 mm / 15.2 MPa | 1.3 mm / 4.3 MPa |
 | `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 15.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
+| `NanoKVMDesk` | 2.6 mm / 6.5 MPa | 2.8 mm / 6.8 MPa | 2.7 mm / 6.5 MPa | 2.9 mm / 6.8 MPa | 2.8 mm / 6.8 MPa | 2.6 mm / 6.5 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
@@ -329,6 +330,28 @@ The maintainer asked for the Jetson Orin Nano Developer Kit.
 - **README.** In the download table for upright landscape, the `M1` row with standoffs was under the `OPi5Pro` row and `OPi5Pro` had no row with standoffs. Both are fixed, and a check that every model is linked exactly once found nothing else.
 - 312 models, 943 release files.
 
+### History 17: Sipeed NanoKVM-Desk, and one zip per board in the release (2026-11-16)
+
+The maintainer asked for the Sipeed NanoKVM Lite, the NanoKVM Full and the NanoKVM Pro (Desk and ATX); the NanoKVM-PCIe and NanoKVM-USB were left out from the start (README "Not covered"). Only the NanoKVM-Desk is added.
+
+- **Sources.** Sipeed's wiki (the NanoKVM and NanoKVM Pro pages, the NanoKVM-Desk quick start guide and the NanoKVM Pro FAQ) and Sipeed's download site, which the wiki links to: `KVM/nanoKVM/HDK/04_3D_file` (3D models of the Lite and of the boards inside the Full), `KVM/KVM_Pro/1_3D` (3D models of the Desk unit and of Sipeed's rack adapter for it) and `LICHEE/LicheeRV_Nano` (the LicheeRV Nano's dimension drawing). Links in section 7. Neither the files nor shapes made from them are in this repository or the viewer.
+- **NanoKVM Lite not added.** It is a LicheeRV Nano (22.86 x 35.56 mm) with the HDMI board stacked on it and no case. Neither board has mounting holes: the only two round holes in the LicheeRV Nano that are big enough for a screw (3.2 mm, 12.52 mm apart) hold the pegs of its Ethernet jack, in the official 3D model of the Lite and the LicheeRV Nano's drawing. Holding it would need a cradle round the board stack, a new kind of board plate, so that is left to the maintainer (section 9).
+- **NanoKVM Full not added.** Sipeed publishes 3D models of the boards inside it, but no 3D model or drawing of its case, only the case's size. The case is what a bracket would hold, and its screw holes and ports cannot be checked from the size alone (section 9).
+- **NanoKVM-ATX not added.** It goes inside the computer it controls, on a half-height or full-height expansion slot bracket, like the NanoKVM-PCIe, so there is nothing to put on a frame.
+- **Desk: held by its case, with the case's own screw holes.** The Desk is a closed case, so the case is what the bracket holds. Sipeed's official 3D models of the Desk have the case's screw holes, and Sipeed's quick start guide (rack mounting) says which may be used: the four screws under the rubber feet on the bottom, of which the two rear ones can be used for mounting and the two front ones cannot, because they are shorter and close to the board inside. The rear ones are M2 x 6 (M2 x 7 on units made after October 2025), and Sipeed's rack adapter replaces them with M2 x 7 through its 1.5 mm floor. So the bracket uses the two rear holes rather than a form that hugs the case: a screw holds the case in every orientation, including upside down, which a hugging form would have to do with clips, and the case's outline does not have to be matched to a tolerance.
+- **Two cases.** Sipeed publishes two models of the Desk: `3D_KVM_PRO_DESK_plastic_20260508.step` (current units, plastic front shell) and `3D_KVM_PRO_DESK_print_20260508.step` (earlier units, 3D-printed front shell). Behind the front shell they share the metal body, with the same back and the same two rear screw holes (within 0.01 mm). The bracket fits both, and `--check` runs against both.
+- **Outline and holes.** 67.1 x 65.4 x 27.0 mm including the thumbwheel (the current case; the earlier one is within it). `l` runs from the back to the front, `s` across from the side away from the thumbwheel. The rear screw holes are 13.57 mm from the back and 22.55 and 42.38 mm from the `s` = 0 side.
+- **Edges.** Ethernet, the USB-C ports, both HDMI ports and the microSD slot are on the back (`l` = 0), and the screen and the thumbwheel on the front (`l` = L). With `frame_edge` `s=0` the side away from the thumbwheel faces the back plate in upright portrait, and the front faces the frame in upright landscape and shelf portrait (4 mm away), so the ports never face the frame. One end has to face the frame in those orientations; the front was chosen because every port and the card are on the back. The screen and the thumbwheel cannot be used there (README).
+- **Standoffs and screws.** 3 mm tall and 6 mm across, at the two rear screw holes, and two more as rests under the front half of the case, at `l` = 42, 20.7 mm either side of the centre line: with only two screws in a row across the case it would rock about them. The rests are not under a screw hole of either case, so a screw put in there goes into nothing, and they are behind the front rubber foot of the current case (`l` = 46.2 to 56.5). The standoffs have 2.4 mm through holes (`through` = `case`): M2 x 12 screws from under the plate = 3 mm of plate + 3 mm of standoff + 6 mm into the case, as deep as the original M2 x 6. The holes of the version without standoffs are 2.4 mm too (`hole_d`), the first board with holes smaller than 3 mm, because the case takes only M2.
+- **Placement checked.** On the upright portrait bracket with standoffs, the bottom of each official model sits on the tops of the standoffs and its rear screw holes are on the axes of the two rear standoffs, within 0.01 mm.
+- **Openings.** One opening in the middle, which leaves the 20 mm round hole in the bottom of the earlier case uncovered.
+- **Parts.** The case as one box. The rubber feet are not in the models and their thickness is not published: the front ones stay on and reach the plate only if they are thicker than the 3 mm standoffs. The rear ones come off with the rear screws.
+- `--check`: no overlap with the frame or with either official 3D model and no unsupported area in all 24 models, and the DIN leaf springs bend freely in all 8 DIN models.
+- **Beam estimates** (table in history 8). The plate is short and nearly square: a 10 N push at the far edge gives at most 2.9 mm (flat landscape) and 6.8 MPa, and the DIN rail versions at most 2.9 mm and 7.7 MPa (flat landscape). Sipeed does not publish the Desk's weight; 1 N at the centre of the case bends the shelves at most 0.09 mm.
+- **One zip per board in the release (maintainer's decision).** 14 boards make 336 models, 1008 files in 3 formats, past the 1000 files a release can hold. The maintainer chose one zip per board over splitting the formats. Each zip holds the board's 72 files in a folder named after the board, so the file names did not change; `viewer.html` and the coupons stay outside the zips. The README's download tables (one row per model) became one table with a zip per board, and a table of what the file names mean. The workflow checks that every file in `models/` is in the release exactly once.
+- **README.** The print time table had no rows for `OPi5Pro` and `OrinNano`, and the table of official 3D models had no row for the Jetson. Both are added.
+- 336 models, 21 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -384,6 +407,8 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | LattePanda Mu Lite Carrier (`MuLite`) | Official KiCad designs of the Lite Carrier [V2](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29) and [V1](https://github.com/LattePandaTeam/LattePanda-Mu/tree/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu), the [3D model V2.0.1](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/Carrier-Boards/DFR1142_Lite_Carrier_for_LattePanda_Mu%28V2.0.1%29.zip) (STEP) and the module's [dimension drawing](https://github.com/LattePandaTeam/LattePanda-Mu/blob/1f65a60f90b566f2510deee5d31f41dea7b1de6c/Mechanicals/LattePanda_Mu_Dimension_Drawing.pdf), in the [LattePanda Mu repository](https://github.com/LattePandaTeam/LattePanda-Mu) (MIT); ports from the [Lite Carrier page](https://docs.lattepanda.com/content/mu_edition/lite_carrier/) in the LattePanda documentation. 146 x 102 mm, 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm (history 12) | High. Interference checked against the official 3D model of the carrier (the module, cooler and M.2 cards on top are not in it) |
 | Orange Pi 5 Pro (`OPi5Pro`) | Official [mechanical drawing](https://drive.google.com/file/d/10j5W9Dki9KfirN4JE5pp6X2RujavGOyS/view) `OPi_5_Pro_V1_2_1-dxf.pdf` (PDF, top and bottom views, board v1.2), from the [service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-Pro.html). 89.1 x 56 mm, 3.0 mm holes 58 x 49 mm apart, 3.5 mm from the long edges and 7.6 mm from the microSD end; microSD and an M.2 2280 slot under the board (history 15) | High for the outline and holes. No official 3D model and no heights on the drawing: checked against the outline only, and against the connectors past the edges as tall boxes |
 | NVIDIA Jetson Orin Nano Developer Kit / Super (`OrinNano`) | Official [carrier board specification SP-11324-001 v1.3](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_specification_sp.pdf) (PDF, figure 4-1), [3D model](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_3d_step_model.zip/) `P3766-P3768SKU4-P3767ENVELOPE.stp` (STEP, the developer kit on its base) and [carrier board reference design files A04](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_reference_design_files_a04_20230320.zip/) (outline and drill layers), from the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads); Super from the [user guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/index.html). 100 x 79 mm, 2.75 mm holes 86 x 58 mm apart, 4 mm from the `l` = 0 end and 4 mm from the `s` = S edge (history 16) | High. Interference checked against the official 3D model, with the base, its screws and the antennas left out. No SSD in the 2280 slot in the model |
+| Sipeed NanoKVM-Desk (NanoKVM Pro) (`NanoKVMDesk`) | Official 3D models of the Desk unit from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/KVM_Pro/1_3D): [`3D_KVM_PRO_DESK_plastic_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_plastic_20260508.step) (current units, plastic front shell) and [`3D_KVM_PRO_DESK_print_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_print_20260508.step) (earlier units, 3D-printed front shell); which bottom screws may be used for mounting, and their sizes, from the [NanoKVM-Desk quick start guide](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/desk_start.html) (rack mounting). Case 67.1 x 65.4 x 27.0 mm, rear screw holes (M2) 13.57 mm from the back and 22.55 and 42.38 mm from the side away from the thumbwheel (history 17) | High. Interference checked against both official 3D models. The thickness of the rubber feet is not published |
+| Sipeed NanoKVM Lite, NanoKVM Full (not added) | Lite: the official [3D model](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_NanoKVM_Lite.zip) and the LicheeRV Nano's dimension drawing (`LICHEE/LicheeRV_Nano` on the download site). Full: the official [3D model of its boards](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_RV_Nano_KVM_V1.rar), with no case. Both from the [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file), linked from the [NanoKVM wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html) (history 17) | The Lite has no mounting holes; no 3D model or drawing of the Full's case is published |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
 ### Checking the DIN rail dimensions (2026-11-14)
@@ -434,6 +459,9 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `OPi5Pro` and try it with an Orange Pi 5 Pro: an M.2 2280 SSD under the board (how far it reaches is not published; the standoffs are 8 mm), the parts under the board (no heights or 3D model are published), and taking the microSD card in and out while mounted (history 15)
 - [ ] Orange Pi 5 and Orange Pi 5 Plus: their holes are only in the official 3D models (STEP in RAR archives on the service and support pages). Check them and add the boards (history 15)
 - [ ] Print `OrinNano` and try it with a Jetson Orin Nano Developer Kit off its base: M2.5 screws in the 2.2 mm pilot holes and in the 3 mm holes of the version without standoffs, an M.2 2280 SSD under the board (not in the official model), and where to put the Wi-Fi antennas (history 16)
+- [ ] Print `NanoKVMDesk` and try it with a NanoKVM-Desk, the current case and, if one is at hand, the earlier one: M2 x 12 screws through the 2.4 mm holes into the case's rear holes, whether the case sits flat on the 3 mm rests with the front rubber feet on (their thickness is not published), and 3 mm M2 standoffs with the version without standoffs (history 17)
+- [ ] Sipeed NanoKVM Lite: no mounting holes, so it would need a cradle round the LicheeRV Nano and the HDMI board stacked on it, a new kind of board plate. Needs the maintainer's decision (history 17)
+- [ ] Sipeed NanoKVM Full: add it if Sipeed publishes a 3D model or drawing of its case (history 17)
 - [ ] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? Needs the maintainer's decision (history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
@@ -443,7 +471,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and `MuLite` 99% of it in flat landscape (history 12)
 - [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
-- [ ] A release holds at most 1000 files (now 943 for 13 boards, 72 per board). The next board would pass it: before that, zip some files together (per board, for example) or split the formats
+- [x] A release holds at most 1000 files (943 for 13 boards, 72 per board), and the next board would pass it → one zip per board, the maintainer's choice (history 17): 21 files for 14 boards
 - [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
 
@@ -454,7 +482,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 3. Run `python build_all.py --check` (or only the boards, mounts and orientations you work on, with `--board`, `--mount` and `--orient`) and confirm that it exits with status 0, and that the volumes match the tables below.
 4. Of the open items in section 9, check the ones that need the maintainer's decision.
 5. After changes, open a pull request. The workflow checks every model again.
-6. To publish the files, ask the maintainer first. Once they agree, push a version tag (`git tag v0.2.0 && git push origin v0.2.0`); the workflow builds every model and attaches the files to that release.
+6. To publish the files, push the next version tag on `main` once the pull request is merged (`git tag v0.5.0 && git push origin v0.5.0`); the workflow builds every model, packs them into one zip per board and attaches the zips to that release. Then check that every file the README links to is in the release.
 7. Update sections 8 and 9 and the "last updated" date of these notes.
 
 ### Reference volumes (as of 2026-11-16, cm3)
@@ -478,6 +506,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.658 | 30.490 |
 | OPi5Pro | 17.013 | 17.564 | 17.657 | 18.207 | 17.162 | 17.712 |
 | OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.285 | 21.836 |
+| NanoKVMDesk | 16.555 | 16.844 | 17.198 | 17.487 | 16.704 | 16.992 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -496,6 +525,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.542 | 33.373 |
 | OPi5Pro | 17.576 | 18.126 | 18.178 | 18.729 | 17.701 | 18.252 |
 | OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.360 | 20.911 |
+| NanoKVMDesk | 16.480 | 16.769 | 17.123 | 17.412 | 16.629 | 16.918 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -514,6 +544,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M1 | 31.350 | 31.513 | 31.077 |
 | OPi5Pro | 17.163 | 17.326 | 17.385 |
 | OrinNano | 22.639 | 22.802 | 22.367 |
+| NanoKVMDesk | 16.204 | 16.367 | 15.931 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -532,6 +563,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M1 | 30.802 | 30.965 | 30.529 |
 | OPi5Pro | 15.776 | 15.939 | 15.504 |
 | OrinNano | 20.772 | 20.936 | 20.820 |
+| NanoKVMDesk | 16.116 | 16.279 | 15.843 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -550,6 +582,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M1 | 34.146 | 35.267 | 35.051 |
 | OPi5Pro | 17.997 | 19.117 | 18.901 |
 | OrinNano | 21.849 | 22.970 | 22.754 |
+| NanoKVMDesk | 16.481 | 17.602 | 17.386 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -568,3 +601,4 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | M1 | 31.681 | 32.801 | 32.585 |
 | OPi5Pro | 17.322 | 18.442 | 18.227 |
 | OrinNano | 21.790 | 22.910 | 22.694 |
+| NanoKVMDesk | 16.540 | 17.660 | 17.445 |

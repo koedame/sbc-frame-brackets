@@ -1,0 +1,26 @@
+{
+  "title": "Sipeed NanoKVM-Desk (NanoKVM Pro)",
+  "notes": [
+    "The NanoKVM-Desk is a case with nothing to hold but the case, so this bracket holds the case. Dimensions from Sipeed's official 3D models of the Desk unit: 3D_KVM_PRO_DESK_plastic_20260508.step (current units, plastic front shell) and 3D_KVM_PRO_DESK_print_20260508.step (earlier units, 3D-printed front shell). The two share the metal body behind the front shell, with the same back and the same two rear screw holes.",
+    "Sipeed's NanoKVM-Desk quick start guide (rack mounting): there are four screws under the rubber feet on the bottom; the two rear ones can be used for mounting, the two front ones are shorter and close to the board inside, so they are not. The rear ones are M2 x 6 (M2 x 7 on units made after October 2025), and Sipeed's rack adapter replaces them with M2 x 7 through its 1.5 mm floor. So this bracket uses the case's own rear screw holes, not a form that hugs the case.",
+    "l runs from the back (Ethernet, USB-C, HDMI and the microSD slot) to the front (screen and thumbwheel), s across from the side away from the thumbwheel, which faces the back plate in upright portrait. The front faces the frame in upright landscape and shelf portrait, so the screen and the thumbwheel cannot be used there; the back, with every port, never faces the frame.",
+    "Outline 67.1 x 65.4 x 27.0 mm including the thumbwheel (current case; the earlier one is within it). The rear screw holes are 13.57 mm from the back, 22.55 and 42.38 mm from the s = 0 side (current case; the earlier case is the same within 0.01 mm).",
+    "Standoffs 3 mm tall at the two rear screws and two more as rests under the front half of the case, at l = 42, 20.7 mm either side of the centre line: with only two screws in a row across the case it would rock about them. The rests are not under a screw hole of either case, so a screw put in there goes into nothing, and they are behind the front rubber foot of the current case (l = 46.2 to 56.5). M2 x 12 screws = 3 mm plate + 3 mm standoff + 6 mm into the case, as deep as the original M2 x 6.",
+    "The opening in the middle leaves the 20 mm round hole in the bottom of the earlier case uncovered.",
+    "Parts: the case as one box. The rubber feet are not in the models and their thickness is not published; the front one stays on and reaches the plate only if it is thicker than the 3 mm standoffs."
+  ],
+  "size": [67.1, 65.4],
+  "frame_edge": "s=0",
+  "microsd_edge": "l=0",
+  "holes": [[13.57, 22.55], [13.57, 42.38], [42.0, 12.0], [42.0, 53.4]],
+  "hole_d": 2.4,
+  "standoffs": {"h": 3.0, "d": 6.0, "pilot": 2.4, "screw": "M2 × 12 (the two rear ones; the front two are rests)", "through": "case"},
+  "openings": [[20.5, 41.0, 22.5, 42.7]],
+  "parts": [
+    {"name": "case", "box": [0, 67.1, 0, 65.4, 0, 27.0]}
+  ],
+  "official_models": {
+    "3D_KVM_PRO_DESK_plastic_20260508.step": {"rotate": 90, "centre": [0.0, -2.05], "underside": -4.71},
+    "3D_KVM_PRO_DESK_print_20260508.step": {"rotate": 90, "centre": [0.0, -2.05], "underside": -4.21}
+  }
+}

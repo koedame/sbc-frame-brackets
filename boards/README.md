@@ -26,7 +26,7 @@ All lengths are in mm, in the board's own **top view**: you look at the side tha
 | `frame_edge` | yes | `"s=0"` or `"s=S"`, see above |
 | `microsd_edge` | no | The edge the microSD card comes out of: `"l=0"`, `"l=L"`, `"s=0"` or `"s=S"`. Leave it out if there is no slot. When it is the end that faces the frame in upright landscape and shelf portrait, those brackets keep the board 17 mm (`SD_GAP`) off the back plate so that a finger reaches the card |
 | `holes` | yes | `[[l, s], ...]`, the mounting holes. Every one must be on the board |
-| `hole_d` | yes | Diameter of the through holes in the version without standoffs (3.0 for M2.5 and M3 screws) |
+| `hole_d` | yes | Diameter of the through holes in the version without standoffs (3.0 for M2.5 and M3 screws, 2.4 for M2 as on `NanoKVMDesk`) |
 | `standoffs` | yes | Integrated standoffs (bosses) of the `_spacer` version, see below |
 | `openings` | no | `[[l0, l1, s0, s1], ...]`, rectangles cut through the plate, with 3 mm corner radius. Let one start 4 mm outside the outline (`-4`, or `L + 4`) to make a notch open at that edge, for example 11 to 15 mm deep so that a finger reaches a microSD card under the board, or for a connector under the board. Keep openings clear of the standoffs |
 | `windows` | no | `{"rows": [[s0, s1], ...], "per_row": 3}`: rows of lightening windows. Each row has `per_row` windows between `l = 6` and `l = L - 6`, 6 mm apart. Keep the rows clear of the standoffs |
