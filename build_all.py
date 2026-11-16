@@ -73,7 +73,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(HERE, "models"))
     ap.add_argument("--board-step", action="append", default=[], metavar="PATH",
-                    help="a board's official 3D model, used for the board interference check in place of the simplified board. "
+                    help="a board's official 3D model (STEP, or STL for one published only as STL), used for the board interference check in place of the simplified board. "
                          "Repeat for several models; the file name tells which board it is (STEPS in sbc_brackets.py). Not put in viewer.html")
     ap.add_argument("--check", action="store_true", help="check every model built; exit 1 if any check fails")
     ap.add_argument("--coupons", action="store_true")

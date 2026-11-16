@@ -13,7 +13,10 @@ Structure
 import os, sys
 import math
 from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Pos, Rot, Plane, RectangleRounded,
-                       extrude, fillet, chamfer, Axis, import_step)
+                       extrude, fillet, chamfer, Axis, import_step, Solid)
+from OCP.StlAPI import StlAPI_Reader
+from OCP.TopoDS import TopoDS, TopoDS_Shape
+from OCP.BRepBuilderAPI import BRepBuilderAPI_Sewing, BRepBuilderAPI_MakeSolid
 
 # ======================= Common helpers =======================
 SLOT_X = {20: [0.0], 40: [-10.0, 10.0]}          # slot centres on each face of the frame
@@ -253,10 +256,13 @@ def bed_chamfer(s):
     return s
 
 
-def add_spacers(s, pts, h, d_boss, d_pilot):
-    """Add standoffs (bosses) to the front plate. Fill the plate holes, add the bosses, then drill the pilot holes again"""
+def add_spacers(s, pts, h, d_boss, d_pilot, foot=None):
+    """Add standoffs (bosses) to the front plate. Fill the plate holes, add the bosses, then drill the pilot holes again.
+    foot = (height, diameter) of a wider base under a boss that has to be slim further up"""
     for x, y in pts:
         s += Pos(x, y, Z0 + (T + h) / 2) * Cylinder(d_boss / 2, T + h - 0.01)
+        if foot:
+            s += Pos(x, y, Z0 + (T + foot[0]) / 2) * Cylinder(foot[1] / 2, T + foot[0] - 0.01)
     for x, y in pts:
         s -= Pos(x, y, Z0 + (T + h) / 2) * Cylinder(d_pilot / 2, T + h + 2)
     return s
@@ -265,15 +271,26 @@ def add_spacers(s, pts, h, d_boss, d_pilot):
 def official(step_path):
     """Place a board's official 3D model on its bracket, for interference checks only. Each board class lists the official
     models it fits in STEPS: file name -> (rotation about z in degrees, centre x and y of the PCB outline, z of the PCB
-    underside), all in the file's own coordinates. For a PCB shorter than the board class, the centre is that of the board
-    class's outline (L x S) around the PCB's holes. Returns (board class, parts). Some models are partly surfaces rather than
-    solids (e.g. the ROCK 5B+ PCB), so the shells that belong to no solid are returned as parts too"""
+    underside[, rotation about x in degrees, applied first]), all in the file's own coordinates (after that first rotation).
+    For a PCB shorter than the board class, the centre is that of the board class's outline (L x S) around the PCB's holes;
+    for a board held by its heatsink, the heatsink's outline and the underside of its base. A model published only as STL is
+    read as a closed mesh. Returns (board class, parts). Some models are partly surfaces rather than solids (e.g. the ROCK 5B+
+    PCB), so the shells that belong to no solid are returned as parts too"""
     name = os.path.basename(step_path)
     for B in BOARDS:
         if name in getattr(B, "STEPS", {}):
-            rot, cx, cy, zb = B.STEPS[name]
-            loc = Pos(0, T + BOARD_Y0 + B.S / 2, Z0 + T + B.BOARD_SPACER - zb) * Rot(0, 0, rot) * Pos(-cx, -cy, 0)
-            model = loc * import_step(step_path)
+            rot, cx, cy, zb, *tilt = B.STEPS[name]
+            loc = (Pos(0, T + BOARD_Y0 + B.S / 2, Z0 + T + B.BOARD_SPACER - zb) * Rot(0, 0, rot) * Pos(-cx, -cy, 0)
+                   * Rot(tilt[0] if tilt else 0, 0, 0))
+            if name.lower().endswith(".stl"):
+                mesh = TopoDS_Shape(); StlAPI_Reader().Read(mesh, step_path)
+                sew = BRepBuilderAPI_Sewing(1e-3); sew.Add(mesh); sew.Perform()
+                mk = BRepBuilderAPI_MakeSolid(); mk.Add(TopoDS.Shell(sew.SewedShape()))
+                part = Solid(mk.Solid())
+                part = part if part.volume > 0 else Solid(part.wrapped.Reversed())
+            else:
+                part = import_step(step_path)
+            model = loc * part
             solids = model.solids()
             in_solid = {sh for so in solids for sh in so.shells()}
             return B, [c for c in solids if c.volume > 0.5] + [sh for sh in model.shells() if sh not in in_solid]
@@ -323,7 +340,7 @@ class Board:
         s = _finish(s, series, H, T + BOARD_Y0 + cls.S)
         if spacer:
             sp = cls.SPACER
-            s = add_spacers(s, cls.spacer_xy(), sp["h"], sp["d"], sp["pilot"])
+            s = add_spacers(s, cls.spacer_xy(), sp["h"], sp["d"], sp["pilot"], sp.get("foot"))
         return s
 
 
@@ -673,7 +690,73 @@ class MuLite(Board):
         return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
 
 
-BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB, M2, LP3Delta, MuLite]
+# ======================= Hardkernel ODROID-N2+ and ODROID-M1, held by their heatsinks =======================
+class HKSink(Board):
+    """Hardkernel boards whose SoC is on the underside, screwed to the top of a heatsink that is also their stand: a 100 mm wide
+    aluminium extrusion, 19 mm tall, with fins underneath and a side wall along each long edge (the same profile on the official
+    heatsink drawings of the ODROID-N2+ and the ODROID-M1, and the N2+ heatsink's 3D model). These brackets hold the heatsink, not
+    the board. The plate is the heatsink's footprint, and its holes match M3 threaded holes in the heatsink's 3 mm base that the
+    board does not use, 14.25 mm from the long edges, which open between the side wall and the outermost fin (2.9 mm from a hole
+    centre). l runs along the extrusion from the end away from the ports, s across it from the side of the board's GPIO header.
+    Heights in ghost() are above the bottoms of the side walls, the heatsink's lowest edge, 6 mm below the base"""
+    S, BT = 100.0, 1.6
+    HOLE_D = 3.0                                       # M3 screws pass through the 3 mm holes of the version without standoffs (tight)
+    SD_END = True                                      # the microSD slot is at the end away from the ports
+    WIN_S = ((21.0, 47.0), (53.0, 79.0))               # two rows of lightening windows, clear of the standoffs
+    SPACER = dict(h=10.0, d=5.0, pilot=3.4, screw="M3 × 16", foot=(3.5, 8.0), through="heatsink")
+    # 10 mm keeps the side walls 4 mm and the fins 5 mm off the plate. The top 6.5 mm goes up between the side wall and the outermost
+    # fin, so it is 5 mm across (0.4 mm from the fin); below the heatsink it widens to 8 mm. M3 x 16 = 3 mm plate + 10 mm standoff + the 3 mm base
+    BOARD_SPACER = 10.0                                # height of the heatsink base's underside, for display and interference checks
+    PCB_H = 13.0                                       # underside of the board above the bottoms of the side walls (estimate: the
+                                                       # heatsink's contact pad ends at about 11 mm, and the SoC sits on it)
+
+    @classmethod
+    def xy(cls, l, s):
+        return (cls.L / 2 - l, T + BOARD_Y0 + s)       # the end away from the ports towards the frame in upright landscape and shelf portrait
+
+    @classmethod
+    def ghost(cls):
+        """Heatsink and bare board for display and interference checks, simplified from the official heatsink drawings (the fins
+        as one block, 0.5 mm deeper than they are). The board's height above the heatsink is not published (PCB_H)"""
+        z0 = Z0 + T + cls.BOARD_SPACER - 6.0
+        def blk(l0, l1, s0, s1, h0, h1):
+            (xa, ya), (xb, yb_) = cls.xy(l0, s0), cls.xy(l1, s1)
+            return box(min(xa, xb), max(xa, xb), ya, yb_, z0 + h0, z0 + h1)
+        L, S = cls.L, cls.S
+        g = blk(0, L, 2.0, S - 2.0, 6.0, 9.0)                       # base
+        g += blk(0, L, 17.1, S - 17.1, 0.5, 6.0)                    # fins
+        for a, b in ((0.0, 1.0), (S, -1.0)):                         # side walls: below the base, beside the base, and up to 19 mm
+            for w0, w1, h0, h1 in ((2.0, 4.4, 0.0, 6.0), (2.0, 6.0, 9.0, 11.6), (0.0, 4.7, 11.6, 19.0)):
+                s0, s1 = sorted((a + b * w0, a + b * w1))
+                g += blk(0, L, s0, s1, h0, h1)
+        g += blk(0.5, cls.L - 0.5, 5.0, 95.0, cls.PCB_H, cls.PCB_H + cls.BT)   # the board, 0.5 mm in from the ends
+        return g
+
+
+class N2Plus(HKSink):
+    """ODROID-N2+ on its heatsink. Heatsink 91 x 100 mm (official heatsink drawing and 3D model, 2020-07-07), the 90 x 90 mm board
+    0.5 mm in from its ends. The heatsink has eight M3 threaded holes: the board is screwed to the four 58 x 83.5 mm apart, the
+    bracket to the four 71.5 x 71.5 mm apart, 9.75 mm from the ends (official board drawing rev 0.4 and the N2+ expansion-board
+    template rev 0.5 for the board holes). The microSD slot is under the board at the end away from the ports and sticks out 1.8 mm
+    past the board"""
+    name, title = "N2Plus", "Hardkernel ODROID-N2+"
+    L = 91.0
+    HOLES = [(9.75, 14.25), (81.25, 14.25), (9.75, 85.75), (81.25, 85.75)]
+    STEPS = {"N2_BODY_20200707.STL": (90, 50.0, -45.5, 6.0, 90)}   # the heatsink (y up, the end away from the ports at z = 91)
+
+
+class M1(HKSink):
+    """ODROID-M1 on its heatsink. Heatsink 123 x 100 mm (official heatsink drawing, 2021-11-08), the 122 x 90 mm board 0.5 mm in
+    from its ends. The heatsink has twelve M3 threaded holes: the board is screwed to the four 90 x 83.5 mm apart, the bracket to the
+    outer four of the other eight, 103.5 x 71.5 mm apart, 9.75 mm from the ends (official board drawing rev 1.0 for the board holes).
+    The microSD slot is at the end away from the ports"""
+    name, title = "M1", "Hardkernel ODROID-M1"
+    L = 123.0
+    HOLES = [(9.75, 14.25), (113.25, 14.25), (9.75, 85.75), (113.25, 85.75)]
+    WIN_N = 4
+
+
+BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB, M2, LP3Delta, MuLite, N2Plus, M1]
 SERIES = (20, 40, "DIN")
 
 
@@ -817,7 +900,7 @@ def oriented(B, series, spacer, orient):
                 s -= rrect(x0, x1, y0, y1)
         s = _finish(s, series, Hp, T + g + L)
         if spacer:
-            s = add_spacers(s, [(x, y) for x, y, _ in to(B.spacer_xy())], sp["h"], sp["d"], sp["pilot"])
+            s = add_spacers(s, [(x, y) for x, y, _ in to(B.spacer_xy())], sp["h"], sp["d"], sp["pilot"], sp.get("foot"))
         return s
 
     s = grip_din() if series == "DIN" else grip(series)
