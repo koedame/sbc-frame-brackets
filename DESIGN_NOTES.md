@@ -42,7 +42,7 @@ Last updated: 2026-11-16
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the board size: `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus` or `M1`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus` or `M1`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only.
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and attach every file to that release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. GitHub's secondary rate limit can stop an upload of several hundred files part way, so the job uploads only the files the release is still missing, tries up to four times 10 minutes apart, and a re-run of the job picks up where it stopped. Push a tag only when the maintainer asks for a release.
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<file name>`, which follows the latest release. Keep file names stable: renaming a file breaks those links.
 - A release holds at most 1000 files. There are now 799 (264 models x 3 formats, `viewer.html` and 6 coupons); each new board adds 72. The workflow stops before uploading if there are more than 1000 (section 9).
@@ -280,9 +280,22 @@ History 10 left these out because their heatsinks are screwed to the boards thro
 - **Beam estimates** (table in history 8). A 10 N push at the far edge gives at most 21.9 mm (`M1` upright landscape) and 22.1 MPa (`N2Plus` upright portrait), below the strength of PETG in every orientation. These two are heavier than the other boards: the N2+ heatsink is about 135 g from the volume of its 3D model in aluminium, and the M1 heatsink about 180 g scaled from that by its length, roughly 0.2 and 0.25 kg with the boards. At 2.5 N the worst shelf, `M1` shelf portrait, bends 1.8 mm at 1.9 MPa (0.71 mm and 0.76 MPa per newton).
 - 264 models, 799 release files.
 
+### History 14: boards as data, and a Claude skill (2026-11-16)
+
+The maintainer asked for boards to be added without touching the code, so that the project can be handed out as a Claude skill that builds a bracket for a board it does not have yet.
+
+- **One JSON definition per board in `boards/`** (fields in `boards/README.md`). The board classes in `sbc_brackets.py` are gone: `Board` reads every file in `boards/` at import, and the file name is the board's name. A definition gives the outline, the mounting holes, the standoffs and which holes get them, the microSD edge, the openings (rectangles, and rows of windows), the simplified board as boxes, and the official 3D models it fits. What was code before is now numbers: the notch arithmetic of `PiB`, `PiA`, `PiZero`, `VIM1S` and `BBB` became plain rectangles, and the window rows (`WIN_S`, `WIN_N`) became `windows`.
+- **One coordinate convention.** Before, each class had its own `xy()`, and some of them mirrored the board: those of `ROCK5B`, `BBB`, `LP3Delta`, `MuLite` and the heatsink boards, and the one `PiB` used for its holes and openings (not for its simplified board). Their shapes came out right because the holes and openings are symmetric or were entered mirrored too. Now every definition is in the board's top view, right-handed, and `frame_edge` (`s=0` or `s=S`) says which edge along `l` faces the back plate, a half turn and never a mirror. The mirrored ones were converted: `ROCK5B`, `BBB` (now the manufacturing data's own x), `LP3Delta`, `N2Plus` and `M1` by `l -> L - l`, and `MuLite` by `s -> S - s`. `SD_END` became `microsd_edge`, the edge the card comes out of; the 17 mm gap applies when that is the end that faces the frame. The `rotate` of an official model is now relative to the board's top view too (half a turn more than before for `frame_edge` `s=S`), so every model lands where it did.
+- **Heights of the simplified boards count from the top of the standoffs.** For `N2Plus` and `M1` that is the underside of the heatsink's base, so their part heights are 6 mm lower than in the old `HKSink.ghost()`, which counted from the bottoms of the side walls.
+- **Nothing moved.** All 264 models have the same volume (mm3, 6 decimals), bounding box and number of faces and solids as before, and so do the holes, standoffs, openings, the simplified boards in every orientation and the placement of every official model. The STEP volumes match the tables below, and `--check` passes with every official 3D model.
+- **Checks on a definition.** An unknown or missing field, a hole off the board, a standoff that is not on a hole, or a box whose start is not below its end stops the build with the file and the field.
+- **Viewer.** It now shows the number of standoffs and the hole diameter from the definition, instead of a fixed "× 4" and "3 mm". The models are listed in file name order, so the viewer opens on `BBB` instead of `PiB`.
+- **Claude skill (`skills/sbc-frame-brackets/SKILL.md`).** For a supported board it hands over the download links from the README and builds nothing. Otherwise it takes the dimensions from the official drawing or 3D model, writes the definition, builds only the files asked for with `--check`, shows them in the viewer and hands over the 3MF, STL and STEP files.
+  It was tried in a fresh `python:3.11-slim` container set up as in the README's "Building from source": following only the skill and `boards/README.md`, a made-up 70 x 50 mm board, described by a text drawing, was added and built in flat portrait for 20x20, and all 24 of its models passed `--check`. What that run found unclear (which edge `frame_edge` is, the heights of parts on top of the board, how deep a notch goes, where the full check writes its files) is now spelled out in the skill and in `boards/README.md`.
+
 ## 5. Current dimensions (main ones)
 
-See the constants in `sbc_brackets.py` for the details.
+See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
 
 | Item | Value | Constant |
 |---|---|---|
@@ -350,7 +363,7 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 - **The current key does not fit aluminium rails with 1.5 mm side walls (7.3 mm deep, 24 mm channel).** Overlaid on a rail with 1.5 mm side walls, all three DIN models interfere by 10.24 mm3 (the key hits by 0.2 mm on each side). The lip edge where the hooks catch is 1 mm thick, the same as TS35 x 7.5.
 
 - Take dimensions for new boards from the manufacturer's official 3D model or drawing. Do not place holes from memory or guesswork: for the VIM1S, the first guess ("rectangular pattern") was wrong.
-- Official 3D models and drawings are not included (`*.stp`, and `*.step` and `*.stl` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`). The file name tells which bracket it belongs to (`STEPS` in each board class).
+- Official 3D models and drawings are not included (`*.stp`, and `*.step` and `*.stl` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`). The file name tells which bracket it belongs to (`official_models` in the board's definition).
 - Shapes converted from the official 3D models do not go into `viewer.html` either. `--board-step` is used only for interference checks, and the boards in the viewer are bare plates, because no notice allowing redistribution of the manufacturers' CAD data could be found (Khadas as of 2026-11-14; Radxa and Pine64 as of 2026-11-15; Libre Computer as of 2026-11-16). BeagleBoard.org publishes no 3D model, and its design files have no license file (as of 2026-11-16), so only dimensions read from them are used. The LattePanda 3D models are under CC BY 3.0 and the LattePanda Mu repository under the MIT license (as of 2026-11-16), which would allow redistribution with attribution; they are kept out all the same, so every board is handled the same way.
 
 ## 8. Test print log
@@ -395,7 +408,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 
 ## 10. Steps to resume work
 
-1. Read these notes and the README.
+1. Read these notes and the README, and `boards/README.md` for the board definitions.
 2. Set up the environment as in the README's "Building from source" (Python 3.11–3.14, `pip install -r requirements.txt`).
 3. Run `python build_all.py --check` (or only the boards, mounts and orientations you work on, with `--board`, `--mount` and `--orient`) and confirm that it exits with status 0, and that the volumes match the tables below.
 4. Of the open items in section 9, check the ones that need the maintainer's decision.

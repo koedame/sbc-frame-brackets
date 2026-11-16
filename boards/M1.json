@@ -1,0 +1,30 @@
+{
+  "title": "Hardkernel ODROID-M1",
+  "notes": [
+    "The SoC is on the underside of the board, screwed to the top of a heatsink that is also its stand: a 100 mm wide aluminium extrusion, 19 mm tall, with fins underneath and a side wall along each long edge (the same profile on the official heatsink drawings of the ODROID-N2+ and the ODROID-M1, and the N2+ heatsink's 3D model). This bracket holds the heatsink, not the board.",
+    "Heatsink 123 x 100 mm (official heatsink drawing, 2021-11-08), the 122 x 90 mm board 0.5 mm in from its ends. The plate is the heatsink's footprint.",
+    "The heatsink has twelve M3 threaded holes: the board is screwed to the four 90 x 83.5 mm apart, the bracket to the outer four of the other eight, 103.5 x 71.5 mm apart, 9.75 mm from the ends and 14.25 mm from the long edges (official board drawing rev 1.0 for the board holes). They are in the heatsink's 3 mm base and open between the side wall and the outermost fin (2.9 mm from a hole centre).",
+    "l runs along the extrusion from the end with the ports, s across it from the side of the board's GPIO header. The microSD slot is at the l = L end.",
+    "Standoffs 10 mm tall keep the side walls 4 mm and the fins 5 mm off the plate. The top 6.5 mm goes up between the side wall and the outermost fin, so it is 5 mm across (0.4 mm from the fin); below the heatsink it widens to 8 mm. M3 x 16 screws = 3 mm plate + 10 mm standoff + the 3 mm base. M3 screws pass through the 3 mm holes of the version without standoffs (tight).",
+    "Parts are simplified from the official heatsink drawings (the fins as one block, 0.5 mm deeper than they are). Heights are from the underside of the heatsink's base, which sits on the standoffs; the side walls reach 6 mm below it. The board's height above the heatsink is not published: its underside is estimated at 7 mm (the heatsink's contact pad ends at about 5 mm, and the SoC sits on it).",
+    "No official 3D model is published."
+  ],
+  "size": [123.0, 100.0],
+  "frame_edge": "s=0",
+  "microsd_edge": "l=L",
+  "holes": [[113.25, 14.25], [9.75, 14.25], [113.25, 85.75], [9.75, 85.75]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 10.0, "d": 5.0, "pilot": 3.4, "screw": "M3 × 16", "foot": [3.5, 8.0], "through": "heatsink"},
+  "windows": {"rows": [[21.0, 47.0], [53.0, 79.0]], "per_row": 4},
+  "parts": [
+    {"name": "heatsink base", "box": [0, 123.0, 2.0, 98.0, 0, 3.0]},
+    {"name": "fins", "box": [0, 123.0, 17.1, 82.9, -5.5, 0]},
+    {"name": "side wall, below the base", "box": [0, 123.0, 2.0, 4.4, -6.0, 0]},
+    {"name": "side wall, beside the base", "box": [0, 123.0, 2.0, 6.0, 3.0, 5.6]},
+    {"name": "side wall, up to 19 mm", "box": [0, 123.0, 0, 4.7, 5.6, 13.0]},
+    {"name": "side wall, below the base", "box": [0, 123.0, 95.6, 98.0, -6.0, 0]},
+    {"name": "side wall, beside the base", "box": [0, 123.0, 94.0, 98.0, 3.0, 5.6]},
+    {"name": "side wall, up to 19 mm", "box": [0, 123.0, 95.3, 100.0, 5.6, 13.0]},
+    {"name": "PCB", "box": [0.5, 122.5, 5.0, 95.0, 7.0, 8.6]}
+  ]
+}

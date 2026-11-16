@@ -1,0 +1,22 @@
+{
+  "title": "LattePanda Mu Lite Carrier",
+  "notes": [
+    "146 x 102 mm, four 3.2 mm holes at (3.0, 3.5), (142.5, 3.5), (3.5, 98.5) and (142.5, 98.5) mm from the corner between the PCIe slot end and the edge with the ports (official KiCad design of the Lite Carrier V1 and V2, and official 3D model V2.0.1).",
+    "l = 0 is the PCIe slot end (towards the frame in upright landscape and shelf portrait). All the ports are along the s = 0 edge. The power and reset buttons stick out of the s = S edge, which faces the back plate, near the PCIe end.",
+    "The LattePanda Mu module, its cooler and the M.2 cards sit on top of the board; under it, the pins of the PCIe slot reach 3.3 mm.",
+    "Standoffs 5 mm tall: the pins of the PCIe slot reach 3.3 mm below the board.",
+    "Two rows of windows, clear of the standoffs."
+  ],
+  "size": [146.0, 102.0],
+  "frame_edge": "s=S",
+  "holes": [[3.5, 98.5], [142.5, 98.5], [3.0, 3.5], [142.5, 3.5]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 5.0, "d": 6.0, "pilot": 2.6, "screw": "M3"},
+  "windows": {"rows": [[10.5, 48.0], [54.0, 91.5]], "per_row": 4},
+  "parts": [
+    {"name": "PCB", "box": [0, 146.0, 0, 102.0, 0, 1.6]}
+  ],
+  "official_models": {
+    "DFR1142 Lite Carrier for LattePanda Mu(V2.0.1).step": {"rotate": 0, "centre": [-69.5, 47.5], "underside": 0.0}
+  }
+}

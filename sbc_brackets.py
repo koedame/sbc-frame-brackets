@@ -7,11 +7,11 @@ Coordinates (bracket-local, in mm)
 
 Structure
   - The grip (two hooks + a key that sits in the front slot + the back plate) is shared by every board
-  - The front plate is the same size as the board. Holes, cut-outs and the SD card notch are per board
+  - The front plate is the same size as the board. Holes, cut-outs and the SD card notch are per board, from its definition
+    in boards/ (boards/README.md)
   - spacer=True adds standoffs (bosses) integrated into the front plate (upright orientations only, see SPACER_ORIENTS)
 """
-import os, sys
-import math
+import glob, json, math, os, sys
 from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Pos, Rot, Plane, RectangleRounded,
                        extrude, fillet, chamfer, Axis, import_step, Solid)
 from OCP.StlAPI import StlAPI_Reader
@@ -269,19 +269,18 @@ def add_spacers(s, pts, h, d_boss, d_pilot, foot=None):
 
 
 def official(step_path):
-    """Place a board's official 3D model on its bracket, for interference checks only. Each board class lists the official
-    models it fits in STEPS: file name -> (rotation about z in degrees, centre x and y of the PCB outline, z of the PCB
-    underside[, rotation about x in degrees, applied first]), all in the file's own coordinates (after that first rotation).
-    For a PCB shorter than the board class, the centre is that of the board class's outline (L x S) around the PCB's holes;
-    for a board held by its heatsink, the heatsink's outline and the underside of its base. A model published only as STL is
-    read as a closed mesh. Returns (board class, parts). Some models are partly surfaces rather than solids (e.g. the ROCK 5B+
-    PCB), so the shells that belong to no solid are returned as parts too"""
+    """Place a board's official 3D model on its bracket, for interference checks only. A definition lists the official models
+    it fits in official_models (boards/README.md). A model published only as STL is read as a closed mesh. Returns (board,
+    parts). Some models are partly surfaces rather than solids (e.g. the ROCK 5B+ PCB), so the shells that belong to no solid
+    are returned as parts too"""
     name = os.path.basename(step_path)
     for B in BOARDS:
-        if name in getattr(B, "STEPS", {}):
-            rot, cx, cy, zb, *tilt = B.STEPS[name]
-            loc = (Pos(0, T + BOARD_Y0 + B.S / 2, Z0 + T + B.BOARD_SPACER - zb) * Rot(0, 0, rot) * Pos(-cx, -cy, 0)
-                   * Rot(tilt[0] if tilt else 0, 0, 0))
+        if name in B.official_models:
+            m = B.official_models[name]
+            rot = (m["rotate"] + (0 if B.frame_edge == "s=0" else 180)) % 360   # (l, s) -> (x, y) turns half a turn for s=S
+            cx, cy = m["centre"]
+            loc = (Pos(0, T + BOARD_Y0 + B.S / 2, Z0 + T + B.standoffs["h"] - m["underside"]) * Rot(0, 0, rot) * Pos(-cx, -cy, 0)
+                   * Rot(m.get("tilt", 0), 0, 0))
             if name.lower().endswith(".stl"):
                 mesh = TopoDS_Shape(); StlAPI_Reader().Read(mesh, step_path)
                 sew = BRepBuilderAPI_Sewing(1e-3); sew.Add(mesh); sew.Perform()
@@ -294,476 +293,139 @@ def official(step_path):
             solids = model.solids()
             in_solid = {sh for so in solids for sh in so.shells()}
             return B, [c for c in solids if c.volume > 0.5] + [sh for sh in model.shells() if sh not in in_solid]
-    known = ", ".join(n for B in BOARDS for n in getattr(B, "STEPS", {}))
+    known = ", ".join(n for B in BOARDS for n in B.official_models)
     raise SystemExit(f"{name}: not a known official 3D model (known: {known})")
 
 
+# ======================= Boards (boards/*.json) =======================
+BOARD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "boards")
+FIELDS = {"title": True, "notes": False, "size": True, "frame_edge": True, "microsd_edge": False, "holes": True, "hole_d": True,
+          "standoffs": True, "openings": False, "windows": False, "parts": True, "official_models": False}   # name: required
+STANDOFF_FIELDS = {"h", "d", "pilot", "screw", "foot", "through", "at"}
+MODEL_FIELDS = {"rotate", "centre", "underside", "tilt"}
+
+
 class Board:
-    """What every board class shares. A board class gives its outline (L x S), where its holes, openings and standoffs are on the
-    upright-portrait front plate (holes_xy / cuts / spacer_xy, in bracket-local x and y), and a simplified board (ghost)"""
-    SD_END = False                                     # True when the microSD slot is at the l = 0 short edge
-    WIN_N = 3                                          # lightening windows per row, for boards that give the rows in WIN_S
+    """A board, read from its definition boards/<name>.json (the fields are described in boards/README.md). The definition is in
+    the board's own top-view coordinates, mm: l from 0 to L along one side (usually the long side), s from 0 to S along the
+    other. xy() maps them onto the upright-portrait front plate (the "board frame", in bracket-local x and y), with the
+    frame_edge edge towards the back plate"""
 
-    @classmethod
-    def cuts(cls):
-        """Rows of lightening windows, clear of the standoffs: WIN_S gives the s range of each row, with WIN_N windows per row
-        between l = 6 and L - 6"""
-        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - (cls.WIN_N - 1) * RIB) / cls.WIN_N
-        c = []
-        for s0, s1 in cls.WIN_S:
-            for i in range(cls.WIN_N):
-                a = l0 + i * (wl + RIB)
-                (xa, ya), (xb, yb2) = cls.xy(a, s0), cls.xy(a + wl, s1)
-                c.append((min(xa, xb), max(xa, xb), ya, yb2))
-        return c
+    def __init__(self, path):
+        self.name = os.path.splitext(os.path.basename(path))[0]
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        self._check(d)
+        self.title, self.notes = d["title"], d.get("notes", [])
+        self.L, self.S = (float(v) for v in d["size"])
+        self.frame_edge, self.hole_d, self.holes = d["frame_edge"], d["hole_d"], d["holes"]
+        self.standoffs = {k: v for k, v in d["standoffs"].items() if k != "at"}   # h, d, pilot, screw[, foot, through]
+        self.standoff_at = d["standoffs"].get("at", self.holes)
+        self.openings, self.windows, self.parts = d.get("openings", []), d.get("windows"), d["parts"]
+        self.official_models = d.get("official_models", {})
+        # the short end at the top in upright portrait is the one that faces the frame in upright landscape and shelf portrait
+        self.sd_end = d.get("microsd_edge") == ("l=L" if self.frame_edge == "s=0" else "l=0")
 
-    @classmethod
-    def holes_xy(cls):
-        return [cls.xy(l, s_) for l, s_ in cls.HOLES]
+    def _check(self, d):
+        """Stop on a definition that cannot be what was meant (a typo in a field name, a hole off the board, a box inside out)"""
+        def bad(msg):
+            raise SystemExit(f"boards/{self.name}.json: {msg} (see boards/README.md)")
+        if not self.name.isalnum() or not self.name.isascii():
+            bad("the file name is the board's name in the output file names: letters and digits only")
+        for k in set(d) - set(FIELDS):
+            bad(f"unknown field {k!r}")
+        for k in [k for k, req in FIELDS.items() if req and k not in d]:
+            bad(f"missing field {k!r}")
+        L, S = d["size"]
+        if not (L > 0 and S > 0):
+            bad("size is [L, S], both above 0")
+        if d["frame_edge"] not in ("s=0", "s=S"):
+            bad('frame_edge is "s=0" or "s=S"')
+        if d.get("microsd_edge", "l=0") not in ("l=0", "l=L", "s=0", "s=S"):
+            bad('microsd_edge is "l=0", "l=L", "s=0" or "s=S"')
+        sp = d["standoffs"]
+        for k in set(sp) - STANDOFF_FIELDS:
+            bad(f"unknown standoffs field {k!r}")
+        for k in ("h", "d", "pilot", "screw"):
+            if k not in sp:
+                bad(f"missing standoffs field {k!r}")
+        for l, s in d["holes"]:
+            if not (0 < l < L and 0 < s < S):
+                bad(f"hole {[l, s]} is off the {L} x {S} board")
+        for p in sp.get("at", []):
+            if p not in d["holes"]:
+                bad(f"standoff {p} is not at one of the holes")
+        for r in d.get("openings", []) + [p["box"] for p in d["parts"]]:
+            if any(a >= b for a, b in zip(r[::2], r[1::2])):
+                bad(f"{r} is not [from, to, ...] with each from below its to")
+        for k in set(d.get("windows") or {}) - {"rows", "per_row"}:
+            bad(f"unknown windows field {k!r}")
+        for f, m in d.get("official_models", {}).items():
+            if set(m) - MODEL_FIELDS or not {"rotate", "centre", "underside"} <= set(m):
+                bad(f"official_models[{f!r}] has rotate, centre, underside and an optional tilt")
 
-    @classmethod
-    def spacer_xy(cls):
-        return cls.holes_xy()
+    def xy(self, l, s):
+        """Board (l, s) -> bracket-local (x, y) on the upright-portrait front plate. Both ways round it is a turn, never a mirror"""
+        if self.frame_edge == "s=0":
+            return (l - self.L / 2, T + BOARD_Y0 + s)
+        return (self.L / 2 - l, T + BOARD_Y0 + (self.S - s))
 
-    @classmethod
-    def bracket(cls, series, spacer=False, orient=None):
+    def holes_xy(self):
+        return [self.xy(l, s) for l, s in self.holes]
+
+    def spacer_xy(self):
+        return [self.xy(l, s) for l, s in self.standoff_at]
+
+    def cuts(self):
+        """Openings through the front plate as (x0, x1, y0, y1): the definition's openings, then its rows of windows (per_row
+        windows in each row, between l = 6 and L - 6, RIB apart)"""
+        rects = list(self.openings)
+        if self.windows:
+            n = self.windows["per_row"]; l0, l1 = 6.0, self.L - 6.0; wl = (l1 - l0 - (n - 1) * RIB) / n
+            rects += [(a, a + wl, s0, s1) for s0, s1 in self.windows["rows"] for a in (l0 + i * (wl + RIB) for i in range(n))]
+        out = []
+        for l0, l1, s0, s1 in rects:
+            (xa, ya), (xb, yb) = self.xy(l0, s0), self.xy(l1, s1)
+            out.append((min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb)))
+        return out
+
+    def ghost(self):
+        """Simplified board for display and interference checks: the boxes of the definition's parts, their heights from the
+        top of the standoffs (the underside of what sits on them)"""
+        z = Z0 + T + self.standoffs["h"]; g = None
+        for p in self.parts:
+            l0, l1, s0, s1, h0, h1 = p["box"]
+            (xa, ya), (xb, yb) = self.xy(l0, s0), self.xy(l1, s1)
+            b = box(min(xa, xb), max(xa, xb), min(ya, yb), max(ya, yb), z + h0, z + h1)
+            g = b if g is None else g + b
+        return g
+
+    def bracket(self, series, spacer=False, orient=None):
         if spacer and orient not in (None,) + SPACER_ORIENTS:
             raise ValueError(f"no integrated standoffs in {orient}: on a standing board plate they cannot print without support")
         if orient not in (None, UPRIGHT):
-            return oriented(cls, series, spacer, orient)
-        H = cls.L / 2
-        s = _l_body(series, H, BOARD_Y0 + cls.S)
-        for x, y in cls.holes_xy():
-            s -= Pos(x, y, Z0 + T / 2) * Cylinder(cls.HOLE_D / 2, T + 2)
-        for c in cls.cuts():
+            return oriented(self, series, spacer, orient)
+        H = self.L / 2
+        s = _l_body(series, H, BOARD_Y0 + self.S)
+        for x, y in self.holes_xy():
+            s -= Pos(x, y, Z0 + T / 2) * Cylinder(self.hole_d / 2, T + 2)
+        for c in self.cuts():
             s -= rrect(*c)
-        s = _finish(s, series, H, T + BOARD_Y0 + cls.S)
+        s = _finish(s, series, H, T + BOARD_Y0 + self.S)
         if spacer:
-            sp = cls.SPACER
-            s = add_spacers(s, cls.spacer_xy(), sp["h"], sp["d"], sp["pilot"], sp.get("foot"))
+            sp = self.standoffs
+            s = add_spacers(s, self.spacer_xy(), sp["h"], sp["d"], sp["pilot"], sp.get("foot"))
         return s
 
 
-# ======================= Raspberry Pi Model B size (5, 4 B, 3 B+, 3 B, 2 B, 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4, Libre Computer Le Potato) =======================
-class PiB(Board):
-    """85 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges. Same on the official mechanical drawings of the Raspberry Pi 5, 4 B, 3 B+, 3 B and 1 B+;
-    the 2 B has "the same form factor" as the 1 B+ (official documentation). The official drawings of the Radxa ROCK 3C (2D DXF) and
-    the Pine64 ROCK64 (dimension drawing) have the same outline and holes, with the microSD slot on the underside at a short edge.
-    So does the Hardkernel ODROID-C4 (official PCB mechanical drawing, DXF), with 3.0 mm holes, but its microSD slot is under the
-    board at the middle of the GPIO-header edge, which faces the back plate on the ports-down set of holes.
-    The Libre Computer AML-S905X-CC (Le Potato) PCB is 84 x 56 mm in its official 3D model, 1 mm shorter at the port end; its
-    3.0 mm holes are 3.5 mm from the microSD end and the long edges, as on the Raspberry Pi"""
-    name, title = "PiB", "Raspberry Pi 5 / 4 B / 3 B+ / 3 B / 2 B / 1 B+, Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4, Libre Computer Le Potato"
-    STEPS = {"AML-S905X-CC-V1.0.stp": (0, 41.5, 28.0, 0.0)}     # Le Potato: the PCB spans x 0-84, so 41.5 is the centre of the 85 mm outline
-    L, S = 85.0, 56.0                                  # board outline
-    HOLE_L, HOLE_S = (3.5, 61.5), (3.5, 52.5)          # mounting holes (long side, short side)
-    HOLE_D = 3.0                                       # hole diameter of the version without standoffs
-    SD_DEPTH = 19.0
-    SD_END = True
-    SPACER = dict(h=5.0, d=6.0, pilot=2.2, screw="M2.5")
-    BOARD_SPACER = 5.0                                 # height the board sits at, for display and interference checks
-
-    @classmethod
-    def holes(cls, flip=False):
-        """flip=True is the set for ports facing up. Offset by 20 mm along the long side"""
-        return [((cls.L - l) if flip else l, s) for l in cls.HOLE_L for s in cls.HOLE_S]
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + s)
-
-    @classmethod
-    def holes_xy(cls):
-        return [cls.xy(l, s_) for flip in (False, True) for l, s_ in cls.holes(flip)]   # two sets of holes (ports down / ports up)
-
-    @classmethod
-    def spacer_xy(cls):
-        return [cls.xy(l, s_) for l, s_ in cls.holes(False)]                         # standoffs only for the ports-down set
-
-    @classmethod
-    def cuts(cls):
-        H = cls.L / 2; yb = T + BOARD_Y0; yc = yb + 28.0; xn = H - cls.SD_DEPTH
-        y0w = yb + 3.5 + 6.0 / 2 + 4.0; y1w = 2 * yc - y0w
-        c = [tuple(sorted((sg * xn, sg * (2 * H - xn + 4)))) + (y0w, y1w) for sg in (1, -1)]   # openings at both ends = SD card notch
-        return c + [(x0, x1, y0w, y1w) for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB))]
-
-    @classmethod
-    def ghost(cls):
-        """Board for display and interference checks (simplified). GPIO side towards the back plate, USB/LAN at the top end"""
-        to = lambda l, s, h: (cls.L / 2 - l, T + BOARD_Y0 + (cls.S - s), Z0 + T + cls.BOARD_SPACER + h)
-        def blk(l0, l1, s0, s1, h0, h1):
-            a, b = to(l0, s0, h0), to(l1, s1, h1)
-            return box(min(a[0], b[0]), max(a[0], b[0]), min(a[1], b[1]), max(a[1], b[1]), min(a[2], b[2]), max(a[2], b[2]))
-        g = blk(0, cls.L, 0, cls.S, 0, 1.6)
-        g += blk(64, 87, 2, 54, 1.6, 17.6)             # USB / LAN
-        g += blk(7, 58, 49, 54.5, 1.6, 10.1)           # GPIO
-        return g
-
-
-# ======================= Raspberry Pi Model A+ size (3 A+, 1 A+) =======================
-class PiA(Board):
-    """65 x 56 mm, holes 58 x 49 mm, 3.5 mm from the edges (official 3 A+ mechanical drawing, which the documentation says also applies to the 1 A+)"""
-    name, title = "PiA", "Raspberry Pi 3 A+ / 1 A+"
-    L, S, BT = 65.0, 56.0, 1.6
-    HOLES = [(3.5, 3.5), (3.5, 52.5), (61.5, 3.5), (61.5, 52.5)]   # symmetric along the long side, so one set fits either orientation
-    HOLE_D = 3.0
-    SD_DEPTH = 15.0
-    SD_END = True
-    SPACER = dict(h=5.0, d=6.0, pilot=2.2, screw="M2.5")
-    BOARD_SPACER = 5.0
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + (cls.S - s))      # GPIO side (large s) towards the back plate, ports facing out
-
-    @classmethod
-    def cuts(cls):
-        H = cls.L / 2; yb = T + BOARD_Y0
-        y0w = yb + 3.5 + 6.0 / 2 + 4.0; y1w = yb + cls.S - (3.5 + 6.0 / 2 + 4.0)   # clear of the standoffs, as on PiB
-        xn = H - cls.SD_DEPTH
-        c = [tuple(sorted((sg * xn, sg * (H + 4)))) + (y0w, y1w) for sg in (1, -1)]   # SD card notch at both ends (fits either way round)
-        return c + [(x0, x1, y0w, y1w) for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB))]
-
-    @classmethod
-    def ghost(cls):
-        """Board for display and interference checks (simplified): USB-A, HDMI and the GPIO header, placed from the official 3 A+ drawing"""
-        def blk(l0, l1, s0, s1, h0, h1):
-            xa, ya = cls.xy(l0, s0); xb, yb_ = cls.xy(l1, s1)
-            za, zb = Z0 + T + cls.BOARD_SPACER + h0, Z0 + T + cls.BOARD_SPACER + h1
-            return box(min(xa, xb), max(xa, xb), min(ya, yb_), max(ya, yb_), za, zb)
-        t = cls.BT
-        g = blk(0, cls.L, 0, cls.S, 0, t)
-        g += blk(51.0, 66.0, 24.5, 38.5, t, t + 7.0)          # USB-A (centre 31.5 mm from the HDMI edge, Z-Height 7.0)
-        g += blk(24.5, 39.5, -1.0, 11.5, t, t + 6.5)          # HDMI (centre 32 mm, Z-Height 6.5)
-        g += blk(7.0, 58.0, 49.0, 54.5, t, t + 8.5)           # GPIO header (Z-Height 8.5)
-        return g
-
-
-# ======================= Raspberry Pi Zero size (Zero, Zero W, Zero 2 W, Radxa ZERO 3W / 3E) =======================
-class PiZero(Board):
-    """65 x 30 mm, holes 58 x 23 mm, 3.5 mm from the edges (official Zero W and Zero 2 W mechanical drawings; the Zero has the same holes).
-    The official drawings and 3D models of the Radxa ZERO 3W and 3E have the same outline and holes"""
-    name, title = "PiZero", "Raspberry Pi Zero / Zero W / Zero 2 W, Radxa ZERO 3W / 3E"
-    L, S, BT = 65.0, 30.0, 1.6
-    STEPS = {"radxa_zero_3w_3d.stp": (180, 32.495, 15.003, -1.6),        # Radxa ZERO 3W
-             "rs109_pcba.stp": (180, 32.495, 15.003, -1.62)}             # Radxa ZERO 3E (the pads under the holes are 0.02 mm proud)
-    HOLES = [(3.5, 3.5), (3.5, 26.5), (61.5, 3.5), (61.5, 26.5)]   # 58 x 23. Symmetric both ways, so one set fits either orientation
-    HOLE_D = 3.0
-    SD_DEPTH = 15.0
-    SD_END = True
-    WIN_M = 2.5
-    SPACER = dict(h=3.0, d=6.0, pilot=2.2, screw="M2.5")
-    BOARD_SPACER = 3.0
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + (cls.S - s))      # GPIO side (large s) towards the back plate, ports facing out
-
-    @classmethod
-    def cuts(cls):
-        H = cls.L / 2; yb = T + BOARD_Y0
-        y0w = yb + 3.5 + cls.HOLE_D / 2 + cls.WIN_M; y1w = yb + cls.S - 3.5 - cls.HOLE_D / 2 - cls.WIN_M
-        xn = H - cls.SD_DEPTH
-        c = [tuple(sorted((sg * xn, sg * (H + 4)))) + (y0w, y1w) for sg in (1, -1)]
-        return c + [(x0, x1, y0w, y1w) for x0, x1 in ((-(xn - RIB), -RIB / 2), (RIB / 2, xn - RIB))]
-
-    @classmethod
-    def ghost(cls):
-        """Board for display and interference checks (simplified), with the microSD card"""
-        def blk(l0, l1, s0, s1, h0, h1):
-            xa, ya = cls.xy(l0, s0); xb, yb_ = cls.xy(l1, s1)
-            za, zb = Z0 + T + cls.BOARD_SPACER + h0, Z0 + T + cls.BOARD_SPACER + h1
-            return box(min(xa, xb), max(xa, xb), min(ya, yb_), max(ya, yb_), za, zb)
-        t = cls.BT
-        g = blk(0, cls.L, 0, cls.S, 0, t)
-        g += blk(6.8, 18.0, -0.5, 7.5, t, t + 3.5)             # mini HDMI
-        g += blk(37.4, 45.4, -1.0, 5.0, t, t + 3.0)            # micro USB (data)
-        g += blk(50.0, 58.0, -1.0, 5.0, t, t + 3.0)            # micro USB (power)
-        g += blk(7.1, 58.0, 25.2, 27.8 + 2.54, t, t + 8.5)     # GPIO header (if fitted)
-        g += blk(61.0, 66.0, 7.0, 23.0, t, t + 1.3)            # camera connector
-        g += blk(-2.5, 12.0, 11.4, 22.4, t, t + 1.4)           # microSD (centre 16.9 mm from the port edge, official Zero W drawing)
-        return g
-
-
-# ======================= Khadas VIM1S / VIM3 / VIM4 =======================
-class VIM1S(Board):
-    """Dimensions taken from Khadas' official 3D model vim1s-pcba-3d-v11.stp. The official 3D models and 2D drawings of the
-    VIM3 and VIM4 have the same outline and holes"""
-    name, title = "VIM1S", "Khadas VIM1S / VIM3 / VIM4"
-    L, S, BT = 82.0, 56.638, 1.21
-    HOLES = [(2.5, 3.134), (79.5, 3.134), (16.5, 48.634), (65.5, 48.634)]   # trapezoid pattern (77 / 49 / 45.5). s=0 is the GPIO side
-    HOLE_D = 3.0
-    SD_L0, SD_L1, SD_S0 = 32.0, 55.0, 46.0             # microSD notch (middle of the port-side edge, underside of the board)
-    WIN_S0, WIN_S1 = 7.5, 41.0
-    SPACER = dict(h=5.0, d=5.0, pilot=1.7, screw="M2")  # 5 mm because the LAN jack on the underside sticks out 3.5 mm below the board
-    BOARD_SPACER = 5.0
-    STEPS = {"vim1s-pcba-3d-v11.stp": (0, 35.16, -34.633, -1.205),
-             "vim3-pcba-3d-v14.stp": (180, -155.846, 46.546, 50.143),
-             "vim4-pcba-3d-v13.stp": (180, 41.0, 28.315, -1.2)}
-
-    @classmethod
-    def xy(cls, l, s):
-        return (l - cls.L / 2, T + BOARD_Y0 + s)
-
-    @classmethod
-    def cuts(cls):
-        l0, l1 = 6.0, cls.L - 6.0; wl = (l1 - l0 - 2 * RIB) / 3
-        c = []
-        for i in range(3):                             # three lightening windows
-            a = l0 + i * (wl + RIB)
-            (xa, ya), (xb, yb2) = cls.xy(a, cls.WIN_S0), cls.xy(a + wl, cls.WIN_S1)
-            c.append((xa, xb, ya, yb2))
-        yo = T + BOARD_Y0 + cls.S
-        (xa, ya), (xb, _) = cls.xy(cls.SD_L0, cls.SD_S0), cls.xy(cls.SD_L1, 0)
-        return c + [(xa, xb, ya, yo + 4)]              # microSD notch (open to the outer edge)
-
-    @classmethod
-    def ghost(cls):
-        """Just the bare board (does not affect the bracket shape). Use the official 3D models (STEPS) for interference checks"""
-        z = Z0 + T + cls.BOARD_SPACER
-        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
-
-
-# ======================= Radxa ROCK 5B / 5B+ =======================
-class ROCK5B(Board):
-    """100.2 x 74.25 mm, four 3.5 mm holes 93.15 x 49 mm apart, 3.55 mm from the GPIO-side edge (official 2D drawings and 3D models
-    of the ROCK 5B v1.42 and ROCK 5B+ v1.2). The microSD card sticks out past the GPIO-side edge, under the board, beside the frame"""
-    name, title = "ROCK5B", "Radxa ROCK 5B / 5B+"
-    L, S, BT = 100.2, 74.25, 1.6
-    HOLES = [(3.55, 3.55), (96.70, 3.55), (3.55, 52.55), (96.70, 52.55)]   # s=0 is the GPIO side
-    HOLE_D = 3.0                                       # the board holes are 3.5 mm
-    WIN_S = ((10.55, 45.55), (59.55, 70.25))           # two rows of lightening windows, clear of the standoffs
-    SPACER = dict(h=8.0, d=5.4, pilot=2.2, screw="M2.5")  # 8 mm: parts under the 5B+ reach 5.4 mm below the board, and the 5B's microSD card sits under it. 5.4 mm: a part under the 5B+ is 3.1 mm from a hole centre
-    BOARD_SPACER = 8.0
-    STEPS = {"ROCK5B_v1.42_3D.step": (180, -6.896, 94.691, -1.5),
-             "rock5bp_pcba_3d_V1_2_20250314.stp": (0, 47.097, 37.121, -1.6)}
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + s)
-
-    @classmethod
-    def ghost(cls):
-        """Just the bare board (does not affect the bracket shape). Use the official 3D models (STEPS) for interference checks"""
-        z = Z0 + T + cls.BOARD_SPACER
-        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
-
-
-# ======================= BeagleBoard.org BeagleBone Black =======================
-class BBB(Board):
-    """86.36 x 54.61 mm (3.400 x 2.150 in), four 3.175 mm (1/8 in) holes in a trapezoid, from the board outline and drill file of
-    the official Rev C manufacturing data and the board dimension drawing in the System Reference Manual. The microSD slot,
-    micro HDMI and USB-A are at one short end (microSD and micro HDMI under the board), Ethernet, the power jack and mini USB
-    (under the board) at the other. No official 3D model is published"""
-    name, title = "BBB", "BeagleBoard.org BeagleBone Black"
-    L, S, BT = 86.36, 54.61, 1.575
-    # l = 0 is the microSD end (x = 3.400 in in the manufacturing data), s is y there (0 at the P9 header edge).
-    # From the drill file: (3.175, 0.250), (3.175, 1.900), (0.575, 0.125), (0.575, 2.025) in
-    HOLES = [(5.715, 6.35), (5.715, 48.26), (71.755, 3.175), (71.755, 51.435)]
-    HOLE_D = 3.0                                       # the board holes are 3.175 mm
-    SD_END = True
-    SD_NOTCH = (23.0, 20.0, 44.5)                      # microSD end notch: depth, s range (microSD holder and micro HDMI under the board)
-    USB_NOTCH = (75.0, 38.0, 50.0)                     # power end notch: from l, s range (mini USB under the board)
-    WIN_L, WIN_S = (29.0, 69.0), (10.0, 44.61)         # two lightening windows, clear of the standoffs and the notches
-    SPACER = dict(h=6.0, d=6.0, pilot=2.6, screw="M3")  # 6 mm tall: the System Reference Manual gives a "max height" of 4.76 mm without
-                                                       # saying of what. 6 mm across: the nearest parts under the board are 5.2 mm from a hole centre
-    BOARD_SPACER = 6.0
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + s)
-
-    @classmethod
-    def cuts(cls):
-        def r(l0, l1, s0, s1):
-            (xa, ya), (xb, yb_) = cls.xy(l0, s0), cls.xy(l1, s1)
-            return min(xa, xb), max(xa, xb), ya, yb_
-        d, s0, s1 = cls.SD_NOTCH; u, t0, t1 = cls.USB_NOTCH; (a, b), (w0, w1) = cls.WIN_L, cls.WIN_S
-        wl = (b - a - RIB) / 2
-        return [r(-4.0, d, s0, s1), r(u, cls.L + 4.0, t0, t1)] + [r(c, c + wl, w0, w1) for c in (a, a + wl + RIB)]
-
-    @classmethod
-    def ghost(cls):
-        """Board for display and interference checks (simplified). x, y are the manufacturing data's coordinates (mm, top view):
-        outlines from the silkscreen, header pins from the drill file, heights from the official bill of materials. The heights of
-        the micro HDMI and mini USB under the board are not published, so they are shown reaching the plate (it is notched there)"""
-        def blk(x0, x1, y0, y1, h0, h1):
-            (xa, ya), (xb, yb_) = cls.xy(cls.L - x0, y0), cls.xy(cls.L - x1, y1)
-            za, zb = Z0 + T + cls.BOARD_SPACER + h0, Z0 + T + cls.BOARD_SPACER + h1
-            return box(min(xa, xb), max(xa, xb), ya, yb_, za, zb)
-        t = cls.BT; down = 0.02 - cls.BOARD_SPACER
-        g = blk(0, cls.L, 0, cls.S, 0, t)
-        g += blk(-2.62, 19.23, 21.89, 37.80, t, t + 13.3)     # Ethernet (RJ45, 13.3 mm tall)
-        g += blk(-2.54, 12.07, 4.95, 14.10, t, t + 11.0)      # power jack (11 mm)
-        g += blk(72.34, 86.33, 10.26, 23.37, t, t + 7.0)      # USB-A (7 mm)
-        for y0 in (0.635, 48.895):                             # P9 / P8 expansion headers (8.5 mm), and their pins through the board
-            g += blk(18.415, 76.835, y0, y0 + 5.08, t, t + 8.5)
-            g += blk(19.2, 76.1, y0 + 0.77, y0 + 4.31, t - 3.0, 0)
-        g += blk(66.17, 86.36, 24.26, 44.41, -1.8, 0)         # microSD holder, under the board (1.8 mm)
-        g += blk(80.45, 87.05, 21.90, 30.11, down, 0)         # micro HDMI, under the board
-        g += blk(-0.50, 6.50, 40.28, 47.98, down, 0)          # mini USB, under the board
-        return g
-
-
-# ======================= Hardkernel ODROID-M2 =======================
-class M2(Board):
-    """90 x 90 mm, four 3.3 mm holes at (3.5, 3.5), (86.5, 3.5), (86.5, 75.5) and (16.6, 78.5) mm from the corner between the edge
-    with the microSD slot and the edge with the GPIO header (official PCB mechanical drawing rev 1.0, DXF, and 3D model rev 1.0).
-    Most ports are along the edge opposite the GPIO header. The microSD card sticks out 9.9 mm past its edge, on top of the board,
-    and the USB-C port on that edge sticks out 1.4 mm. Under the board are a connector next to the UART label (6.8 mm deep; a surface
-    rather than a solid in the 3D model), the RTC battery holder (6.5 mm), the M.2 slot (5.5 mm) and the standoff for an M.2 2280 SSD (4.1 mm)"""
-    name, title = "M2", "Hardkernel ODROID-M2"
-    L, S, BT = 90.0, 90.0, 1.5
-    HOLES = [(3.5, 3.5), (86.5, 3.5), (86.5, 75.5), (16.6, 78.5)]   # l = 0 is the microSD edge, s = 0 the GPIO-header edge
-    HOLE_D = 3.0                                       # the board holes are 3.3 mm
-    WIN_S = ((10.5, 40.0), (46.0, 68.5))               # two rows of lightening windows, clear of the standoffs
-    SPACER = dict(h=8.0, d=6.0, pilot=2.6, screw="M3")  # 8 mm: the connector by the UART label reaches 6.8 mm below the board and an
-                                                       # SSD on the 4.1 mm M.2 standoff about 6.5 mm. 6 mm across: the nearest part is 3.4 mm from a hole centre
-    BOARD_SPACER = 8.0
-    STEPS = {"M2_MAIN_REV1.0.step": (0, 45.0, 45.0, -1.498)}
-
-    @classmethod
-    def xy(cls, l, s):
-        return (l - cls.L / 2, T + BOARD_Y0 + s)       # the microSD edge away from the frame in upright landscape and shelf portrait
-
-    @classmethod
-    def ghost(cls):
-        """Just the bare board (does not affect the bracket shape). Use the official 3D model (STEPS) for interference checks"""
-        z = Z0 + T + cls.BOARD_SPACER
-        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
-
-
-# ======================= LattePanda 3 Delta =======================
-class LP3Delta(Board):
-    """125 x 78 mm, four 3.2 mm holes 118 x 71 mm apart, 3.5 mm from the edges (official KiCad footprint in the LattePanda KiCad
-    library, and official 3D model V1.1). The three USB-A ports are at one short end, the HDMI, Ethernet, headphone and USB-C ports
-    at the other. The microSD and nano SIM slot is under the board at the long edge with the 12 V input header and, under the board,
-    the display and touch panel connectors; the other long edge has the RTC battery, the Arduino-side GPIO header and the power
-    button. Under the board are the two M.2 slots, the cards in them and their standoffs (the deepest, 5.1 mm below the board)"""
-    name, title = "LP3Delta", "LattePanda 3 Delta"
-    L, S, BT = 125.0, 78.0, 1.2
-    HOLES = [(3.5, 3.5), (121.5, 3.5), (3.5, 74.5), (121.5, 74.5)]   # l = 0 is the USB-A end, s = 0 the RTC battery edge
-    HOLE_D = 3.0                                       # the board holes are 3.2 mm
-    WIN_S = ((10.5, 36.0), (42.0, 67.5))               # two rows of lightening windows, clear of the standoffs
-    WIN_N = 4
-    SPACER = dict(h=8.0, d=6.0, pilot=2.6, screw="M3")  # 8 mm: the M.2 standoffs reach 5.1 mm below the board. 6 mm across: the
-                                                       # nearest part under the board is 3.2 mm from a hole centre
-    BOARD_SPACER = 8.0
-    STEPS = {"LattePanda 3 Delta 3D Model V1.1 20250221.step": (180, 0.0, 0.0, -1.2)}
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + s)       # the USB-A end towards the frame in upright landscape and shelf portrait
-
-    @classmethod
-    def ghost(cls):
-        """Just the bare board (does not affect the bracket shape). Use the official 3D model (STEPS) for interference checks"""
-        z = Z0 + T + cls.BOARD_SPACER
-        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
-
-
-# ======================= LattePanda Mu on the Lite Carrier =======================
-class MuLite(Board):
-    """146 x 102 mm, four 3.2 mm holes at (3.5, 3.5), (142.5, 3.5), (3.0, 98.5) and (142.5, 98.5) mm from the corner between the
-    PCIe slot end and the edge opposite the ports (official KiCad design of the Lite Carrier V1 and V2, and official 3D model
-    V2.0.1). All the ports are along one long edge. The power and reset buttons stick out of the other long edge, near the PCIe
-    end. The LattePanda Mu module, its cooler and the M.2 cards sit on top of the board; under it, the pins of the PCIe slot reach
-    3.3 mm"""
-    name, title = "MuLite", "LattePanda Mu Lite Carrier"
-    L, S, BT = 146.0, 102.0, 1.6
-    HOLES = [(3.5, 3.5), (142.5, 3.5), (3.0, 98.5), (142.5, 98.5)]   # l = 0 is the PCIe slot end, s = 0 the edge with the buttons
-    HOLE_D = 3.0                                       # the board holes are 3.2 mm
-    WIN_S = ((10.5, 48.0), (54.0, 91.5))               # two rows of lightening windows, clear of the standoffs
-    WIN_N = 4
-    SPACER = dict(h=5.0, d=6.0, pilot=2.6, screw="M3")  # 5 mm: the pins of the PCIe slot reach 3.3 mm below the board
-    BOARD_SPACER = 5.0
-    STEPS = {"DFR1142 Lite Carrier for LattePanda Mu(V2.0.1).step": (180, -69.5, 47.5, 0.0)}
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + s)       # the PCIe slot end towards the frame in upright landscape and shelf portrait
-
-    @classmethod
-    def ghost(cls):
-        """Just the bare board (does not affect the bracket shape). Use the official 3D model (STEPS) for interference checks"""
-        z = Z0 + T + cls.BOARD_SPACER
-        return box(-cls.L / 2, cls.L / 2, T + BOARD_Y0, T + BOARD_Y0 + cls.S, z, z + cls.BT)
-
-
-# ======================= Hardkernel ODROID-N2+ and ODROID-M1, held by their heatsinks =======================
-class HKSink(Board):
-    """Hardkernel boards whose SoC is on the underside, screwed to the top of a heatsink that is also their stand: a 100 mm wide
-    aluminium extrusion, 19 mm tall, with fins underneath and a side wall along each long edge (the same profile on the official
-    heatsink drawings of the ODROID-N2+ and the ODROID-M1, and the N2+ heatsink's 3D model). These brackets hold the heatsink, not
-    the board. The plate is the heatsink's footprint, and its holes match M3 threaded holes in the heatsink's 3 mm base that the
-    board does not use, 14.25 mm from the long edges, which open between the side wall and the outermost fin (2.9 mm from a hole
-    centre). l runs along the extrusion from the end away from the ports, s across it from the side of the board's GPIO header.
-    Heights in ghost() are above the bottoms of the side walls, the heatsink's lowest edge, 6 mm below the base"""
-    S, BT = 100.0, 1.6
-    HOLE_D = 3.0                                       # M3 screws pass through the 3 mm holes of the version without standoffs (tight)
-    SD_END = True                                      # the microSD slot is at the end away from the ports
-    WIN_S = ((21.0, 47.0), (53.0, 79.0))               # two rows of lightening windows, clear of the standoffs
-    SPACER = dict(h=10.0, d=5.0, pilot=3.4, screw="M3 × 16", foot=(3.5, 8.0), through="heatsink")
-    # 10 mm keeps the side walls 4 mm and the fins 5 mm off the plate. The top 6.5 mm goes up between the side wall and the outermost
-    # fin, so it is 5 mm across (0.4 mm from the fin); below the heatsink it widens to 8 mm. M3 x 16 = 3 mm plate + 10 mm standoff + the 3 mm base
-    BOARD_SPACER = 10.0                                # height of the heatsink base's underside, for display and interference checks
-    PCB_H = 13.0                                       # underside of the board above the bottoms of the side walls (estimate: the
-                                                       # heatsink's contact pad ends at about 11 mm, and the SoC sits on it)
-
-    @classmethod
-    def xy(cls, l, s):
-        return (cls.L / 2 - l, T + BOARD_Y0 + s)       # the end away from the ports towards the frame in upright landscape and shelf portrait
-
-    @classmethod
-    def ghost(cls):
-        """Heatsink and bare board for display and interference checks, simplified from the official heatsink drawings (the fins
-        as one block, 0.5 mm deeper than they are). The board's height above the heatsink is not published (PCB_H)"""
-        z0 = Z0 + T + cls.BOARD_SPACER - 6.0
-        def blk(l0, l1, s0, s1, h0, h1):
-            (xa, ya), (xb, yb_) = cls.xy(l0, s0), cls.xy(l1, s1)
-            return box(min(xa, xb), max(xa, xb), ya, yb_, z0 + h0, z0 + h1)
-        L, S = cls.L, cls.S
-        g = blk(0, L, 2.0, S - 2.0, 6.0, 9.0)                       # base
-        g += blk(0, L, 17.1, S - 17.1, 0.5, 6.0)                    # fins
-        for a, b in ((0.0, 1.0), (S, -1.0)):                         # side walls: below the base, beside the base, and up to 19 mm
-            for w0, w1, h0, h1 in ((2.0, 4.4, 0.0, 6.0), (2.0, 6.0, 9.0, 11.6), (0.0, 4.7, 11.6, 19.0)):
-                s0, s1 = sorted((a + b * w0, a + b * w1))
-                g += blk(0, L, s0, s1, h0, h1)
-        g += blk(0.5, cls.L - 0.5, 5.0, 95.0, cls.PCB_H, cls.PCB_H + cls.BT)   # the board, 0.5 mm in from the ends
-        return g
-
-
-class N2Plus(HKSink):
-    """ODROID-N2+ on its heatsink. Heatsink 91 x 100 mm (official heatsink drawing and 3D model, 2020-07-07), the 90 x 90 mm board
-    0.5 mm in from its ends. The heatsink has eight M3 threaded holes: the board is screwed to the four 58 x 83.5 mm apart, the
-    bracket to the four 71.5 x 71.5 mm apart, 9.75 mm from the ends (official board drawing rev 0.4 and the N2+ expansion-board
-    template rev 0.5 for the board holes). The microSD slot is under the board at the end away from the ports and sticks out 1.8 mm
-    past the board"""
-    name, title = "N2Plus", "Hardkernel ODROID-N2+"
-    L = 91.0
-    HOLES = [(9.75, 14.25), (81.25, 14.25), (9.75, 85.75), (81.25, 85.75)]
-    STEPS = {"N2_BODY_20200707.STL": (90, 50.0, -45.5, 6.0, 90)}   # the heatsink (y up, the end away from the ports at z = 91)
-
-
-class M1(HKSink):
-    """ODROID-M1 on its heatsink. Heatsink 123 x 100 mm (official heatsink drawing, 2021-11-08), the 122 x 90 mm board 0.5 mm in
-    from its ends. The heatsink has twelve M3 threaded holes: the board is screwed to the four 90 x 83.5 mm apart, the bracket to the
-    outer four of the other eight, 103.5 x 71.5 mm apart, 9.75 mm from the ends (official board drawing rev 1.0 for the board holes).
-    The microSD slot is at the end away from the ports"""
-    name, title = "M1", "Hardkernel ODROID-M1"
-    L = 123.0
-    HOLES = [(9.75, 14.25), (113.25, 14.25), (9.75, 85.75), (113.25, 85.75)]
-    WIN_N = 4
-
-
-BOARDS = [PiB, PiA, PiZero, VIM1S, ROCK5B, BBB, M2, LP3Delta, MuLite, N2Plus, M1]
+BOARDS = [Board(p) for p in sorted(glob.glob(os.path.join(BOARD_DIR, "*.json")))]
 SERIES = (20, 40, "DIN")
 
 
 # ======================= Mounting orientations =======================
 # The grip only prints one way up, so every orientation keeps it on the build plate (z = Z0) and changes how the board plate sits
 # relative to it. A board's holes, openings and standoffs are defined once, on the upright-portrait front plate (the "board frame":
-# holes_xy / cuts / spacer_xy / ghost / STEPS), and place() moves them, the simplified board and the official 3D models to the
+# holes_xy / cuts / spacer_xy / ghost / official_models), and place() moves them, the simplified board and the official 3D models to the
 # orientation. In the flat and shelf orientations the board plate stands upright while printing, so openings get 45-degree roofs,
 # holes become teardrops, and each opening keeps the rest of its rectangle as a shallow pocket in the face under the board.
 # Those orientations have no integrated standoffs: a standoff growing sideways out of a standing plate only prints without support
@@ -788,7 +450,7 @@ def shelf_top(series):
 
 def gap(B, orient):
     """From the front face of the back plate to the near edge of the board"""
-    return SD_GAP if B.SD_END and orient in ("upright-landscape", "shelf-portrait") else BOARD_Y0
+    return SD_GAP if B.sd_end and orient in ("upright-landscape", "shelf-portrait") else BOARD_Y0
 
 
 def flat_edge(B, orient, series):
@@ -803,8 +465,8 @@ def flat_edge(B, orient, series):
     need = 0.0
     for x, y in B.holes_xy():
         p = (M * Pos(x, y, Z0)).position
-        if hit(p.X, B.HOLE_D / 2):
-            need = max(need, zc - (p.Z - B.HOLE_D / 2))
+        if hit(p.X, B.hole_d / 2):
+            need = max(need, zc - (p.Z - B.hole_d / 2))
     return W / 2 + need
 
 
@@ -882,7 +544,7 @@ def oriented(B, series, spacer, orient):
     """Bracket for an orientation other than upright portrait"""
     M = place(B, orient, series)
     kind = orient.split("-")[0]; portrait = orient.endswith("portrait")
-    L, S = B.L, B.S; g = gap(B, orient); xr = xr_of(series); sp = B.SPACER
+    L, S = B.L, B.S; g = gap(B, orient); xr = xr_of(series); sp = B.standoffs
     to = lambda xy: [tuple((M * Pos(x, y, Z0)).position) for x, y in xy]
 
     def rect(c):                                       # an opening of the board frame -> (x0, x1, y0, y1, z0, z1)
@@ -893,7 +555,7 @@ def oriented(B, series, spacer, orient):
         Hp = S / 2
         s = _l_body(series, Hp, g + L, Hb=max(Hp, xr))
         for x, y, _ in to(B.holes_xy()):
-            s -= Pos(x, y, Z0 + T / 2) * Cylinder(B.HOLE_D / 2, T + 2)
+            s -= Pos(x, y, Z0 + T / 2) * Cylinder(B.hole_d / 2, T + 2)
         for x0, x1, y0, y1, _, _ in map(rect, B.cuts()):
             y0 = max(y0, T + FIL + 1.0)                # an opening that reaches past the board stops short of the gusset
             if y1 - y0 > 2 * WIN_R + 0.1 and x1 - x0 > 2 * WIN_R + 0.1:
@@ -925,7 +587,7 @@ def oriented(B, series, spacer, orient):
         ac = lambda p: p[1]
         Pa = None
     for p in to(B.holes_xy()):
-        s -= _vcut(kind, _tear(ac(p), p[2], B.HOLE_D / 2), n0 - 1, n1 + 1)
+        s -= _vcut(kind, _tear(ac(p), p[2], B.hole_d / 2), n0 - 1, n1 + 1)
     for c in map(rect, B.cuts()):
         a0, a1 = (c[0], c[1]) if kind == "flat" else (c[2], c[3])
         if kind == "shelf":

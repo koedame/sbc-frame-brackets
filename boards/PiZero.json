@@ -1,0 +1,30 @@
+{
+  "title": "Raspberry Pi Zero / Zero W / Zero 2 W, Radxa ZERO 3W / 3E",
+  "notes": [
+    "65 x 30 mm, holes 58 x 23 mm, 3.5 mm from the edges (official Zero W and Zero 2 W mechanical drawings; the Zero has the same holes). The official drawings and 3D models of the Radxa ZERO 3W and 3E have the same outline and holes.",
+    "l = 0 is the microSD end, s = 0 the edge with the mini HDMI and micro USB ports. The GPIO-header edge (s = S) faces the back plate, the ports face out.",
+    "The holes are symmetric both ways, so one set fits either way round. The openings at both ends are the microSD notch (15 mm deep); all openings keep 2.5 mm from the holes.",
+    "microSD centred 16.9 mm from the port edge (official Zero W drawing).",
+    "The ZERO 3E's pads under the holes are 0.02 mm proud of its PCB, hence its underside at -1.62."
+  ],
+  "size": [65.0, 30.0],
+  "frame_edge": "s=S",
+  "microsd_edge": "l=0",
+  "holes": [[3.5, 3.5], [3.5, 26.5], [61.5, 3.5], [61.5, 26.5]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 3.0, "d": 6.0, "pilot": 2.2, "screw": "M2.5"},
+  "openings": [[-4.0, 15.0, 7.5, 22.5], [50.0, 69.0, 7.5, 22.5], [21.0, 29.5, 7.5, 22.5], [35.5, 44.0, 7.5, 22.5]],
+  "parts": [
+    {"name": "PCB", "box": [0, 65.0, 0, 30.0, 0, 1.6]},
+    {"name": "mini HDMI", "box": [6.8, 18.0, -0.5, 7.5, 1.6, 5.1]},
+    {"name": "micro USB (data)", "box": [37.4, 45.4, -1.0, 5.0, 1.6, 4.6]},
+    {"name": "micro USB (power)", "box": [50.0, 58.0, -1.0, 5.0, 1.6, 4.6]},
+    {"name": "GPIO header (if fitted)", "box": [7.1, 58.0, 25.2, 30.34, 1.6, 10.1]},
+    {"name": "camera connector", "box": [61.0, 66.0, 7.0, 23.0, 1.6, 2.9]},
+    {"name": "microSD", "box": [-2.5, 12.0, 11.4, 22.4, 1.6, 3.0]}
+  ],
+  "official_models": {
+    "radxa_zero_3w_3d.stp": {"rotate": 0, "centre": [32.495, 15.003], "underside": -1.6},
+    "rs109_pcba.stp": {"rotate": 0, "centre": [32.495, 15.003], "underside": -1.62}
+  }
+}

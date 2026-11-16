@@ -1,0 +1,25 @@
+{
+  "title": "Khadas VIM1S / VIM3 / VIM4",
+  "notes": [
+    "Dimensions from Khadas' official 3D model of the VIM1S (vim1s-pcba-3d-v11.stp). The official 3D models and 2D drawings of the VIM3 and VIM4 have the same outline and holes.",
+    "s = 0 is the GPIO-header edge, which faces the back plate. The holes are a trapezoid (77 / 49 / 45.5 mm).",
+    "The opening that runs out past s = S is the microSD notch, in the middle of the port-side edge (the slot is under the board).",
+    "Standoffs 5 mm tall because the LAN jack sticks out 3.5 mm below the board."
+  ],
+  "size": [82.0, 56.638],
+  "frame_edge": "s=0",
+  "microsd_edge": "s=S",
+  "holes": [[2.5, 3.134], [79.5, 3.134], [16.5, 48.634], [65.5, 48.634]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 5.0, "d": 5.0, "pilot": 1.7, "screw": "M2"},
+  "openings": [[32.0, 55.0, 46.0, 60.638]],
+  "windows": {"rows": [[7.5, 41.0]], "per_row": 3},
+  "parts": [
+    {"name": "PCB", "box": [0, 82.0, 0, 56.638, 0, 1.21]}
+  ],
+  "official_models": {
+    "vim1s-pcba-3d-v11.stp": {"rotate": 0, "centre": [35.16, -34.633], "underside": -1.205},
+    "vim3-pcba-3d-v14.stp": {"rotate": 180, "centre": [-155.846, 46.546], "underside": 50.143},
+    "vim4-pcba-3d-v13.stp": {"rotate": 180, "centre": [41.0, 28.315], "underside": -1.2}
+  }
+}

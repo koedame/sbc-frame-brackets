@@ -74,7 +74,7 @@ def main():
     ap.add_argument("--out", default=os.path.join(HERE, "models"))
     ap.add_argument("--board-step", action="append", default=[], metavar="PATH",
                     help="a board's official 3D model (STEP, or STL for one published only as STL), used for the board interference check in place of the simplified board. "
-                         "Repeat for several models; the file name tells which board it is (STEPS in sbc_brackets.py). Not put in viewer.html")
+                         "Repeat for several models; the file name tells which board it is (official_models in boards/<board>.json). Not put in viewer.html")
     ap.add_argument("--check", action="store_true", help="check every model built; exit 1 if any check fails")
     ap.add_argument("--coupons", action="store_true")
     ap.add_argument("--board", nargs="+", choices=[B.name for B in sb.BOARDS], default=[B.name for B in sb.BOARDS])
@@ -115,7 +115,7 @@ def main():
         m = dict(id=n, name=B.name, title=B.title, series=series, mount=sb.mount_label(series), spacer=spacer,
                  orient=orient, orient_label=sb.ORIENTS[orient], ghost=gk,
                  size=[round(x, 1) for x in (bb.size.X, bb.size.Y, bb.size.Z)], vol=round(s.volume / 1000, 1), min=None,
-                 boss=(dict(B.SPACER) if spacer else None))
+                 hole_d=B.hole_d, boss=(dict(B.standoffs, n=len(B.spacer_xy())) if spacer else None))
         line = f"{n:40s} size {m['size']} mm  volume {m['vol']} cm3"
         if a.check:
             fr = frames[series]
@@ -160,7 +160,8 @@ def main():
         html = (tpl.replace("__THREE_LICENSE__", lic)
                    .replace("__THREE__", three.replace("</script", "<\\/script"))
                    .replace("__ORBIT__", orbit.replace("</script", "<\\/script"))
-                   .replace("__DATA__", json.dumps(data, separators=(",", ":"))))
+                   # The data comes from the board definitions; "<" escaped so that no string in it can close the <script>
+                   .replace("__DATA__", json.dumps(data, separators=(",", ":")).replace("<", "\\u003c")))
         open(os.path.join(a.out, "viewer.html"), "w", encoding="utf-8").write(html)
         print("Wrote viewer.html")
     if a.check:

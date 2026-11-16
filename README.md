@@ -380,7 +380,7 @@ Tested on Linux ARM64 (Python 3.11, 3.13 and 3.14) and Linux x86-64 (Python 3.11
 
 | Option | What it does |
 |---|---|
-| `--board PiB PiA` | Brackets to build: `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1` (default: all) |
+| `--board PiB PiA` | Brackets to build, by the name of their definition in [`boards/`](boards/README.md): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1` (default: all) |
 | `--mount 20 DIN` | Mounts to build: `20`, `40`, `DIN` (default: all) |
 | `--orient flat-portrait shelf-landscape` | Orientations to build: `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape` (default: all) |
 | `--format 3mf step` | What to write: `3mf`, `stl`, `step`, `viewer` (default: all). The upright orientations get both the version without and the version with standoffs |
@@ -422,42 +422,48 @@ Even when you pass official models, the viewer shows bare boards, so that no sha
 
 ## Customising
 
-All dimensions live in `sbc_brackets.py`.
+The dimensions every bracket shares live in `sbc_brackets.py`. Each board's own dimensions live in its definition, `boards/<board>.json` ([`boards/README.md`](boards/README.md) describes the fields).
 
-| To change | Constant in `sbc_brackets.py` |
+| To change | Where |
 |---|---|
-| Fit on the extrusion | `FIT` (clearance per side, currently 0.05 mm) |
+| Fit on the extrusion | `FIT` in `sbc_brackets.py` (clearance per side, currently 0.05 mm) |
 | DIN rail hooks and leaf springs | `DIN_HOOK` (0.8 mm), `DIN_LEAF_T` (1.2 mm), `DIN_FIT` (0.05 mm), `DIN_SLIT_OUT` (room for the spring to bend outwards, 2.0 mm. `--check` tells you if a deeper hook needs more) |
 | Width of the DIN rail centre key | `DIN_KEY_HALF` (half width, currently 12.2 mm) |
 | Hook engagement | `HOOK` (currently 1.0 mm) |
 | Hook stiffness | `ARM_T` (1.6 mm at the root), `ARM_TIP` (0.9 mm at the tip) |
 | Width along the rail | `W` (currently 16 mm) |
-| Board hole diameter | `HOLE_D` in each board class |
-| Standoffs | `SPACER` in each board class (height, outer diameter, pilot hole) |
+| Board hole diameter | `hole_d` in the board's definition |
+| Standoffs | `standoffs` in the board's definition (height, outer diameter, pilot hole) |
 | Gap for a finger to reach the microSD card when that end faces the frame | `SD_GAP` (currently 17 mm) |
 
 Before changing the fit, print the coupons from `--coupons` and try them on your extrusion.
 
 **Adding a board**
 
-1. Copy the `PiA` class in `sbc_brackets.py`.
-2. Change the board outline (`L`, `S`), the mounting holes (`HOLES`) and the notch for the SD card. Set `SD_END` if the microSD slot is at the `l = 0` short end.
-3. Add it to `BOARDS`.
-4. If the manufacturer publishes a 3D model, add it to `STEPS` (rotation, and the centre of the board outline and the height of its underside in the file's own coordinates).
-5. Run `python build_all.py --board <new board> --format step --check --board-step <official model>` to check interference and supports in every orientation.
+A board is one JSON file in `boards/`; no code changes.
+
+1. Check [Supported boards](#supported-boards) first: many boards share an outline and mounting holes with one that is already there.
+2. Copy the definition of the closest board to `boards/<NewBoard>.json`. The file name becomes the board's name in `--board` and in the output file names.
+3. Change the outline, the mounting holes, the standoffs, the openings and the simplified parts. [`boards/README.md`](boards/README.md) describes every field and the coordinates.
+4. If the manufacturer publishes a 3D model, add it to `official_models`.
+5. Run `python build_all.py --board <NewBoard> --format step --check` to check interference and supports in every orientation, with `--board-step <official model>` if there is one. It exits with status 1 if any check fails.
+6. Run `python build_all.py --board <NewBoard> --format viewer` and open `models/viewer.html` to see the brackets with the board.
 
 Take the dimensions from the manufacturer's official 3D model or drawing, not from memory.
+With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKILL.md) follows the same steps, and for a supported board hands over the download links instead.
 
 ## Project layout
 
 | Path | Contents |
 |---|---|
 | [`DESIGN_NOTES.md`](DESIGN_NOTES.md) | Why things are the way they are: design decisions, rejected ideas, test prints and open items. Read this first if you want to work on the design |
-| `sbc_brackets.py` | Shape definitions. Every dimension is here |
+| `boards/` | One definition per board (JSON): outline, mounting holes, standoffs, openings and the simplified board. Fields: [`boards/README.md`](boards/README.md) |
+| `sbc_brackets.py` | Shapes every bracket shares (grip, plates, orientations), built from the definitions in `boards/` |
 | `build_all.py` | Writes the 3MF, STL, STEP and `viewer.html` files |
 | `viewer.tpl.html` | Template for the viewer |
 | `checks_print.py` | Support check. Slices the part layer by layer and checks each layer stays within 45 degrees of the one below |
 | `checks_time.py` | Print time estimate |
+| [`skills/sbc-frame-brackets/`](skills/sbc-frame-brackets/SKILL.md) | Claude skill: hands over the download links for a supported board, or adds a new board and builds only the files needed |
 | `.github/workflows/build.yml` | Builds and checks every model on pull requests that change the generator, and attaches every file to the release when a version tag is pushed |
 | `vendor/` | three.js r128 (MIT license, `vendor/LICENSE-three.txt`) |
 | `models/` | Default output directory. Not committed: the generated files are attached to the releases instead |
@@ -485,7 +491,7 @@ Take the dimensions from the manufacturer's official 3D model or drawing, not fr
 
 Issues and pull requests are welcome, for example a board that is missing or a dimension that is wrong.
 
-- Take dimensions from the manufacturer's published drawings or 3D models, and add the source to section 7 of [`DESIGN_NOTES.md`](DESIGN_NOTES.md). Do not add the manufacturer's CAD files, or shapes converted from them, to the repository: most of them are not licensed for redistribution.
+- Take dimensions from the manufacturer's published drawings or 3D models, and write the source in the `notes` of the board's definition and in section 7 of [`DESIGN_NOTES.md`](DESIGN_NOTES.md). Do not add the manufacturer's CAD files, or shapes converted from them, to the repository: most of them are not licensed for redistribution.
 - Run `python build_all.py --board <board> --check` for the brackets you changed. The pull request runs the same check for every model.
 - Your contribution is licensed under the same terms as the files it changes: MIT for the scripts and documentation, CC BY 4.0 for the models and images (see [License](#license)).
 - Report security problems privately as described in [`SECURITY.md`](SECURITY.md), not in an issue.
