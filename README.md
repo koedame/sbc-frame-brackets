@@ -198,7 +198,7 @@ In the flat and shelf orientations the board plate prints standing up, so its ho
 <summary><b>How the brackets hold on</b></summary>
 
 - **Extrusion grip (all boards)**: identical hooks at the top and bottom catch the slots on the top and bottom faces of the extrusion. A key in the front slot takes the vertical load.
-- **DIN rail grip (all boards)**: a centre key sits in the rail channel (between the side walls) and takes the vertical load. Hooks on leaf springs at both sides catch behind the lips. The key fits both steel rails with 1 mm sheet and aluminium rails with 1.5 mm side walls.
+- **DIN rail grip (all boards)**: hooks on leaf springs at both sides catch behind the lips. The solid roots of the leaf springs sit 0.05 mm from the lip edges and take the vertical load, and a centre key in the rail channel (between the side walls) backs them up. The key fits both steel rails with 1 mm sheet and aluminium rails with 1.5 mm side walls.
 - Both grips are the same at the top and bottom, so a bracket can be mounted upside down.
 - **Board plate**: the same size as the board (on `N2Plus` and `M1`, the heatsink; on `NanoKVMDesk`, the case), with cut-outs to save material. It is notched where the SD card goes in and out.
 

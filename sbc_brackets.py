@@ -152,7 +152,8 @@ def din_leaf_x():
 
 def grip_din(h=W):
     """Grip for DIN rail. Identical top and bottom.
-    - The centre key sits in the hat's channel (between the side walls) and takes the vertical load
+    - The roots of the leaf springs (solid back plate, DIN_FIT from the lip edges) touch the lip edges first and take the vertical load.
+      The centre key sits in the hat's channel (between the side walls) as a back-up
     - Leaf springs on both sides pass outside the lip edges, and the hooks at their tips catch behind the lips. Each leaf spring is a cantilever
       running along the rail (the print height direction) and flexes vertically (x). It is separated from the back plate by DIN_SLIT_IN and DIN_SLIT_OUT and joined only by T on the build plate side"""
     xl = din_leaf_x(); g = None
