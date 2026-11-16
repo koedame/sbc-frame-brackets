@@ -6,12 +6,12 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/hero-dark.png">
-  <img alt="Brackets side by side on a 20x20 aluminium extrusion, for (left to right) LattePanda Mu Lite Carrier, LattePanda 3 Delta, Hardkernel ODROID-M1, Hardkernel ODROID-N2+, Hardkernel ODROID-M2, NVIDIA Jetson Orin Nano Developer Kit, Radxa ROCK 5B, Orange Pi 5 Pro, Khadas VIM1S, BeagleBoard.org BeagleBone Black, Raspberry Pi 4, Sipeed NanoKVM-Desk, Raspberry Pi 3 A+ and Raspberry Pi Zero" src="docs/images/hero-light.png">
+  <img alt="Brackets side by side on a 20x20 aluminium extrusion, for (left to right) LattePanda Mu Lite Carrier, LattePanda 3 Delta, Hardkernel ODROID-M1, Hardkernel ODROID-N2+, Hardkernel ODROID-M2, NVIDIA Jetson Orin Nano Developer Kit, Orange Pi 5 Plus, Radxa ROCK 5B, Orange Pi 5, Orange Pi 5 Pro, Khadas VIM1S, BeagleBoard.org BeagleBone Black, Raspberry Pi 4, Sipeed NanoKVM-Desk, Raspberry Pi 3 A+ and Raspberry Pi Zero" src="docs/images/hero-light.png">
 </picture>
 
 ![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-3776AB?logo=python&logoColor=white)
 ![build123d 0.13](https://img.shields.io/badge/CAD-build123d%200.13-0f7b6c)
-![336 models](https://img.shields.io/badge/models-336-0f7b6c)
+![384 models](https://img.shields.io/badge/models-384-0f7b6c)
 ![6 orientations](https://img.shields.io/badge/orientations-6-0f7b6c)
 ![3MF · STL · STEP](https://img.shields.io/badge/files-3MF%20%C2%B7%20STL%20%C2%B7%20STEP-0f7b6c)
 ![No supports](https://img.shields.io/badge/supports-none-0f7b6c)
@@ -30,9 +30,9 @@ Ready-made files for every model are attached to the [latest release](https://gi
 - **Six orientations.** Stand the board out from the frame, lay it flat against the frame or put it on a shelf above the frame, each in portrait or landscape.
 - **Either way up.** The grip is identical at the top and bottom, so every bracket can be mounted upside down.
 - **No supports.** Every model prints with the grip on the plate. The 3MF and STL files are already oriented and centred on the plate.
-- **Ready to download.** 3MF, STL and STEP files for all 336 models are attached to the latest release, in one zip per bracket. There is nothing to build unless you want to change a shape.
+- **Ready to download.** 3MF, STL and STEP files for all 384 models are attached to the latest release, in one zip per bracket. There is nothing to build unless you want to change a shape.
 - **The whole Raspberry Pi range.** One bracket per board size: Raspberry Pi 5, 4, 3, 2 and 1 B+ share one, the A+ boards share one, and the Zero family shares one.
-- **Other popular boards.** The Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4 and Libre Computer Le Potato fit the `PiB` bracket made for the Raspberry Pi Model B size, the Radxa ZERO 3W / 3E fit the `PiZero` bracket, the Khadas VIM3 / VIM4 fit the `VIM1S` bracket, and the Radxa ROCK 5B / 5B+ have their own, as do the NVIDIA Jetson Orin Nano Developer Kit, the Orange Pi 5 Pro, BeagleBoard.org BeagleBone Black, the Hardkernel ODROID-M2, the LattePanda 3 Delta and the LattePanda Mu on its Lite Carrier. The Hardkernel ODROID-N2+ and ODROID-M1 are held by the heatsink that comes under the board, and the Sipeed NanoKVM-Desk by its case, with two of the case's own screws.
+- **Other popular boards.** The Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4 and Libre Computer Le Potato fit the `PiB` bracket made for the Raspberry Pi Model B size, the Radxa ZERO 3W / 3E fit the `PiZero` bracket, the Khadas VIM3 / VIM4 fit the `VIM1S` bracket, and the Radxa ROCK 5B / 5B+ have their own, as do the NVIDIA Jetson Orin Nano Developer Kit, the Orange Pi 5, 5 Plus and 5 Pro, BeagleBoard.org BeagleBone Black, the Hardkernel ODROID-M2, the LattePanda 3 Delta and the LattePanda Mu on its Lite Carrier. The Hardkernel ODROID-N2+ and ODROID-M1 are held by the heatsink that comes under the board, and the Sipeed NanoKVM-Desk by its case, with two of the case's own screws.
 - **Three mounts.** 20x20 extrusion, 40x40 extrusion (6 mm slot) and TS35 x 7.5 DIN rail.
 - **Checked in CAD.** `--check` measures interference with the frame and the board, unsupported area, an estimated print time and, for DIN rail, whether the leaf springs have room to bend.
 - **Offline 3D viewer.** Download [`viewer.html`](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/viewer.html) from the latest release and open it in any browser with WebGL. No network connection needed.
@@ -68,6 +68,8 @@ Ready-made files for every model are attached to the [latest release](https://gi
 | Libre Computer AML-S905X-CC (Le Potato) | 84 x 56 mm | `PiB` |
 | LattePanda 3 Delta | 125 x 78 mm | `LP3Delta` |
 | LattePanda Mu on the Lite Carrier (DFR1142, V1 and V2) | 146 x 102 mm | `MuLite` |
+| Orange Pi 5 | 100 x 61.8 mm | `OPi5` |
+| Orange Pi 5 Plus | 100 x 75 mm | `OPi5Plus` |
 | Orange Pi 5 Pro | 89.1 x 56 mm | `OPi5Pro` |
 | NVIDIA Jetson Orin Nano Developer Kit (off its base) | 100 x 79 mm | `OrinNano` |
 | NVIDIA Jetson Orin Nano Super Developer Kit (off its base) | 100 x 79 mm | `OrinNano` |
@@ -79,7 +81,6 @@ The board outlines and mounting holes were taken from the manufacturers' officia
 <summary><b>Not covered</b></summary>
 
 - **Raspberry Pi 1 Model A / Model B**: no official mechanical drawing is published, so the mounting holes cannot be checked.
-- **Orange Pi 5 / Orange Pi 5 Plus**: their mounting holes are given only in the official 3D models, which have not been checked yet. Not added yet.
 - **Compute Modules**: they need a carrier board. Mount the carrier board instead.
 - **Raspberry Pi 400 / 500**: keyboard computers.
 - **Raspberry Pi Pico**: a microcontroller board, not a single-board computer.
@@ -118,10 +119,10 @@ The flat orientations keep the board closest to the frame. The shelf orientation
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/gallery-dark.png">
-  <img alt="A grid of brackets for Raspberry Pi B size, A+ size and Zero size boards, Khadas VIM1S, Radxa ROCK 5B, BeagleBoard.org BeagleBone Black, Hardkernel ODROID-M2, LattePanda 3 Delta, LattePanda Mu Lite Carrier, Hardkernel ODROID-N2+, Hardkernel ODROID-M1, Orange Pi 5 Pro, NVIDIA Jetson Orin Nano Developer Kit and Sipeed NanoKVM-Desk, each on a 20x20 extrusion, a 40x40 extrusion and a TS35 DIN rail" src="docs/images/gallery-light.png">
+  <img alt="A grid of brackets for Raspberry Pi B size, A+ size and Zero size boards, Khadas VIM1S, Radxa ROCK 5B, BeagleBoard.org BeagleBone Black, Hardkernel ODROID-M2, LattePanda 3 Delta, LattePanda Mu Lite Carrier, Hardkernel ODROID-N2+, Hardkernel ODROID-M1, Orange Pi 5 Pro, Orange Pi 5, Orange Pi 5 Plus, NVIDIA Jetson Orin Nano Developer Kit and Sipeed NanoKVM-Desk, each on a 20x20 extrusion, a 40x40 extrusion and a TS35 DIN rail" src="docs/images/gallery-light.png">
 </picture>
 
-Every model is attached to the [latest release](https://github.com/koedame/sbc-frame-brackets/releases/latest): one zip per bracket with the 3MF, STL and STEP files of all its models, 336 models in all, and next to them the [offline viewer](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/viewer.html) and the fit test coupons.
+Every model is attached to the [latest release](https://github.com/koedame/sbc-frame-brackets/releases/latest): one zip per bracket with the 3MF, STL and STEP files of all its models, 384 models in all, and next to them the [offline viewer](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/viewer.html) and the fit test coupons.
 The links below always point to the latest release.
 
 | Bracket | Boards | Download |
@@ -138,6 +139,8 @@ The links below always point to the latest release.
 | `N2Plus` | Hardkernel ODROID-N2+ (on its heatsink) | [N2Plus.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/N2Plus.zip) |
 | `M1` | Hardkernel ODROID-M1 (on its heatsink) | [M1.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/M1.zip) |
 | `OPi5Pro` | Orange Pi 5 Pro | [OPi5Pro.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/OPi5Pro.zip) |
+| `OPi5` | Orange Pi 5 | [OPi5.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/OPi5.zip) |
+| `OPi5Plus` | Orange Pi 5 Plus | [OPi5Plus.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/OPi5Plus.zip) |
 | `OrinNano` | NVIDIA Jetson Orin Nano Developer Kit / Super | [OrinNano.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/OrinNano.zip) |
 | `NanoKVMDesk` | Sipeed NanoKVM-Desk (by its case) | [NanoKVMDesk.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/NanoKVMDesk.zip) |
 
@@ -171,6 +174,8 @@ File names are `<bracket>_<mount>[_<orientation>][_spacer]`; upright portrait ha
 | `N2Plus` | 10 mm | 5 mm (8 mm at the foot) | 3.4 mm, through | M3 x 16 from under the plate into the heatsink |
 | `M1` | 10 mm | 5 mm (8 mm at the foot) | 3.4 mm, through | M3 x 16 from under the plate into the heatsink |
 | `OPi5Pro` | 8 mm | 5 mm | 2.2 mm | M2.5 self-tapping |
+| `OPi5` | 8 mm | 6 mm | 2.2 mm | M2.5 self-tapping |
+| `OPi5Plus` | 8 mm | 6 mm | 2.6 mm | M3 self-tapping |
 | `OrinNano` | 8 mm | 5 mm | 2.2 mm | M2.5 self-tapping |
 | `NanoKVMDesk` | 3 mm | 6 mm | 2.4 mm, through | M2 x 12 from under the plate into the case, in the two rear standoffs (the front two are rests) |
 
@@ -187,6 +192,10 @@ On `MuLite`, the 5 mm clears the pins of the PCIe slot, the deepest part under t
 On `N2Plus` and `M1` the bracket holds the heatsink, not the board. Both boards come screwed to the top of an aluminium heatsink that is also their stand, fins down, so the plate is the size of the heatsink and its holes line up with four M3 threaded holes in the heatsink's base that the board does not use. They open between a side wall and the outermost fin. The 10 mm standoffs keep the heatsink 4 mm off the plate. Their top 6.5 mm goes up between the side wall and the fin, so it is only 5 mm across (0.4 mm from the fin), and 8 mm below that. Put M3 x 16 screws in from under the plate, through the standoffs and into the heatsink: 3 mm of plate, 10 mm of standoff and the 3 mm base, so each screw ends flush with the top of the base, under the board. Do not use longer screws, and leave room for the screw heads under the plate when brackets sit side by side. In the flat orientations the back of the plate lies against the frame, so countersink the four holes on the back and use countersunk M3 x 16 screws, put in before the bracket goes on the frame. The standoffs have not been tried on a real heatsink. With the version without standoffs, use plain (unthreaded) round M3 spacers 10 mm long and no more than 5 mm across, with the same M3 x 16 screws, which are a tight fit in the 3 mm plate holes.
 
 On `OPi5Pro`, how far the parts under the board reach is not published and there is no official 3D model. The 8 mm is meant to leave room for an M.2 2280 SSD in the slot under the board, as on the other boards with an M.2 slot underneath (on the ODROID-M2 an SSD reaches about 6.5 mm below the board), but it has not been checked with an SSD fitted. Use standoffs at least 8 mm tall with the version without standoffs too, no more than 5.6 mm across, corners included: the nearest parts under the board are 2.8 mm from a hole centre.
+
+On `OPi5`, the 8 mm clears the parts under the board in the official 3D model: the deepest is the card in the M.2 slot, 4.9 mm below the board. The model has a 2230 card; a 2242 card plugs into the same connector, so it should sit at the same height, but it has not been checked. Use standoffs at least 8 mm tall with the version without standoffs too, no more than 9.2 mm across, corners included: the nearest parts under the board are 4.6 mm from a hole centre. The board holes are 2.9 mm, for M2.5 screws.
+
+On `OPi5Plus`, the bracket uses the four holes near the corners, 87.08 x 49.21 mm apart; the board's other two 3.2 mm holes are not used. The 8 mm clears the parts under the board in the official 3D model: the deepest is the M.2 2280 SSD, 6.4 mm below the board, which leaves 1.6 mm. Use standoffs at least 8 mm tall with the version without standoffs too, no more than 8.6 mm across, corners included: the nearest parts under the board are 4.3 mm from a hole centre. The board holes are 3.2 mm, for M3 screws, so the 3 mm holes of the version without standoffs are a tight fit for them.
 
 On `OrinNano`, take the board off the developer kit's base: the bracket takes its place, on the same four holes 86 x 58 mm apart (the board's other two holes are not used). The 8 mm clears the parts under the board in the official 3D model: the deepest are the Wi-Fi card and the M.2 2230 SSD, 4.8 mm below the board. An SSD in the M.2 2280 slot plugs into the same kind of connector, so it should sit at the same height, but it is not in the model and has not been checked. In the model the two Wi-Fi antennas, on cables from the Wi-Fi card, lie in the base; the bracket has no place for them, and they were left out of the check. Use standoffs at least 8 mm tall with the version without standoffs too, no more than 6.8 mm across, corners included: the nearest parts under the board are 3.4 mm from a hole centre. The board holes are 2.75 mm, for M2.5 screws.
 
@@ -227,6 +236,8 @@ Estimated print time of the 20x20 version (upright: without / with standoffs):
 | `N2Plus` | ~68 / 88 min | ~76 / 97 min | ~91 min | ~90 min | ~99 min | ~89 min |
 | `M1` | ~85 / 107 min | ~91 / 111 min | ~113 min | ~113 min | ~118 min | ~115 min |
 | `OPi5Pro` | ~52 / 73 min | ~55 / 73 min | ~60 min | ~61 min | ~62 min | ~64 min |
+| `OPi5` | ~55 / 79 min | ~57 / 78 min | ~70 min | ~70 min | ~71 min | ~74 min |
+| `OPi5Plus` | ~66 / 90 min | ~64 / 86 min | ~82 min | ~82 min | ~78 min | ~84 min |
 | `OrinNano` | ~65 / 87 min | ~63 / 84 min | ~83 min | ~83 min | ~80 min | ~84 min |
 | `NanoKVMDesk` | ~47 / 56 min | ~47 / 55 min | ~54 min | ~54 min | ~53 min | ~53 min |
 
@@ -268,6 +279,8 @@ Mounted upside down, top and bottom swap.
 - On the LattePanda Mu Lite Carrier all the ports are where the power and HDMI edge is in the table. The power and reset buttons stick out of the opposite edge, 10 to 27 mm from the PCIe slot end, where the GPIO edge is: in upright portrait and shelf landscape they are 4 mm from the frame, so use the Auto_Power jumper or a switch on the F_PANEL header there. The PCIe slot end is where the microSD end is, with the usual 4 mm gap; a card in the PCIe slot has not been checked.
 - The Hardkernel ODROID-N2+ and ODROID-M1 sit on their heatsinks, whose side walls run along the GPIO header edge and the opposite edge. Their Ethernet, USB, HDMI and power ports are at one end of the heatsink, where the other short end is in the table, so they never face the frame. The microSD slot, the audio jack and the infrared receiver are at the other end, where the microSD end is, so in upright landscape and shelf portrait it faces the frame with the 17 mm gap. The GPIO header edge is where the GPIO edge is. The four holes are symmetric, so the heatsink also fits turned round, with the GPIO header edge away from the frame and the two ends swapped. On the N2+ the microSD slot is under the board, between the board and the heatsink, and the card sticks out 1.8 mm past the board.
 - The Orange Pi 5 Pro has its microSD slot under the board at one short end, with the power, MaskROM and reset buttons, and Ethernet and USB at the other, so the table applies as it is. The two HDMI ports, the audio jack and USB-C stick out 2.5 mm past the power and HDMI edge; they were checked as boxes 30 mm tall and do not touch the bracket in any orientation. Neither does the microSD card, which sticks out past its end under the board.
+- The Orange Pi 5 has its microSD slot on top of the board at one short end, with the power button, and Ethernet and the three USB-A ports at the other, so the table applies as it is. The power input, the audio jack, HDMI and USB-C stick out up to 2.7 mm past the power and HDMI edge, and the 26-pin header is along the GPIO edge.
+- The Orange Pi 5 Plus has two USB 2.0 ports, three HDMI ports, two Ethernet ports and a USB-C port along one long edge, where the power and HDMI edge is in the table; they stick out up to 4.1 mm. The microSD slot (under the board), the audio jack, the infrared receiver, two buttons, the two USB 3.0 ports and the other USB-C port are along the opposite edge, where the GPIO edge is: in upright portrait and shelf landscape that edge faces the frame, 4 mm away, so those ports cannot be used and the card can only be changed with the board off. Use upright landscape, flat or shelf portrait to reach them. The 40-pin header runs along the end where the microSD end is in the table, which gets the usual 4 mm gap, not 17 mm, so in upright landscape and shelf portrait a HAT or a ribbon cable on it may not fit. The M.2 Wi-Fi card is on top of the board at the other short end.
 - The NVIDIA Jetson Orin Nano Developer Kit has all its ports (power, DisplayPort, four USB-A, Ethernet and USB-C) along one long edge, where the power and HDMI edge is in the table; they stick out 1.9 mm. Its microSD slot is under the module at the opposite long edge, where the GPIO edge is: in upright portrait and shelf landscape that edge faces the frame, 4 mm away, so the card can only be changed with the board off. The 40-pin header runs along the end where the other short end is, and the two camera connectors are at the end where the microSD end is in the table, with the usual 4 mm gap.
 - The Sipeed NanoKVM-Desk has all its ports (Ethernet, the USB-C ports, both HDMI ports) and the microSD slot on its back, where the other short end is in the table, so they never face the frame. The screen and the thumbwheel are on the front, where the microSD end is, with the usual 4 mm gap: in upright landscape and shelf portrait they face the frame and cannot be used. The side away from the thumbwheel is where the GPIO edge is.
 - In shelf, landscape the GPIO edge is only 4 mm from the frame, so a HAT or a ribbon cable on the GPIO header may not fit.
@@ -290,7 +303,7 @@ python build_all.py --board PiB --mount 20 --orient flat-portrait --format 3mf -
 ```
 
 This writes only the model you ask for, here `PiB_2020_flat-portrait.3mf`, to `models/` and checks it.
-Without any of `--board`, `--mount`, `--orient` and `--format`, it builds all 336 models in every format and `viewer.html`, which takes several minutes (more with `--check`).
+Without any of `--board`, `--mount`, `--orient` and `--format`, it builds all 384 models in every format and `viewer.html`, which takes several minutes (more with `--check`).
 
 > [!NOTE]
 > On minimal Linux installs (containers, servers), OpenCascade needs libGL. If you see `ImportError: libGL.so.1`, install it, for example with `sudo apt install libgl1` on Debian and Ubuntu.
@@ -299,7 +312,7 @@ Tested on Linux ARM64 (Python 3.11, 3.13 and 3.14) and Linux x86-64 (Python 3.11
 
 | Option | What it does |
 |---|---|
-| `--board PiB PiA` | Brackets to build, by the name of their definition in [`boards/`](boards/README.md): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OrinNano`, `NanoKVMDesk` (default: all) |
+| `--board PiB PiA` | Brackets to build, by the name of their definition in [`boards/`](boards/README.md): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano`, `NanoKVMDesk` (default: all) |
 | `--mount 20 DIN` | Mounts to build: `20`, `40`, `DIN` (default: all) |
 | `--orient flat-portrait shelf-landscape` | Orientations to build: `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape` (default: all) |
 | `--format 3mf step` | What to write: `3mf`, `stl`, `step`, `viewer` (default: all). The upright orientations get both the version without and the version with standoffs |
@@ -328,6 +341,8 @@ The official 3D models are distributed by the board manufacturers and are not in
 | Libre Computer Le Potato | `AML-S905X-CC-V1.0.stp` | "STEP" (`.stp.gz`, unpack it first) on the [Le Potato product page](https://libre.computer/products/aml-s905x-cc/) |
 | LattePanda 3 Delta | `LattePanda 3 Delta 3D Model V1.1 20250221.step` | `LattePanda 3 Delta/LattePanda 3 Delta 3D Model V1.1 step 20250221.zip` in the [LattePanda 3D models repository](https://github.com/LattePandaTeam/LattePanda-3D-Models) |
 | LattePanda Mu Lite Carrier | `DFR1142 Lite Carrier for LattePanda Mu(V2.0.1).step` | `Mechanicals/Carrier-Boards/DFR1142_Lite_Carrier_for_LattePanda_Mu(V2.0.1).zip` in the [LattePanda Mu repository](https://github.com/LattePandaTeam/LattePanda-Mu) |
+| Orange Pi 5 | `OPi5_pcb_asm-0809.stp` | "Mechanical" (`OPi5_pcb_asm-0809.rar`, unpack it first) on the [Orange Pi 5 service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-pi-5.html) |
+| Orange Pi 5 Plus | `OPI-5PLUS-PCBA.stp` | "Mechanical" (`OPI-5PLUS-PCBA.rar`, unpack it first) on the [Orange Pi 5 Plus service and support page](http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/service-and-support/Orange-Pi-5-plus.html) |
 | NVIDIA Jetson Orin Nano Developer Kit | `P3766-P3768SKU4-P3767ENVELOPE.stp` | 3D model (zip) on the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads) |
 | Sipeed NanoKVM-Desk, current case (plastic front shell) | `3D_KVM_PRO_DESK_plastic_20260508.step` | `KVM/KVM_Pro/1_3D/` on the [Sipeed download site](https://dl.sipeed.com/) |
 | Sipeed NanoKVM-Desk, earlier case (3D-printed front shell) | `3D_KVM_PRO_DESK_print_20260508.step` | `KVM/KVM_Pro/1_3D/` on the [Sipeed download site](https://dl.sipeed.com/) |
@@ -407,6 +422,7 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 - The Radxa ROCK 3C, Pine64 ROCK64 and Hardkernel ODROID-C4 have no official 3D model. Their outline, mounting holes and microSD slot were compared with the official drawings, but the bracket was not checked against their components.
 - BeagleBoard.org BeagleBone Black has no official 3D model either. It is checked against a simplified board placed from the official Rev C manufacturing data (board outline, drill file, silkscreen, placement list and bill of materials), in all six orientations.
 - The Orange Pi 5 Pro has no official 3D model. Its outline, mounting holes, microSD slot and the area of the M.2 slot under the board come from the official mechanical drawing, which gives no heights. The bracket was checked against the outline of the board and, as boxes 30 mm tall, the connectors that stick out past its edges, but not against the parts under the board, and not with an SSD fitted.
+- The Orange Pi 5 and Orange Pi 5 Plus are checked against their official 3D models, in all six orientations. The Orange Pi 5 model has a 2230 card in the M.2 slot and cables plugged into four of its ports, which were left in; it has no 26-pin header. The Orange Pi 5 Plus model has a 2280 SSD and a Wi-Fi card in its M.2 slots.
 - The NVIDIA Jetson Orin Nano Developer Kit is checked against its official 3D model, in all six orientations, with the base, its screws and the Wi-Fi antennas left out. The model has an SSD in the M.2 2230 slot but none in the 2280 slot.
 - The Sipeed NanoKVM-Desk is checked against Sipeed's official 3D models of its current and earlier cases, in all six orientations. The thickness of its rubber feet is not published; the front ones stay on and would reach the plate only if they were thicker than the 3 mm standoffs.
 - None of the Radxa, Pine64, Khadas, BeagleBoard.org, Hardkernel, Orange Pi, Libre Computer, LattePanda, NVIDIA or Sipeed boards has been tried on a printed bracket.

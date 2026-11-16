@@ -1,0 +1,35 @@
+{
+  "title": "Orange Pi 5",
+  "notes": [
+    "100 x 61.8 mm and 1.2 mm thick, with four 2.9 mm holes 93.86 x 55.89 mm apart: 3.15 mm from the l = 0 end, 2.99 mm from the l = L end, 3.05 mm from the s = 0 edge and 2.86 mm from the s = S edge (official 3D model OPi5_pcb_asm-0809.stp, the Mechanical download on the Orange Pi 5 service and support page). The product page gives 62 x 100 mm.",
+    "l = 0 is the microSD end: the slot is on top of the board, 38.8 to 54.9 mm from the s = 0 edge, and the card sticks out 2.3 mm past the end; the power button next to it sticks out 1.1 mm. Ethernet and the three USB-A ports (USB 3.0 over USB 2.0, and another USB 2.0) are at the l = L end and stick out up to 2.6 mm past it. The USB-C power input, the audio jack, HDMI and the other USB-C port are along the s = 0 edge and stick out up to 2.7 mm past it. The 26-pin header is along the s = S edge, which faces the back plate, and nothing sticks out past that edge. The header is not in the official 3D model.",
+    "Under the board is the M.2 Key M slot. In the official 3D model it holds a 2230 card, which reaches 4.9 mm below the board; the other parts under the board reach 2.8 mm at most (the screw holding the card). The 8 mm standoffs leave 3.1 mm under the card.",
+    "Standoffs 6 mm across: the nearest parts under the board are 4.6 mm from a hole centre. The 2.9 mm holes are for M2.5 screws.",
+    "Two rows of three windows, 4 mm clear of the standoffs, with a 6 mm rib between the rows. No notch: the microSD slot is on top of the board.",
+    "Parts: boxes round the parts in the official 3D model, rounded to 0.01 mm: the PCB, the connectors and the button that stick out past the edges, the microSD card and, under the board, the M.2 slot with its card. The slot also has a standoff hole for a 2242 card, and its box reaches as far as such a card would.",
+    "The official 3D model has cables plugged into both USB-C ports, the audio jack and the upper USB-A port. They were left in the check and do not touch the bracket in any orientation."
+  ],
+  "size": [100.0, 61.8],
+  "frame_edge": "s=S",
+  "microsd_edge": "l=0",
+  "holes": [[3.153, 3.051], [3.153, 58.941], [97.008, 3.051], [97.008, 58.941]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 8.0, "d": 6.0, "pilot": 2.2, "screw": "M2.5"},
+  "windows": {"rows": [[10.05, 28.0], [34.0, 51.95]], "per_row": 3},
+  "parts": [
+    {"name": "PCB", "box": [0, 100.0, 0, 61.8, 0, 1.2]},
+    {"name": "USB-C (power)", "box": [7.0, 16.0, -1.08, 6.82, 0.45, 4.48]},
+    {"name": "Audio jack", "box": [19.0, 25.06, -2.1, 11.89, 1.2, 6.7]},
+    {"name": "HDMI", "box": [30.4, 45.4, -2.7, 9.45, -0.98, 7.4]},
+    {"name": "USB-C", "box": [50.41, 59.41, -1.08, 6.82, 0.45, 4.48]},
+    {"name": "Ethernet", "box": [81.17, 102.27, 19.71, 36.15, -2.6, 14.5]},
+    {"name": "USB 3.0 and USB 2.0", "box": [84.34, 101.8, 39.55, 55.22, -2.0, 17.4]},
+    {"name": "USB 2.0", "box": [87.74, 101.6, 8.58, 14.29, -2.03, 15.0]},
+    {"name": "microSD card", "box": [-2.29, 15.01, 38.83, 54.93, 0.6, 3.35]},
+    {"name": "Power button", "box": [-1.1, 4.0, 13.1, 17.7, 1.2, 5.8]},
+    {"name": "M.2 Key M slot and card (under)", "box": [59.45, 81.52, 13.43, 59.47, -4.9, 0.65]}
+  ],
+  "official_models": {
+    "OPi5_pcb_asm-0809.stp": {"tilt": 180, "rotate": 180, "centre": [0.0, 0.0], "underside": -1.2}
+  }
+}
