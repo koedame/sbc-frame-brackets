@@ -41,7 +41,7 @@ All lengths are in mm, in the board's own **top view**: you look at the side tha
 | `h` | yes | Height above the plate. The board sits at this height in every version, for display and the checks |
 | `d` | yes | Outer diameter |
 | `pilot` | yes | Pilot hole diameter for a self-tapping screw (2.2 for M2.5, 2.6 for M3, 1.7 for M2) |
-| `screw` | yes | Screw shown in the viewer, e.g. `"M2.5"` |
+| `screw` | yes | Screw for the board's holes, shown in the viewer, e.g. `"M2.5"` or `"M3 × 16"`. It starts with the thread size, `M2`, `M2.5` or `M3`, which sets the countersinks on the back of the holes in the flat orientations |
 | `foot` | no | `[height, diameter]` of a wider base under a standoff that has to be slim further up |
 | `through` | no | For screws that go from under the plate through the standoffs, what they screw into (shown in the viewer), e.g. `"heatsink"` |
 | `at` | no | `[[l, s], ...]`, the holes that get standoffs, when not all of them do. Each one must be in `holes` |

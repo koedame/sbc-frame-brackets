@@ -5,8 +5,9 @@ Ready-made files for every model are attached to each GitHub release; build only
 Usage:
   python build_all.py --board PiB --mount 20 --orient flat-portrait --format 3mf
                                                # only what you need: here the PiB bracket (Raspberry Pi B size) for 20x20, flat portrait, as 3MF
-  python build_all.py --board PiB --check      # also check interference with the frame and board, unsupported areas, print time and
-                                               # that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame); for DIN rail
+  python build_all.py --board PiB --check      # also check interference with the frame and board, unsupported areas, print time,
+                                               # that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame) and that flat head
+                                               # screws stay below the back of the flat plates; for DIN rail
                                                # against steel and aluminium rails, and whether the leaf springs can bend far enough to push on
                                                # (exit 1 if a check fails)
   python build_all.py --check --board-step vim1s-pcba-3d-v11.stp --board-step ROCK5B_v1.42_3D.step
@@ -158,6 +159,10 @@ def main():
                 v, ar = overlap(s, [M * g for g in gs])
                 hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
                 bad |= round(v, 2) > 0 or round(ar, 2) > 0
+            if orient.startswith("flat"):              # the plate lies on the frame: the screw heads have to sink into it
+                v, _ = overlap(s, [M * h for h in B.flat_heads()])
+                hits.append(f"flat head screws overlap {v:.2f} mm3")
+                bad |= round(v, 2) > 0
             hit_board = "  ".join(hits)
             unsup = cp.unsupported(s)[0]
             bad |= unsup > 0
