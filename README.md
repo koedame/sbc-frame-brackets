@@ -198,7 +198,7 @@ In the flat and shelf orientations the board plate prints standing up, so its ho
 <summary><b>How the brackets hold on</b></summary>
 
 - **Extrusion grip (all boards)**: identical hooks at the top and bottom catch the slots on the top and bottom faces of the extrusion. A key in the front slot takes the vertical load.
-- **DIN rail grip (all boards)**: a centre key sits in the rail channel (between the side walls) and takes the vertical load. Hooks on leaf springs at both sides catch behind the lips.
+- **DIN rail grip (all boards)**: a centre key sits in the rail channel (between the side walls) and takes the vertical load. Hooks on leaf springs at both sides catch behind the lips. The key fits both steel rails with 1 mm sheet and aluminium rails with 1.5 mm side walls.
 - Both grips are the same at the top and bottom, so a bracket can be mounted upside down.
 - **Board plate**: the same size as the board (on `N2Plus` and `M1`, the heatsink; on `NanoKVMDesk`, the case), with cut-outs to save material. It is notched where the SD card goes in and out.
 
@@ -303,7 +303,7 @@ Tested on Linux ARM64 (Python 3.11, 3.13 and 3.14) and Linux x86-64 (Python 3.11
 | `--mount 20 DIN` | Mounts to build: `20`, `40`, `DIN` (default: all) |
 | `--orient flat-portrait shelf-landscape` | Orientations to build: `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape` (default: all) |
 | `--format 3mf step` | What to write: `3mf`, `stl`, `step`, `viewer` (default: all). The upright orientations get both the version without and the version with standoffs |
-| `--check` | Report interference with the frame and the board, unsupported area and estimated print time. For DIN rail, also the overlap when the leaf springs bend outwards as far as pushing on needs. Exits with status 1 if any check fails |
+| `--check` | Report interference with the frame and the board, unsupported area and estimated print time, and check that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame). For DIN rail, check against both a steel rail and an aluminium rail with 1.5 mm side walls, and report the overlap when the leaf springs bend outwards as far as pushing on needs. Exits with status 1 if any check fails |
 | `--coupons` | Also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm) |
 | `--board-step <path>` | Check the board interference against a board's official 3D model (STEP, or STL for a model published only as STL) instead of the simplified board. Repeat it for several models (they are not put in the viewer) |
 | `--out <dir>` | Write somewhere other than `models/` |
@@ -349,8 +349,8 @@ The dimensions every bracket shares live in `sbc_brackets.py`. Each board's own 
 | To change | Where |
 |---|---|
 | Fit on the extrusion | `FIT` in `sbc_brackets.py` (clearance per side, currently 0.05 mm) |
-| DIN rail hooks and leaf springs | `DIN_HOOK` (0.8 mm), `DIN_LEAF_T` (1.2 mm), `DIN_FIT` (0.05 mm), `DIN_SLIT_OUT` (room for the spring to bend outwards, 2.0 mm. `--check` tells you if a deeper hook needs more) |
-| Width of the DIN rail centre key | `DIN_KEY_HALF` (half width, currently 12.2 mm) |
+| DIN rail hooks and leaf springs | `DIN_HOOK` (0.8 mm), `DIN_NOSE_H` (length of the hook, 3.0 mm), `DIN_LEAF_T` (0.8 mm), `DIN_FIT` (0.05 mm), `DIN_SLIT_OUT` (room for the spring to bend outwards, 1.5 mm. `--check` tells you if a deeper hook needs more). A longer hook or a thicker spring raises the strain at the spring's root (see [`DESIGN_NOTES.md`](DESIGN_NOTES.md) section 4, history 4) |
+| Width of the DIN rail centre key | `DIN_KEY_HALF` (half width, currently 11.8 mm, so it fits both steel and aluminium rails) |
 | Hook engagement | `HOOK` (currently 1.0 mm) |
 | Hook stiffness | `ARM_T` (1.6 mm at the root), `ARM_TIP` (0.9 mm at the tip) |
 | Width along the rail | `W` (currently 16 mm) |
@@ -410,7 +410,7 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 - The NVIDIA Jetson Orin Nano Developer Kit is checked against its official 3D model, in all six orientations, with the base, its screws and the Wi-Fi antennas left out. The model has an SSD in the M.2 2230 slot but none in the 2280 slot.
 - The Sipeed NanoKVM-Desk is checked against Sipeed's official 3D models of its current and earlier cases, in all six orientations. The thickness of its rubber feet is not published; the front ones stay on and would reach the plate only if they were thicker than the 3 mm standoffs.
 - None of the Radxa, Pine64, Khadas, BeagleBoard.org, Hardkernel, Orange Pi, Libre Computer, LattePanda, NVIDIA or Sipeed boards has been tried on a printed bracket.
-- The DIN rail versions have not been printed yet. The centre key does not fit aluminium DIN rails with 1.5 mm side walls (see [`DESIGN_NOTES.md`](DESIGN_NOTES.md) section 7).
+- The DIN rail versions have not been printed yet. They are checked against steel TS35 x 7.5 rails with 1 mm sheet and aluminium rails 7.3 mm deep with 1.5 mm side walls (see [`DESIGN_NOTES.md`](DESIGN_NOTES.md) section 7). On steel rails the centre key has 0.7 mm to spare on each side; the bracket is still held up and down by the roots of the leaf springs, 0.05 mm from the lip edges.
 
 ## Contributing
 

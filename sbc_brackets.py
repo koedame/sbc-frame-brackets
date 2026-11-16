@@ -56,20 +56,30 @@ def frame(series, L=120.0):
 
 # ---- DIN rail TS35 x 7.5 (EN 60715) ----
 DIN_W, DIN_D, DIN_T, DIN_BASE = 35.0, 7.5, 1.0, 27.0   # width, depth, sheet thickness, outer width of the hat's base
+DIN_ALU_WALL, DIN_ALU_D = 1.5, 7.3                     # aluminium rails (Takachi FDR): 1.5 mm side walls (24 mm channel), 7.3 deep;
+                                                       # the lips are 1 mm at the edge, as on steel rails
 
 
-def din_rail(L=120.0):
-    """Simplified DIN rail (for interference checks and display). The front (front face of the lips) is y=0, the back (panel side) is y=-7.5"""
+def din_rail(L=120.0, wall=DIN_T, depth=DIN_D):
+    """Simplified DIN rail (for interference checks and display). The front (front face of the lips) is y=0, the back (panel side) is
+    y=-depth. wall = thickness of the side walls and the base (the steel rail's sheet, or DIN_ALU_WALL)"""
     hb = DIN_BASE / 2; hw = DIN_W / 2
-    r = box(-hw, -(hb - DIN_T), -DIN_T, 0, -L / 2, L / 2) + box(hb - DIN_T, hw, -DIN_T, 0, -L / 2, L / 2)   # lips
-    r += box(-hb, -(hb - DIN_T), -DIN_D, 0, -L / 2, L / 2) + box(hb - DIN_T, hb, -DIN_D, 0, -L / 2, L / 2)  # side walls
-    r += box(-hb, hb, -DIN_D, -DIN_D + DIN_T, -L / 2, L / 2)                                              # base
+    r = box(-hw, -(hb - wall), -DIN_T, 0, -L / 2, L / 2) + box(hb - wall, hw, -DIN_T, 0, -L / 2, L / 2)   # lips
+    r += box(-hb, -(hb - wall), -depth, 0, -L / 2, L / 2) + box(hb - wall, hb, -depth, 0, -L / 2, L / 2)  # side walls
+    r += box(-hb, hb, -depth, -depth + wall, -L / 2, L / 2)                                              # base
     return r
 
 
 def mount_frame(series, L=120.0):
     """Shape of what the bracket mounts on (series = 20 / 40 / "DIN")"""
     return din_rail(L) if series == "DIN" else frame(series, L)
+
+
+def mount_frames(series, L=120.0):
+    """Everything the bracket must fit, for --check: the frame, or for DIN rail both steel and aluminium rails"""
+    if series != "DIN":
+        return [("frame", frame(series, L))]
+    return [("steel rail", din_rail(L)), ("aluminium rail", din_rail(L, DIN_ALU_WALL, DIN_ALU_D))]
 
 
 def mount_tag(series):
@@ -121,14 +131,18 @@ def grip(series, fit=FIT, h=W):
 # ---- Grip for DIN rail ----
 DIN_FIT = 0.05           # clearance to the lip edge (per side)
 DIN_HOOK = 0.8           # how far the hook reaches behind the lip
-DIN_LEAF_T = 1.2         # leaf spring thickness
+DIN_LEAF_T = 0.8         # leaf spring thickness. With DIN_NOSE_H this sets the bending strain at the spring's root when the barb
+                         # clears the lip: 0.77% (beam), under the 0.96% allowed for a one-off push in PETG across the layers
 DIN_LEAF_BACK = 2.6      # how deep the leaf spring reaches behind the lip
 DIN_SLIT_IN = 0.5        # gap on the inner side of the leaf spring (towards the key). Only separates it from the back plate
-DIN_SLIT_OUT = 2.0       # gap on the outer side. The band of back plate in front of the leaf spring moves outwards with it, and its top end
+DIN_SLIT_OUT = 1.5       # gap on the outer side. The band of back plate in front of the leaf spring moves outwards with it, and its top end
                          # moves further than the barb tip (din_spring_travel()). The back plate beyond this gap stops the spring a little
-                         # after the barb clears the lip, so it cannot be bent much further than pushing on needs
-DIN_NOSE_H = 7.0         # length of the hook (barb) along the rail. Only on the tip side of the leaf spring
-DIN_KEY_HALF = 12.2      # half width of the key that sits in the centre channel (between the side walls, about 25 mm wide)
+                         # after the barb clears the lip, so it cannot be bent much further than pushing on needs (at the stop the root
+                         # strain is about 1.2%, still under the yield strain of about 1.4%)
+DIN_NOSE_H = 3.0         # length of the hook (barb) along the rail. Only on the tip side of the leaf spring, so the lip edge pushes the
+                         # spring as far from its root as it can
+DIN_KEY_HALF = 11.8      # half width of the key that sits in the centre channel (between the side walls): 25 mm wide on steel rails
+                         # with 1 mm sheet, 24 mm on aluminium rails with 1.5 mm side walls; the key fits both
 DIN_KEY_D = 2.0
 
 
@@ -173,7 +187,7 @@ def din_spring_travel():
     """How far the top end of a DIN leaf spring moves outwards while the barb tip passes the lip edge (DIN_HOOK - DIN_FIT).
     The spring is a cantilever from the top of the front plate (z = Z0 + T). The lip edge pushes it at the lowest point of the
     barb tip (where the 45-degree underside ends); above that point the spring stays straight, so its top end moves further.
-    Beam estimate, ignoring the twist of the spring: 1.77 mm (a linear FEA of the spring and the band gives 1.63 mm at the band)"""
+    Beam estimate, ignoring the twist of the spring: 0.98 mm (a linear FEA of the spring and the band gives 0.95 mm at the band)"""
     za = W / 2 - DIN_NOSE_H + DIN_HOOK + 0.01
     a = za - (Z0 + T)
     return (DIN_HOOK - DIN_FIT) * (1 + 1.5 * (W / 2 - za) / a)

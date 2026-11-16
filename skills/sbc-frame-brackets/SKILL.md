@@ -99,14 +99,14 @@ python build_all.py --board <Name> --mount 20 --orient flat-portrait --format 3m
 | `--mount` | `20`, `40`, `DIN`, one or more |
 | `--orient` | `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape`, one or more |
 | `--format` | `3mf`, `stl`, `step`, `viewer`, one or more. The upright orientations get both the version without and the version with standoffs |
-| `--check` | Checks interference with the frame and the board, unsupported area, that the part is one solid, and on DIN rail that the leaf springs can bend far enough |
+| `--check` | Checks interference with the frame and the board, unsupported area, that the part is one solid, that it is held (moved 0.3 mm forward, up or down it hits the frame), and on DIN rail both a steel and an aluminium rail and that the leaf springs can bend far enough |
 | `--board-step <file>` | Check against the manufacturer's 3D model instead of `parts` (the file's name must be in `official_models`) |
 | `--out <dir>` | Output directory, `models/` by default |
 
 The exit status is the result:
 
 - **0**: every check passed. The last line says `Checks passed for all <n> models`.
-- **1, after a line per model**: a check failed. The last line, `Checks failed for ...`, names the failed models; on each one's line, look for the number that is not 0 (`frame overlap`, `board overlap`, `unsupported ... mm2`, `separate solids`, `leaf spring ... overlap`). Fix the definition (usually taller or narrower standoffs, or a notch for a part under the board) and build again. Never hand over files from a run that exited 1.
+- **1, after a line per model**: a check failed. The last line, `Checks failed for ...`, names the failed models; on each one's line, look for the number that is not 0 (`frame overlap`, `aluminium rail`, `board overlap`, `unsupported ... mm2`, `separate solids`, `leaf spring ... overlap`) or for `not held`. Fix the definition (usually taller or narrower standoffs, or a notch for a part under the board) and build again. Never hand over files from a run that exited 1.
 - **1, with only a line starting `boards/<Name>.json:`**: the definition itself is wrong, before anything was built. Fix what the line names.
 - **2**: an option is wrong; the message lists the valid values.
 

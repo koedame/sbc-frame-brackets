@@ -5,8 +5,10 @@ Ready-made files for every model are attached to each GitHub release; build only
 Usage:
   python build_all.py --board PiB --mount 20 --orient flat-portrait --format 3mf
                                                # only what you need: here the PiB bracket (Raspberry Pi B size) for 20x20, flat portrait, as 3MF
-  python build_all.py --board PiB --check      # also check interference with the frame and board, unsupported areas and print time,
-                                               # and for DIN rail whether the leaf springs can bend far enough to push on (exit 1 if a check fails)
+  python build_all.py --board PiB --check      # also check interference with the frame and board, unsupported areas, print time and
+                                               # that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame); for DIN rail
+                                               # against steel and aluminium rails, and whether the leaf springs can bend far enough to push on
+                                               # (exit 1 if a check fails)
   python build_all.py --check --board-step vim1s-pcba-3d-v11.stp --board-step ROCK5B_v1.42_3D.step
                                                # check against the boards' official 3D models (not put in viewer.html)
   python build_all.py --coupons                # also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm)
@@ -24,6 +26,8 @@ import sbc_brackets as sb
 HERE = os.path.dirname(os.path.abspath(__file__))
 FORMATS = ["3mf", "stl", "step", "viewer"]
 BED = 256.0                                   # size of the build plate the 3MF and STL are placed on (centred)
+RETAIN_D = 0.3                                # retention: moved this far forward, up or down, the bracket must hit what it is on
+RETAIN = {"forward": (0, RETAIN_D, 0), "up": (RETAIN_D, 0, 0), "down": (-RETAIN_D, 0, 0)}
 
 
 def model_id(B, series, spacer, orient=sb.UPRIGHT):
@@ -95,7 +99,7 @@ def main():
         B, solids = sb.official(p)
         official.setdefault(B.name, []).append((os.path.basename(p), solids))
     boards_chk.update((n, v) for n, v in official.items() if n in boards_chk)
-    frames = {s: sb.mount_frame(s, 300) for s in a.mount}
+    frames = {s: sb.mount_frames(s, 300) for s in a.mount}
     models = []; ghosts = {}; failed = []
     for B, orient, series, spacer in [(B, o, se, sp) for B in boards for o in a.orient for se in a.mount for sp in (False, True)
                                        if o in sb.SPACER_ORIENTS or not sp]:   # flat and shelf: no integrated standoffs
@@ -118,9 +122,11 @@ def main():
                  hole_d=B.hole_d, boss=(dict(B.standoffs, n=len(B.spacer_xy())) if spacer else None))
         line = f"{n:40s} size {m['size']} mm  volume {m['vol']} cm3"
         if a.check:
-            fr = frames[series]
-            hit_frame = (s & fr).volume
-            hits = []; bad = round(hit_frame, 2) > 0 or len(s.solids()) != 1
+            hit_frame = []; loose = []
+            for lab, fr in frames[series]:
+                hit_frame.append((s & fr).volume)
+                loose += [f"{d} on the {lab}" for d, v in RETAIN.items() if round((Pos(*v) * s & fr).volume, 2) <= 0]
+            hits = []; bad = any(round(v, 2) > 0 for v in hit_frame) or len(s.solids()) != 1 or bool(loose)
             for lab, gs in boards_chk[B.name]:
                 v, ar = overlap(s, [M * g for g in gs])
                 hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
@@ -129,7 +135,9 @@ def main():
             unsup = cp.unsupported(s)[0]
             bad |= unsup > 0
             m["min"] = ct.estimate(s)["min"]
-            line += (f"  frame overlap {hit_frame:.2f}  {hit_board}  unsupported {unsup} mm2  ~{m['min']} min"
+            line += (f"  frame overlap {hit_frame[0]:.2f}" + "".join(f" ({lab} {v:.2f})" for (lab, _), v in zip(frames[series][1:], hit_frame[1:]))
+                     + ("  held" if not loose else f"  not held: comes off when moved {RETAIN_D} mm " + ", ".join(loose))
+                     + f"  {hit_board}  unsupported {unsup} mm2  ~{m['min']} min"
                      + ("" if len(s.solids()) == 1 else f"  {len(s.solids())} separate solids (must be 1)"))
             if series == "DIN":
                 spring = sb.din_spring_hit(s)

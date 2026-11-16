@@ -11,7 +11,7 @@ Last updated: 2026-11-17
 
 - Use aluminium extrusion like a DIN rail, and keep adding parts, one per device, that hold Raspberry Pis, mini PCs, network routers, power strips and so on side by side.
 - The extrusions are 20x20 and 40x40 (6 mm slot, 2 mm lip, 12 mm under the lips, 6 mm slot depth).
-- There is also a version for real DIN rail (TS35 x 7.5, EN 60715: 35 mm wide, 7.5 mm deep, 1 mm sheet).
+- There is also a version for real DIN rail (TS35 x 7.5, EN 60715: 35 mm wide, 7.5 mm deep, 1 mm sheet). It also fits aluminium TS35 rails 7.3 mm deep with 1.5 mm side walls.
 - **The back of the frame is assumed to be blocked.** Shapes that wrap around from the back cannot be used.
 - The frame normally runs horizontally (as a rail). Mounting on a vertical frame has not been tested with the current one-piece design.
 - Printed on an FDM printer without supports. Assumed conditions: 256 mm square build plate, 0.4 mm nozzle, PETG.
@@ -87,15 +87,32 @@ A standard was designed with a frame-side part A (fixed shape) and a device-side
 The same front plate as the frame version, with a grip for DIN rail.
 
 - **The frame grip cannot be reused**: the rail lips are thin and shallow (1 mm), so arms coming straight off the back plate cannot get enough flex length (the strain is far too high).
-- **Leaf springs**: the hooks sit at the tips of cantilevered leaf springs that run along the rail (the print height direction). The leaf springs are cut free from the back plate by a gap on each side (0.5 mm inside, 2.0 mm outside) and joined only by the 3 mm on the build plate side. The band of back plate in front of each spring is cut free with it and moves with it. They flex vertically (x), so they print in the same orientation.
+- **Leaf springs**: the hooks sit at the tips of cantilevered leaf springs that run along the rail (the print height direction). The leaf springs are cut free from the back plate by a gap on each side (0.5 mm inside, 1.5 mm outside) and joined only by the 3 mm on the build plate side. The band of back plate in front of each spring is cut free with it and moves with it. They flex vertically (x), so they print in the same orientation.
 - **Centre key**: sits in the rail channel (between the side walls) and takes the vertical load rigidly. Same idea as the key in the front slot of the frame version. The leaf springs only keep the bracket from coming off.
+  - **23.6 mm wide since 2026-11-17** (`DIN_KEY_HALF` 11.8, was 12.2), so it fits aluminium rails with 1.5 mm side walls (24 mm channel, 0.2 mm to spare on each side) as well as steel rails with 1 mm sheet (25 mm channel, 0.7 mm on each side, was 0.3 mm). `--check` checks every DIN model against both rails (section 6).
+  - The wider clearance on steel rails does not add vertical play. The 3 mm at the root of each leaf spring is part of the solid back plate and sits 0.05 mm (`DIN_FIT`) from the lip edge, so it touches the lip edge long before the key touches a side wall, on either rail. That was already so with the 24.4 mm key, so in practice the roots of the leaf springs take the vertical load and the key is the back-up.
 - **How this differs from the "spring structure with a gap" avoided earlier**: what was avoided was a gap between the back plate and the frame, which caused play. The back plate of the DIN version sits directly on the rail front; the only gaps are beside the leaf springs.
 - **Outer gap 2.0 mm (2026-11-15).** The outer gap used to be 0.5 mm, but the barb tip has to move 0.75 mm (`DIN_HOOK` − `DIN_FIT`) to clear the lip edge. The band in front of the spring would have hit the back plate with the barb still 0.25 mm on the lip, so the bracket could neither be pushed on nor levered off (moving the spring and band 0.75 mm outwards overlapped the back plate by 9.75 mm3; the overlap starts at 0.5 mm).
-  - The spring bends rather than moving as a whole. The lip edge pushes it at the lowest point of the barb tip (z ≈ 1.8 mm, where the 45-degree underside ends), 6.8 mm above its root at the top of the front plate, and the spring stays straight above that point, so its top end (z = 8 mm) moves further than the barb tip: 1.77 mm by beam theory, 1.63 mm at the band and 1.75 mm at the spring behind it (where nothing is in the way) by a linear FEA of the spring and band. Hence 2.0 mm rather than 1.0 mm.
+  - The spring bends rather than moving as a whole. The lip edge pushes it at the lowest point of the barb tip (where the 45-degree underside ends), and the spring stays straight above that point, so its top end (z = 8 mm) moves further than the barb tip. With the 7 mm hook of the time that point was z ≈ 1.8 mm, 6.8 mm above the root at the top of the front plate, and the top end moved 1.77 mm by beam theory, 1.63 mm at the band and 1.75 mm at the spring behind it (where nothing is in the way) by a linear FEA of the spring and band. Hence 2.0 mm rather than 1.0 mm.
   - The back plate beyond the outer gap stops the spring a little after the barb clears, so it cannot be bent much further than pushing on needs. The inner gap stays 0.5 mm: the spring moves away from it.
   - `--check` now moves each spring, its barb and its band outwards by the beam estimate (`din_spring_travel()`) and reports the overlap with the rest of the bracket, which must be 0. This is on the safe side: the real spring moves less near its root.
-- **Strain and force (re-estimated 2026-11-15).** About 2.9% bending strain at the root of each leaf spring (cantilever 6.8 mm long to the lowest point of the barb tip, 1.2 mm thick, 0.75 mm deflection; the FEA gives 2.85%), about 13.5 N per spring to bend it that far (E = 2550 MPa) and about 11 N of push per spring before friction (the lead-in face of the barb is about 40 degrees from the push direction). The earlier estimate (1.7%, 4.8 N) took the load at the middle of the barb.
-  - The spring runs along the print height, so it bends across the layers. Bambu Lab's PETG Basic data sheet (V3.0) gives 2550 MPa and 35 MPa across the layers (Z), so it starts to yield at roughly 35 / 2550 ≈ 1.4%. At about twice that, the roots may whiten or take a set when the bracket is pushed on (section 9).
+- **Strain at the root of the leaf springs lowered (2026-11-17).** With a 7 mm hook (`DIN_NOSE_H`) and a 1.2 mm spring (`DIN_LEAF_T`), the bending strain at the root came to about 2.9% (cantilever 6.8 mm to the lowest point of the barb tip, 0.75 mm deflection; the FEA gave 2.85%), with about 13.5 N per spring to bend it that far and about 11 N of push per spring before friction. (The estimate before 2026-11-15, 1.7% and 4.8 N, took the load at the middle of the barb.)
+  - The spring runs along the print height, so it bends across the layers. Bambu Lab's PETG Basic data sheet (V3.0) gives 2550 MPa and 35 MPa across the layers (Z), so it starts to yield at roughly 35 / 2550 ≈ 1.37%. Covestro's *Snap-Fit Joints for Plastics* design guide allows 0.7 times the yield strain for a part snapped on once (0.96% here) and 0.6 times that again for one taken off and put back repeatedly (0.58%). 2.9% was about three times the first, so the roots would likely have whitened or cracked.
+  - The strain is ε = 3·δ·t / (2·a²), δ = 0.75 mm (`DIN_HOOK` − `DIN_FIT`), t = spring thickness, a = root to the lowest point of the barb tip. The ways down, by beam theory:
+
+    | Change | a (mm) | Strain |
+    |---|---|---|
+    | 7.0 mm hook, 1.2 mm spring (until 2026-11-17) | 6.81 | 2.91% |
+    | Shorter hook at the tip end (4.0 / 3.0 / 2.0 mm) | 9.81 / 10.81 / 11.81 | 1.40 / 1.16 / 0.97% |
+    | Thinner spring (0.8 mm) | 6.81 | 1.94% |
+    | Shallower hook (`DIN_HOOK` 0.55) | 6.56 | 2.09% |
+    | **3.0 mm hook and 0.8 mm spring (adopted)** | **10.81** | **0.77%** |
+    | 2.0 mm hook and 0.8 mm spring | 11.81 | 0.65% |
+
+  - **Adopted: a 3.0 mm hook kept at the tip end of the spring and a 0.8 mm spring** (the maintainer's choice: the first that comes under 0.96%). 0.77% by beam theory, 0.75% by the FEA (largest at the root). It takes about 1.1 N per spring to bend it that far (FEA; 1.09 N by beam theory) and about 0.9 N of push per spring before friction (the lead-in face of the barb is about 40 degrees from the push direction).
+  - What it costs: the spring is about 12 times softer, so each barb is pressed behind its lip by about 1 N instead of 13.5 N, and the hook catches the lip over 3 mm instead of 7 mm (moved 0.3 mm forward, a bracket overlaps a steel rail by 0.96 mm3 instead of 2.46 mm3). The catch face is square to the pull, so a straight pull does not lift the barb; `--check` still finds the bracket held forward, up and down on both rails. For a given strain the force grows with a³, so a short hook as far out as it goes is the best case: under 0.96% no combination gets much more than about 2.7 N per spring by beam theory (a 2.0 mm hook with a 1.19 mm spring).
+  - **Outer gap 1.5 mm (2026-11-17).** The top end of the softer, longer spring only has to move 0.98 mm to clear the lip (beam theory; 0.95 mm at the band and 0.99 mm at the spring behind it by the FEA), so the 2.0 mm gap would have let it bend twice as far as pushing on needs, to about 1.6% at the root, past yield. At 1.5 mm the stop comes at about 1.2%, under yield, and the band still has 0.5 mm to spare (the 2.0 mm gap left 0.23 mm). The narrower spring and gap make the back plate 0.9 mm narrower on each side of the grip and lower the shelf on DIN rail by 0.9 mm; the beam estimates of the DIN versions (history 8) change by at most 0.3 mm and 0.02 MPa (`OrinNano` flat landscape bends 0.3 mm less, the flat orientations start a little closer to the grip).
+  - Not tried on a print: whether the roots whiten, how firmly the softer springs hold, and how easily the bracket pushes on (section 9).
 
 ### History 5: shorter print time (version 1 → 2)
 
@@ -374,9 +391,9 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | Key in the front slot | 5.8 mm wide, 1.8 mm deep | `grip()`, `KEY_D` |
 | Width along the rail | 16 mm | `W` |
 | Front plate and back plate thickness | 3 mm | `T` |
-| DIN: hook engagement / leaf spring thickness / clearance | 0.8 mm / 1.2 mm / 0.05 mm | `DIN_HOOK`, `DIN_LEAF_T`, `DIN_FIT` |
-| DIN: centre key half width / depth | 12.2 mm / 2.0 mm | `DIN_KEY_HALF`, `DIN_KEY_D` |
-| DIN: gap beside the leaf spring, inside / outside | 0.5 mm / 2.0 mm | `DIN_SLIT_IN`, `DIN_SLIT_OUT` |
+| DIN: hook engagement / hook length / leaf spring thickness / clearance | 0.8 mm / 3.0 mm / 0.8 mm / 0.05 mm | `DIN_HOOK`, `DIN_NOSE_H`, `DIN_LEAF_T`, `DIN_FIT` |
+| DIN: centre key half width / depth | 11.8 mm / 2.0 mm | `DIN_KEY_HALF`, `DIN_KEY_D` |
+| DIN: gap beside the leaf spring, inside / outside | 0.5 mm / 1.5 mm | `DIN_SLIT_IN`, `DIN_SLIT_OUT` |
 | Back plate to the rear edge of the board | 4 mm | `BOARD_Y0` |
 | Back plate to the microSD end of the board, when that end faces the frame (upright landscape and shelf portrait) | 17 mm | `SD_GAP` |
 | Pocket under each opening of a standing board plate (flat and shelf) | 1.0 mm deep | `POCKET` |
@@ -384,8 +401,8 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 ## 6. Checks and caveats
 
 - **Printability (supports needed or not)**: use `checks_print.py`. It slices the part layer by layer and checks that each layer stays within 45 degrees of the outline of the layer below. **Do not rely on face angles alone**: that misses shapes that start in mid-air (history 2).
-- **Interference**: measure the volume of the intersection between the bracket and the frame, and between the bracket and the board. Use the board's official 3D model when there is one.
-- **Retention**: move the bracket 0.3 mm forward, up and down, and confirm it then overlaps the frame (i.e. it is hooked on).
+- **Interference**: measure the volume of the intersection between the bracket and the frame, and between the bracket and the board. Use the board's official 3D model when there is one. DIN models are measured against both a steel rail (1 mm sheet, 7.5 deep) and an aluminium rail (1.5 mm side walls, 7.3 deep; `mount_frames()`), and must fit both.
+- **Retention**: `--check` moves the bracket 0.3 mm forward, up and down and confirms it then overlaps the frame (i.e. it is hooked on), on both rails for DIN models. A model that does not is reported as `not held` (until 2026-11-17 this was done by hand).
 - **Upside down**: confirm zero interference in the flipped position too.
 - **DIN leaf spring travel**: `--check` moves each leaf spring outwards by as much as pushing on needs at its top end and reports the overlap with the rest of the bracket. It must be 0; otherwise the spring is stopped before the barb clears the lip (history 4).
 - **Print time**: `checks_time.py` is a home-made estimate, not a slicer measurement. Use it only to compare shapes. No slicer measurements have been taken yet.
@@ -419,7 +436,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | NVIDIA Jetson Orin Nano Developer Kit / Super (`OrinNano`) | Official [carrier board specification SP-11324-001 v1.3](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_specification_sp.pdf) (PDF, figure 4-1), [3D model](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_3d_step_model.zip/) `P3766-P3768SKU4-P3767ENVELOPE.stp` (STEP, the developer kit on its base) and [carrier board reference design files A04](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_reference_design_files_a04_20230320.zip/) (outline and drill layers), from the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads); Super from the [user guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/index.html). 100 x 79 mm, 2.75 mm holes 86 x 58 mm apart, 4 mm from the `l` = 0 end and 4 mm from the `s` = S edge (history 16) | High. Interference checked against the official 3D model, with the base, its screws and the antennas left out. No SSD in the 2280 slot in the model |
 | Sipeed NanoKVM-Desk (NanoKVM Pro) (`NanoKVMDesk`) | Official 3D models of the Desk unit from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/KVM_Pro/1_3D): [`3D_KVM_PRO_DESK_plastic_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_plastic_20260508.step) (current units, plastic front shell) and [`3D_KVM_PRO_DESK_print_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_print_20260508.step) (earlier units, 3D-printed front shell); which bottom screws may be used for mounting, and their sizes, from the [NanoKVM-Desk quick start guide](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/desk_start.html) (rack mounting). Case 67.1 x 65.4 x 27.0 mm, rear screw holes (M2) 13.57 mm from the back and 22.55 and 42.38 mm from the side away from the thumbwheel (history 17) | High. Interference checked against both official 3D models. The thickness of the rubber feet is not published |
 | Sipeed NanoKVM Lite, NanoKVM Full (not added) | Lite: the official [3D model](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_NanoKVM_Lite.zip) and the LicheeRV Nano's dimension drawing (`LICHEE/LicheeRV_Nano` on the download site). Full: the official [3D model of its boards](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_RV_Nano_KVM_V1.rar), with no case. Both from the [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file), linked from the [NanoKVM wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html) (history 17) | The Lite has no mounting holes; no 3D model or drawing of the Full's case is published |
-| DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below) | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
+| DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below), as are the 1.5 mm side walls and 7.3 mm depth of the aluminium rails | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
 ### Checking the DIN rail dimensions (2026-11-14)
 
@@ -432,8 +449,8 @@ The centre key (`DIN_KEY_HALF`) sits in the hat's channel (between the inner fac
 
 - The tolerance of the base width could not be confirmed from available documents. Annex A.3 of IEC 60715:2017 (Figures A.3 and A.4), which defines the rail profiles, is not in the [public preview](https://cdn.standards.iteh.ai/samples/23197/de6fcc085faa4dc1a9af3ef4265d161d/IEC-60715-2017.pdf). Figure 2 (TH 35), which is in the preview, gives device-side dimensions and only shows the lip thickness 1 ±0.04 and the width 35 ±0.3.
 - The drawing in Weidmüller's TS 35X7.5 datasheet only gives width 35, depth 7.5 and thickness 1, not the base width.
-- On a steel rail with 1 mm sheet, the clearance between the key (24.4 mm wide) and each side wall is 0.3 mm.
-- **The current key does not fit aluminium rails with 1.5 mm side walls (7.3 mm deep, 24 mm channel).** Overlaid on a rail with 1.5 mm side walls, all three DIN models interfere by 10.24 mm3 (the key hits by 0.2 mm on each side). The lip edge where the hooks catch is 1 mm thick, the same as TS35 x 7.5.
+- The 24.4 mm key of the time had 0.3 mm to spare on each side on a steel rail with 1 mm sheet, but **did not fit aluminium rails with 1.5 mm side walls (7.3 mm deep, 24 mm channel)**: overlaid on such a rail, every DIN model interfered by 10.24 mm3 (the key hit by 0.2 mm on each side). The lip edge where the hooks catch is 1 mm thick, the same as TS35 x 7.5.
+- **Since 2026-11-17 the key is 23.6 mm wide and fits both** (history 4): 0.2 mm to spare on each side on aluminium, 0.7 mm on steel. `--check` measures every DIN model against both rails.
 
 - Take dimensions for new boards from the manufacturer's official 3D model or drawing. Do not place holes from memory or guesswork: for the VIM1S, the first guess ("rectangular pattern") was wrong.
 - Official 3D models and drawings are not included (`*.stp`, and `*.step` and `*.stl` at the top level, are excluded in `.gitignore`). To re-check interference, download them from the manufacturers' sites (links in the table above) and pass each with `--board-step` (unpack the Le Potato model first: `AML-S905X-CC-V1.0.stp`). The file name tells which bracket it belongs to (`official_models` in the board's definition).
@@ -454,8 +471,8 @@ The material used for the prints and which direction was loose (front-back, up-d
 
 - [ ] Get the results of printing the current version and the coupons, then settle `FIT` and `HOOK`
 - [ ] Check the pilot hole sizes of the integrated standoffs (2.2 mm for M2.5, 1.7 mm for M2, 2.6 mm for M3) on real parts
-- [ ] Print and test the DIN rail version (how easily the leaf springs push on, retention, centre key vs channel width, and whether the roots of the leaf springs whiten or crack)
-- [ ] Lower the strain at the roots of the DIN leaf springs (about 2.9%, section 4 history 4)? Each way trades against how firmly the barbs hold: a shorter barb kept at the tip end of the spring, a shallower barb, or a thinner spring
+- [ ] Print and test the DIN rail version on steel and aluminium rails (how easily the leaf springs push on, whether the softer springs of 2026-11-17 hold the bracket firmly enough, centre key vs channel width, and whether the roots of the leaf springs whiten or crack)
+- [x] Lower the strain at the roots of the DIN leaf springs (about 2.9%)? → a 3.0 mm hook at the tip end and a 0.8 mm spring: 0.77% (FEA 0.75%), under the 0.96% allowed for a part snapped on once; the springs push about 12 times more softly (section 4 history 4). Not tried on a print
 - [ ] Print `PiA`, and try `PiB` with a B-size board other than the Pi 4
 - [ ] Print `ROCK5B` and try it with a ROCK 5B / 5B+: an SSD in the M.2 slots under the board (not in the official models), and taking the ROCK 5B's microSD card in and out while mounted
 - [ ] Print `BBB` and try it with a BeagleBone Black: how far the micro HDMI and mini USB reach below the board (not published; in flat landscape the micro HDMI has to stay within 6 mm, history 9), and M3 screws in the 3 mm holes of the version without standoffs (tight; 3.2 mm or so would need the maintainer to make an exception to the 3 mm holes)
@@ -476,7 +493,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [x] Make the `VIM1S` screw holes smaller for M2? → 2.4 mm, the maintainer's decision (history 18)
 - [x] Libre Computer Le Potato (AML-S905X-CC): check the hole positions against the official 3D model before adding it to `PiB` → added to `PiB`; the holes match and `--check` passes against the official 3D model (history 11). Not tried on a print
 - [x] Confirm the 27 mm outer width of the DIN rail hat's base → confirmed as 27 mm from two vendors' drawings (section 7). Tolerance not confirmed
-- [ ] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? The current key (24.4 mm wide) does not go in. A narrower key adds play on steel rails with 1 mm sheet (section 7)
+- [x] Also fit aluminium DIN rails with 1.5 mm side walls (24 mm channel)? → the key is 23.6 mm wide and fits both; the vertical play is set by the roots of the leaf springs, so it does not grow on steel rails (section 4 history 4, section 7)
 - [ ] Print the new orientations (history 8): the teardrop holes and pockets of the flat and shelf plates, the shelf under a board, and how far the long overhangs (upright landscape, flat landscape, shelf portrait) bend when a cable is plugged in
 - [ ] Stiffen the long overhangs if the prints bend too much (a deeper rib or a second gusset). With a 10 N push at the far edge, `PiZero` reaches the strength of PETG in upright landscape and flat landscape (history 8), and `MuLite` 99% of it in flat landscape (history 12)
 - [ ] Flat orientations: the board plate lies against the front of the frame, so no screw head, nut or standoff thread can stand out behind it. Countersunk holes on the back, or a note on how to fix standoffs from the front? Needs the maintainer's decision. The README asks for countersunk screws only on `N2Plus` and `M1` (history 13)
@@ -503,112 +520,112 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 | Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer | DIN35 | DIN35 spacer |
 |---|---|---|---|---|---|---|
-| PiB | 12.656 | 13.189 | 13.299 | 13.832 | 12.804 | 13.337 |
-| PiA | 10.525 | 11.058 | 11.168 | 11.701 | 10.673 | 11.207 |
-| PiZero | 8.291 | 8.629 | 8.935 | 9.272 | 8.440 | 8.777 |
-| VIM1S | 12.684 | 13.063 | 13.328 | 13.706 | 12.833 | 13.211 |
-| ROCK5B | 17.977 | 18.632 | 18.620 | 19.275 | 18.126 | 18.781 |
-| BBB | 13.989 | 14.566 | 14.632 | 15.209 | 14.138 | 14.715 |
-| M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.807 | 20.567 |
-| LP3Delta | 21.926 | 22.687 | 22.569 | 23.330 | 22.075 | 22.835 |
-| MuLite | 26.666 | 27.152 | 27.309 | 27.795 | 26.815 | 27.300 |
-| N2Plus | 22.543 | 23.375 | 23.186 | 24.018 | 22.692 | 23.523 |
-| M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.658 | 30.490 |
-| OPi5Pro | 17.013 | 17.564 | 17.657 | 18.207 | 17.162 | 17.712 |
-| OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.285 | 21.836 |
-| NanoKVMDesk | 16.555 | 16.844 | 17.198 | 17.487 | 16.704 | 16.992 |
+| PiB | 12.656 | 13.189 | 13.299 | 13.832 | 12.749 | 13.282 |
+| PiA | 10.525 | 11.058 | 11.168 | 11.701 | 10.618 | 11.151 |
+| PiZero | 8.291 | 8.629 | 8.935 | 9.272 | 8.384 | 8.722 |
+| VIM1S | 12.684 | 13.063 | 13.328 | 13.706 | 12.777 | 13.156 |
+| ROCK5B | 17.977 | 18.632 | 18.620 | 19.275 | 18.070 | 18.725 |
+| BBB | 13.989 | 14.566 | 14.632 | 15.209 | 14.082 | 14.659 |
+| M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.751 | 20.512 |
+| LP3Delta | 21.926 | 22.687 | 22.569 | 23.330 | 22.019 | 22.780 |
+| MuLite | 26.666 | 27.152 | 27.309 | 27.795 | 26.759 | 27.245 |
+| N2Plus | 22.543 | 23.375 | 23.186 | 24.018 | 22.636 | 23.467 |
+| M1 | 29.510 | 30.341 | 30.153 | 30.984 | 29.603 | 30.434 |
+| OPi5Pro | 17.013 | 17.564 | 17.657 | 18.207 | 17.106 | 17.657 |
+| OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.229 | 21.780 |
+| NanoKVMDesk | 16.555 | 16.844 | 17.198 | 17.487 | 16.648 | 16.937 |
 
 **Upright landscape (`_upright-landscape`)**
 
 | Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer | DIN35 | DIN35 spacer |
 |---|---|---|---|---|---|---|
-| PiB | 12.299 | 12.833 | 12.902 | 13.435 | 12.425 | 12.958 |
-| PiA | 11.891 | 12.425 | 12.494 | 13.027 | 12.017 | 12.550 |
-| PiZero | 7.609 | 7.947 | 8.605 | 8.943 | 8.126 | 8.464 |
-| VIM1S | 11.567 | 11.946 | 12.177 | 12.556 | 11.698 | 12.077 |
-| ROCK5B | 16.834 | 17.489 | 17.477 | 18.132 | 16.983 | 17.638 |
-| BBB | 14.428 | 15.005 | 15.014 | 15.591 | 14.540 | 15.117 |
-| M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.807 | 20.567 |
-| LP3Delta | 19.856 | 20.617 | 20.499 | 21.260 | 20.004 | 20.765 |
-| MuLite | 24.728 | 25.213 | 25.371 | 25.857 | 24.877 | 25.362 |
-| N2Plus | 26.836 | 27.668 | 27.479 | 28.311 | 26.985 | 27.816 |
-| M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.542 | 33.373 |
-| OPi5Pro | 17.576 | 18.126 | 18.178 | 18.729 | 17.701 | 18.252 |
-| OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.360 | 20.911 |
-| NanoKVMDesk | 16.480 | 16.769 | 17.123 | 17.412 | 16.629 | 16.918 |
+| PiB | 12.299 | 12.833 | 12.902 | 13.435 | 12.382 | 12.915 |
+| PiA | 11.891 | 12.425 | 12.494 | 13.027 | 11.974 | 12.507 |
+| PiZero | 7.609 | 7.947 | 8.605 | 8.943 | 8.013 | 8.351 |
+| VIM1S | 11.567 | 11.946 | 12.177 | 12.556 | 11.653 | 12.032 |
+| ROCK5B | 16.834 | 17.489 | 17.477 | 18.132 | 16.927 | 17.582 |
+| BBB | 14.428 | 15.005 | 15.014 | 15.591 | 14.501 | 15.078 |
+| M2 | 19.659 | 20.419 | 20.302 | 21.062 | 19.751 | 20.512 |
+| LP3Delta | 19.856 | 20.617 | 20.499 | 21.260 | 19.949 | 20.709 |
+| MuLite | 24.728 | 25.213 | 25.371 | 25.857 | 24.821 | 25.306 |
+| N2Plus | 26.836 | 27.668 | 27.479 | 28.311 | 26.929 | 27.760 |
+| M1 | 32.394 | 33.225 | 33.037 | 33.868 | 32.487 | 33.318 |
+| OPi5Pro | 17.576 | 18.126 | 18.178 | 18.729 | 17.658 | 18.209 |
+| OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.304 | 20.855 |
+| NanoKVMDesk | 16.480 | 16.769 | 17.123 | 17.412 | 16.573 | 16.862 |
 
 **Flat portrait (`_flat-portrait`)**
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.095 | 13.258 | 13.294 |
-| PiA | 10.458 | 10.621 | 10.185 |
-| PiZero | 8.208 | 8.371 | 7.935 |
-| VIM1S | 13.172 | 13.335 | 12.899 |
-| ROCK5B | 19.195 | 19.358 | 18.922 |
-| BBB | 14.450 | 14.613 | 14.177 |
-| M2 | 20.645 | 20.808 | 20.373 |
-| LP3Delta | 23.865 | 24.028 | 23.592 |
-| MuLite | 29.860 | 30.023 | 29.587 |
-| N2Plus | 23.582 | 23.745 | 23.310 |
-| M1 | 31.350 | 31.513 | 31.077 |
-| OPi5Pro | 17.163 | 17.326 | 17.385 |
-| OrinNano | 22.639 | 22.802 | 22.367 |
-| NanoKVMDesk | 16.204 | 16.367 | 15.931 |
+| PiB | 13.095 | 13.258 | 13.167 |
+| PiA | 10.458 | 10.621 | 10.173 |
+| PiZero | 8.208 | 8.371 | 7.923 |
+| VIM1S | 13.172 | 13.335 | 12.887 |
+| ROCK5B | 19.195 | 19.358 | 18.909 |
+| BBB | 14.450 | 14.613 | 14.164 |
+| M2 | 20.645 | 20.808 | 20.360 |
+| LP3Delta | 23.865 | 24.028 | 23.580 |
+| MuLite | 29.860 | 30.023 | 29.575 |
+| N2Plus | 23.582 | 23.745 | 23.297 |
+| M1 | 31.350 | 31.513 | 31.065 |
+| OPi5Pro | 17.163 | 17.326 | 17.253 |
+| OrinNano | 22.639 | 22.802 | 22.354 |
+| NanoKVMDesk | 16.204 | 16.367 | 15.919 |
 
 **Flat landscape (`_flat-landscape`)**
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 12.372 | 12.535 | 12.099 |
-| PiA | 10.920 | 11.083 | 10.647 |
-| PiZero | 6.526 | 7.518 | 7.038 |
-| VIM1S | 12.781 | 12.944 | 12.509 |
-| ROCK5B | 18.319 | 18.483 | 18.448 |
-| BBB | 13.406 | 13.569 | 13.133 |
-| M2 | 21.270 | 21.433 | 20.997 |
-| LP3Delta | 21.966 | 22.129 | 21.694 |
-| MuLite | 30.049 | 30.212 | 29.776 |
-| N2Plus | 24.556 | 24.719 | 24.283 |
-| M1 | 30.802 | 30.965 | 30.529 |
-| OPi5Pro | 15.776 | 15.939 | 15.504 |
-| OrinNano | 20.772 | 20.936 | 20.820 |
-| NanoKVMDesk | 16.116 | 16.279 | 15.843 |
+| PiB | 12.372 | 12.535 | 12.086 |
+| PiA | 10.920 | 11.083 | 10.634 |
+| PiZero | 6.526 | 7.518 | 6.926 |
+| VIM1S | 12.781 | 12.944 | 12.496 |
+| ROCK5B | 18.319 | 18.483 | 18.335 |
+| BBB | 13.406 | 13.569 | 13.121 |
+| M2 | 21.270 | 21.433 | 20.985 |
+| LP3Delta | 21.966 | 22.129 | 21.681 |
+| MuLite | 30.049 | 30.212 | 29.764 |
+| N2Plus | 24.556 | 24.719 | 24.271 |
+| M1 | 30.802 | 30.965 | 30.516 |
+| OPi5Pro | 15.776 | 15.939 | 15.491 |
+| OrinNano | 20.772 | 20.936 | 20.487 |
+| NanoKVMDesk | 16.116 | 16.279 | 15.831 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.201 | 14.321 | 14.106 |
-| PiA | 12.198 | 13.318 | 13.103 |
-| PiZero | 8.188 | 9.308 | 9.092 |
-| VIM1S | 12.240 | 13.361 | 13.145 |
-| ROCK5B | 18.215 | 19.335 | 19.120 |
-| BBB | 15.061 | 16.181 | 15.965 |
-| M2 | 20.754 | 21.874 | 21.658 |
-| LP3Delta | 21.834 | 22.954 | 22.738 |
-| MuLite | 27.729 | 28.849 | 28.633 |
-| N2Plus | 27.919 | 29.039 | 28.824 |
-| M1 | 34.146 | 35.267 | 35.051 |
-| OPi5Pro | 17.997 | 19.117 | 18.901 |
-| OrinNano | 21.849 | 22.970 | 22.754 |
-| NanoKVMDesk | 16.481 | 17.602 | 17.386 |
+| PiB | 13.201 | 14.321 | 13.993 |
+| PiA | 12.198 | 13.318 | 12.990 |
+| PiZero | 8.188 | 9.308 | 8.979 |
+| VIM1S | 12.240 | 13.361 | 13.032 |
+| ROCK5B | 18.215 | 19.335 | 19.007 |
+| BBB | 15.061 | 16.181 | 15.853 |
+| M2 | 20.754 | 21.874 | 21.546 |
+| LP3Delta | 21.834 | 22.954 | 22.625 |
+| MuLite | 27.729 | 28.849 | 28.521 |
+| N2Plus | 27.919 | 29.039 | 28.711 |
+| M1 | 34.146 | 35.267 | 34.938 |
+| OPi5Pro | 17.997 | 19.117 | 18.789 |
+| OrinNano | 21.849 | 22.970 | 22.641 |
+| NanoKVMDesk | 16.481 | 17.602 | 17.273 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
 | Model | 20x20 | 40x40 | DIN35 |
 |---|---|---|---|
-| PiB | 13.737 | 14.858 | 14.642 |
-| PiA | 11.561 | 12.682 | 12.466 |
-| PiZero | 8.397 | 9.518 | 9.302 |
-| VIM1S | 14.192 | 15.312 | 15.097 |
-| ROCK5B | 19.573 | 20.693 | 20.478 |
-| BBB | 14.791 | 15.912 | 15.696 |
-| M2 | 21.379 | 22.499 | 22.283 |
-| LP3Delta | 23.980 | 25.100 | 24.885 |
-| MuLite | 31.704 | 32.824 | 32.609 |
-| N2Plus | 24.221 | 25.342 | 25.126 |
-| M1 | 31.681 | 32.801 | 32.585 |
-| OPi5Pro | 17.322 | 18.442 | 18.227 |
-| OrinNano | 21.790 | 22.910 | 22.694 |
-| NanoKVMDesk | 16.540 | 17.660 | 17.445 |
+| PiB | 13.737 | 14.858 | 14.529 |
+| PiA | 11.561 | 12.682 | 12.353 |
+| PiZero | 8.397 | 9.518 | 9.189 |
+| VIM1S | 14.192 | 15.312 | 14.984 |
+| ROCK5B | 19.573 | 20.693 | 20.365 |
+| BBB | 14.791 | 15.912 | 15.583 |
+| M2 | 21.379 | 22.499 | 22.170 |
+| LP3Delta | 23.980 | 25.100 | 24.772 |
+| MuLite | 31.704 | 32.824 | 32.496 |
+| N2Plus | 24.221 | 25.342 | 25.013 |
+| M1 | 31.681 | 32.801 | 32.472 |
+| OPi5Pro | 17.322 | 18.442 | 18.114 |
+| OrinNano | 21.790 | 22.910 | 22.581 |
+| NanoKVMDesk | 16.540 | 17.660 | 17.332 |
