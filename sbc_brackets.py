@@ -194,15 +194,17 @@ def din_spring_travel():
     return (DIN_HOOK - DIN_FIT) * (1 + 1.5 * (W / 2 - za) / a)
 
 
-def din_spring_hit(s):
+def din_spring_hit(s, doubts):
     """Overlap (mm3) between the rest of DIN bracket s and its leaf springs moved outwards by din_spring_travel(), both sides.
     Moves each spring with its barb and the band of back plate in front of it as one piece, so the overlap is on the safe side
-    (the real spring moves less near its root). Must be 0, or the spring stops before the barb clears the lip"""
+    (the real spring moves less near its root). Must be 0, or the spring stops before the barb clears the lip. Measured by
+    checks_overlap.common_volume, which adds to doubts if OCC and the meshes disagree"""
+    from checks_overlap import common_volume
     xl = din_leaf_x(); d = din_spring_travel(); hit = 0.0
     for sg in (1, -1):
         cut = box(*sorted((sg * xl, sg * (xl + DIN_LEAF_T))), -DIN_LEAF_BACK - 0.2, T + FIL + 0.2, Z0 + T, W / 2 + 1) \
             + box(*sorted((sg * (xl - DIN_HOOK - 0.2), sg * xl)), -DIN_LEAF_BACK - 0.2, -0.3, Z0 + T, W / 2 + 1)
-        hit += (Pos(sg * d, 0, 0) * (s & cut) & (s - cut)).volume
+        hit += common_volume(Pos(sg * d, 0, 0) * (s & cut), s - cut, doubts, "leaf spring")
     return hit
 
 

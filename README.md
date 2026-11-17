@@ -325,7 +325,7 @@ Tested on Linux ARM64 (Python 3.11, 3.13 and 3.14) and Linux x86-64 (Python 3.11
 | `--mount 20 DIN` | Mounts to build: `20`, `40`, `DIN` (default: all) |
 | `--orient flat-portrait shelf-landscape` | Orientations to build: `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait`, `shelf-landscape` (default: all) |
 | `--format 3mf step` | What to write: `3mf`, `stl`, `step`, `viewer` (default: all). The upright orientations get both the version without and the version with standoffs |
-| `--check` | Report interference with the frame and the board, unsupported area and estimated print time, and check that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame). In the flat orientations, also check that flat head screws in the holes stay below the back of the plate. For DIN rail, check against both a steel rail and an aluminium rail with 1.5 mm side walls, and report the overlap when the leaf springs bend outwards as far as pushing on needs. Exits with status 1 if any check fails |
+| `--check` | Report interference with the frame and the board, unsupported area and estimated print time, and check that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame). In the flat orientations, also check that flat head screws in the holes stay below the back of the plate. For DIN rail, check against both a steel rail and an aluminium rail with 1.5 mm side walls, and report the overlap when the leaf springs bend outwards as far as pushing on needs. Every overlap is measured both by OpenCascade and from triangle meshes, and a model whose two results disagree fails. Exits with status 1 if any check fails |
 | `--coupons` | Also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm) |
 | `--board-step <path>` | Check the board interference against a board's official 3D model (STEP, or STL for a model published only as STL) instead of the simplified board. Repeat it for several models (they are not put in the viewer) |
 | `--out <dir>` | Write somewhere other than `models/` |
@@ -411,6 +411,7 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 | `viewer.tpl.html` | Template for the viewer |
 | `checks_print.py` | Support check. Slices the part layer by layer and checks each layer stays within 45 degrees of the one below |
 | `checks_time.py` | Print time estimate |
+| `checks_overlap.py` | Overlap volume for the interference, retention and leaf spring checks, measured both by OpenCascade and from triangle meshes |
 | [`skills/sbc-frame-brackets/`](skills/sbc-frame-brackets/SKILL.md) | Claude skill: hands over the download links for a supported board, or adds a new board and builds only the files needed |
 | `.github/workflows/build.yml` | Builds and checks every model on pull requests that change the generator, and attaches one zip per board, the viewer and the fit test coupons to the release when a version tag is pushed |
 | `vendor/` | three.js r128 (MIT license, `vendor/LICENSE-three.txt`) |

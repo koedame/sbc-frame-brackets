@@ -107,7 +107,7 @@ python build_all.py --board <Name> --mount 20 --orient flat-portrait --format 3m
 The exit status is the result:
 
 - **0**: every check passed. The last line says `Checks passed for all <n> models`.
-- **1, after a line per model**: a check failed. The last line, `Checks failed for ...`, names the failed models; on each one's line, look for the number that is not 0 (`frame overlap`, `aluminium rail`, `board overlap`, `flat head screws overlap`, `unsupported ... mm2`, `separate solids`, `leaf spring ... overlap`) or for `not held`. Fix the definition (usually taller or narrower standoffs, or a notch for a part under the board) and build again. Never hand over files from a run that exited 1.
+- **1, after a line per model**: a check failed. The last line, `Checks failed for ...`, names the failed models; on each one's line, look for the number that is not 0 (`frame overlap`, `aluminium rail`, `board overlap`, `flat head screws overlap`, `unsupported ... mm2`, `separate solids`, `leaf spring ... overlap`), for `not held` or for `OCC and mesh disagree` (OpenCascade and the triangle meshes measured an overlap differently, or a shape could not be meshed; OpenCascade can miss overlaps between nearly parallel flat faces, DESIGN_NOTES section 6). Fix the definition (usually taller or narrower standoffs, or a notch for a part under the board) and build again. Never hand over files from a run that exited 1.
 - **1, with only a line starting `boards/<Name>.json:`**: the definition itself is wrong, before anything was built. Fix what the line names.
 - **2**: an option is wrong; the message lists the valid values.
 
