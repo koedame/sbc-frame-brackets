@@ -15,7 +15,7 @@ Usage:
   python build_all.py --coupons                # also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm)
   python build_all.py                          # everything (every model in 3MF, STL and STEP, and viewer.html) to models/
 
-Requirements: Python 3.11 or later, build123d (plus trimesh, shapely, networkx and rtree for --check)
+Requirements: Python 3.11 or later, build123d (plus trimesh, shapely, networkx, rtree and manifold3d for --check)
 """
 import argparse, json, os, sys
 from build123d import Pos, Compound, Mesher, export_step, export_stl
@@ -61,10 +61,11 @@ def mesh(shape, tol=0.08, nd=2):
     return dict(v=[round(c, nd) for p in v for c in (p.X, p.Y, p.Z)], t=[i for tri in t for i in tri])
 
 
-def overlap(s, parts):
-    """Interference between the bracket and a board: the volume (mm3) shared with its solid parts, and for parts that are only
-    surfaces, the area (mm2) of surface inside the bracket. Surfaces lying on the bracket's faces (the board resting on the
-    standoffs) are not counted"""
+def overlap(s, parts, doubts, what):
+    """Interference between the bracket and a board: the volume (mm3) shared with its solid parts (common_volume, which adds to
+    doubts if OCC and the meshes disagree), and for parts that are only surfaces, the area (mm2) of surface inside the bracket.
+    Surfaces lying on the bracket's faces (the board resting on the standoffs) are not counted"""
+    from checks_overlap import common_volume
     vol = area = 0.0
     sbb = s.bounding_box()
     for g in parts:
@@ -72,16 +73,20 @@ def overlap(s, parts):
         if (gb.min.X > sbb.max.X or gb.max.X < sbb.min.X or gb.min.Y > sbb.max.Y or gb.max.Y < sbb.min.Y
                 or gb.min.Z > sbb.max.Z or gb.max.Z < sbb.min.Z):
             continue
-        r = s & g
         if g.solids():
-            vol += r.volume
+            vol += common_volume(s, g, doubts, what)
             continue
-        for f in r.faces():
+        for f in (s & g).faces():
             v, t = f.tessellate(0.05)
             p = (v[t[0][0]] + v[t[0][1]] + v[t[0][2]]) / 3          # a point on the face
             if BRepClass3d_SolidClassifier(s.wrapped, gp_Pnt(p.X, p.Y, p.Z), 1e-4).State() == TopAbs_IN:
                 area += f.area
     return vol, area
+
+
+def disagree(doubts):
+    """The overlaps that OCC and the meshes measured differently (checks_overlap), for the end of a model's line"""
+    return "" if not doubts else "  OCC and mesh disagree (check fails): " + "; ".join(doubts)
 
 
 def main():
@@ -103,7 +108,7 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     boards = [B for B in sb.BOARDS if B.name in a.board]
     if a.check:
-        import checks_print as cp, checks_time as ct
+        import checks_print as cp, checks_time as ct, checks_overlap as co
     boards_chk = {B.name: [("board", [B.ghost()])] for B in boards}   # what the board overlap is measured against (board frame)
     official = {}
     for p in a.board_step:
@@ -118,15 +123,16 @@ def main():
         bb = c.bounding_box()
         line = f"{n:40s} size {[round(x, 1) for x in (bb.size.X, bb.size.Y, bb.size.Z)]} mm  volume {round(c.volume / 1000, 1)} cm3"
         if a.check:
-            hits = []; bad = len(c.solids()) != 1
+            hits = []; doubts = []; bad = len(c.solids()) != 1
             for lab, gs in boards_chk[B.name]:
-                v, ar = overlap(B.cradle_placed(), gs)
+                v, ar = overlap(B.cradle_placed(), gs, doubts, lab)
                 hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
                 bad |= round(v, 2) > 0 or round(ar, 2) > 0
             unsup = cp.unsupported(c)[0]
-            bad |= unsup > 0
+            bad |= unsup > 0 or bool(doubts)
             line += (f"  {'  '.join(hits)}  unsupported {unsup} mm2  ~{ct.estimate(c)['min']} min"
-                     + ("" if len(c.solids()) == 1 else f"  {len(c.solids())} separate solids (must be 1)"))
+                     + ("" if len(c.solids()) == 1 else f"  {len(c.solids())} separate solids (must be 1)")
+                     + disagree(doubts))
             n_checked += 1
             if bad:
                 failed.append(n)
@@ -150,17 +156,18 @@ def main():
                  hole_d=B.hole_d, boss=(dict(B.standoffs, n=len(B.spacer_xy())) if spacer else None))
         line = f"{n:40s} size {m['size']} mm  volume {m['vol']} cm3"
         if a.check:
-            hit_frame = []; loose = []
+            hit_frame = []; loose = []; doubts = []
             for lab, fr in frames[series]:
-                hit_frame.append((s & fr).volume)
-                loose += [f"{d} on the {lab}" for d, v in RETAIN.items() if round((Pos(*v) * s & fr).volume, 2) <= 0]
+                hit_frame.append(co.common_volume(s, fr, doubts, lab))
+                loose += [f"{d} on the {lab}" for d, v in RETAIN.items()
+                          if round(co.common_volume(Pos(*v) * s, fr, doubts, f"moved {d} on the {lab}"), 2) <= 0]
             hits = []; bad = any(round(v, 2) > 0 for v in hit_frame) or len(s.solids()) != 1 or bool(loose)
             for lab, gs in boards_chk[B.name]:
-                v, ar = overlap(s, [M * g for g in gs])
+                v, ar = overlap(s, [M * g for g in gs], doubts, lab)
                 hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
                 bad |= round(v, 2) > 0 or round(ar, 2) > 0
             if orient.startswith("flat"):              # the plate lies on the frame: the screw heads have to sink into it
-                v, _ = overlap(s, [M * h for h in B.flat_heads()])
+                v, _ = overlap(s, [M * h for h in B.flat_heads()], doubts, "flat head screws")
                 hits.append(f"flat head screws overlap {v:.2f} mm3")
                 bad |= round(v, 2) > 0
             hit_board = "  ".join(hits)
@@ -172,9 +179,11 @@ def main():
                      + f"  {hit_board}  unsupported {unsup} mm2  ~{m['min']} min"
                      + ("" if len(s.solids()) == 1 else f"  {len(s.solids())} separate solids (must be 1)"))
             if series == "DIN":
-                spring = sb.din_spring_hit(s)
+                spring = sb.din_spring_hit(s, doubts)
                 bad |= round(spring, 2) > 0
                 line += f"  leaf spring travel {sb.din_spring_travel():.2f} mm overlap {spring:.2f} mm3"
+            bad |= bool(doubts)
+            line += disagree(doubts)
             n_checked += 1
             if bad:
                 failed.append(n)
