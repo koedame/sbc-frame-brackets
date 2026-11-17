@@ -3,7 +3,7 @@
 Notes for picking this project up and carrying on. The README says *what* is here; these notes say *why* it is the way it is and *what to do next*.
 Read these notes before you resume work.
 
-Last updated: 2026-11-17
+Last updated: 2026-11-18
 
 ---
 
@@ -598,7 +598,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 
 ### Reference volumes (as of 2026-11-17, cm3)
 
-Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version. The NanoKVM Lite's cradle, `NanoKVMLite_cradle`, is 1.664.
+Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version. The parts that are not brackets, such as the NanoKVM Lite's cradle, are in the last table by their whole model names.
 
 **Upright portrait (no suffix)**
 
@@ -731,3 +731,9 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 21.790 | 22.910 | 22.581 |
 | NanoKVMDesk | 16.540 | 17.660 | 17.332 |
 | NanoKVMLite | 6.219 | 7.339 | 7.011 |
+
+**Other parts**
+
+| Model | cm3 |
+|---|---|
+| NanoKVMLite_cradle | 1.664 |
