@@ -362,7 +362,7 @@ python build_all.py --board VIM1S ROCK5B --format step --check --board-step vim3
 ```
 
 Put quotes round the LattePanda file names, which contain spaces.
-Some models are partly surfaces rather than solids (the ROCK 5B+ board, for example). For those, `--check` also reports the area of surface inside the bracket, which should be 0.
+Some models are partly surfaces rather than solids (the ROCK 5B+ board, for example). For those, `--check` also reports the area of surface inside the bracket, which should be 0. Like the volumes, it is measured both by OpenCascade and from triangle meshes.
 Even when you pass official models, the viewer shows bare boards, so that no shape converted from the manufacturers' files ends up in the distributed `viewer.html`.
 
 </details>
@@ -411,7 +411,7 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 | `viewer.tpl.html` | Template for the viewer |
 | `checks_print.py` | Support check. Slices the part layer by layer and checks each layer stays within 45 degrees of the one below |
 | `checks_time.py` | Print time estimate |
-| `checks_overlap.py` | Overlap volume for the interference, retention and leaf spring checks, measured both by OpenCascade and from triangle meshes |
+| `checks_overlap.py` | Overlaps for the interference, retention and leaf spring checks, measured both by OpenCascade and from triangle meshes: the volume shared by two solids, and the area of surface inside the bracket for the parts of an official 3D model that are only surfaces |
 | [`skills/sbc-frame-brackets/`](skills/sbc-frame-brackets/SKILL.md) | Claude skill: hands over the download links for a supported board, or adds a new board and builds only the files needed |
 | `.github/workflows/build.yml` | Builds and checks every model on pull requests that change the generator, and attaches one zip per board, the viewer and the fit test coupons to the release when a version tag is pushed |
 | `vendor/` | three.js r128 (MIT license, `vendor/LICENSE-three.txt`) |

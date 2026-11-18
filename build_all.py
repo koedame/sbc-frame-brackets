@@ -19,9 +19,6 @@ Requirements: Python 3.11 or later, build123d (plus trimesh, shapely, networkx, 
 """
 import argparse, json, os, sys
 from build123d import Pos, Compound, Mesher, export_step, export_stl
-from OCP.BRepClass3d import BRepClass3d_SolidClassifier
-from OCP.TopAbs import TopAbs_IN
-from OCP.gp import gp_Pnt
 import sbc_brackets as sb
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -62,11 +59,11 @@ def mesh(shape, tol=0.08, nd=2):
 
 
 def overlap(s, parts, doubts, what):
-    """Interference between the bracket and a board: the volume (mm3) shared with its solid parts (common_volume, which adds to
-    doubts if OCC and the meshes disagree), and for parts that are only surfaces, the area (mm2) of surface inside the bracket.
-    Surfaces lying on the bracket's faces (the board resting on the standoffs) are not counted"""
-    from checks_overlap import common_volume
-    vol = area = 0.0
+    """Interference between the bracket and a board: the volume (mm3) shared with its solid parts (common_volume), and for parts
+    that are only surfaces, the area (mm2) of surface inside the bracket (surface_area). Both add to doubts if OCC and the meshes
+    disagree"""
+    from checks_overlap import common_volume, surface_area
+    vol, shells = 0.0, []
     sbb = s.bounding_box()
     for g in parts:
         gb = g.bounding_box()
@@ -75,13 +72,9 @@ def overlap(s, parts, doubts, what):
             continue
         if g.solids():
             vol += common_volume(s, g, doubts, what)
-            continue
-        for f in (s & g).faces():
-            v, t = f.tessellate(0.05)
-            p = (v[t[0][0]] + v[t[0][1]] + v[t[0][2]]) / 3          # a point on the face
-            if BRepClass3d_SolidClassifier(s.wrapped, gp_Pnt(p.X, p.Y, p.Z), 1e-4).State() == TopAbs_IN:
-                area += f.area
-    return vol, area
+        else:
+            shells.append(g)
+    return vol, (surface_area(s, shells, doubts, what) if shells else 0.0)
 
 
 def disagree(doubts):
