@@ -44,10 +44,10 @@ Last updated: 2026-11-18
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano`, `NanoKVMDesk` or `NanoKVMLite`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only. A board held in a cradle also has `<board>_cradle`, the same for every bracket of that board (history 20).
+- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano`, `NanoKVMDesk`, `NanoKVMLite` or `Drive25`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only. A board held in a cradle also has `<board>_cradle`, the same for every bracket of that board (history 20).
 - **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons, put each board's 3MF, STL and STEP files into `<board>.zip` (in a folder named after the board), and attach the zips, `viewer.html` and the coupons to that release. It stops if a file in `models/` would not be in the release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. The job uploads only the files the release is still missing and tries up to four times 10 minutes apart (GitHub's secondary rate limit stopped uploads of several hundred files part way before the zips), and a re-run of the job picks up where it stopped. Push the next `v0.x.0` tag on `main` after each merged change to the models, the README's download links or the viewer (section 2).
 - The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<board>.zip`, which follows the latest release. Keep board names and file names stable: renaming a board breaks its link, and people look for a file in the zip by its name.
-- A release holds at most 1000 files. With one zip per board there are 24 (17 zips, `viewer.html` and 6 coupons) for 408 models and one cradle in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
+- A release holds at most 1000 files. With one zip per board there are 25 (18 zips, `viewer.html` and 6 coupons) for 432 models and one cradle in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -214,6 +214,7 @@ The grip had to stay as it is, every model had to print without supports and cle
 | `OrinNano` | 7.2 mm / 18.9 MPa | 11.7 mm / 15.1 MPa | 4.9 mm / 15.2 MPa | 11.9 mm / 16.2 MPa | 10.4 mm / 13.2 MPa | 6.0 mm / 16.0 MPa |
 | `NanoKVMDesk` | 2.6 mm / 6.5 MPa | 2.8 mm / 6.8 MPa | 2.7 mm / 6.6 MPa | 2.9 mm / 6.8 MPa | 2.8 mm / 6.8 MPa | 2.6 mm / 6.5 MPa |
 | `NanoKVMLite` | 0.4 mm / 7.5 MPa | 9.0 mm / 32.0 MPa | 0.3 mm / 10.9 MPa | 6.4 mm / 32.1 MPa | 7.7 mm / 21.7 MPa | 0.3 mm / 7.0 MPa |
+| `Drive25` | 5.0 mm / 16.2 MPa | 16.8 mm / 28.9 MPa | 4.6 mm / 16.3 MPa | 17.3 mm / 33.3 MPa | 14.2 mm / 22.9 MPa | 4.1 mm / 13.3 MPa |
 
   Deflection at the far edge / peak bending stress. The strength to compare with is 51 MPa for upright and shelf and 35 MPa for flat. The DIN rail versions come out about the same (for example 3.5 mm for `PiB` flat portrait and 15.8 mm for `ROCK5B` flat landscape). Upright portrait, the original orientation, is in the table for comparison.
 
@@ -466,6 +467,23 @@ History 22 left one overlap measured by OpenCascade alone: the parts of an offic
 - **Results unchanged.** `--check` prints the same line as before for all 408 models and the cradle against the official 3D models (`--board-step`), and finds no disagreement. The simplified boards have no surfaces.
 - **Time and memory.** Making the thin solids of the 35,220 faces of the ROCK 5B+ model takes 122 s, once per run: they are kept for every model of the board, like the meshes. The two upright portrait models of `ROCK5B` (20x20) with that model take 282 s and 2.76 GB at the peak, against 320 s and 1.28 GB before. The memory is the thin solids. The time saved is in the cache of meshes: it looked for meshes to drop before adding each new one, going through every mesh it kept, which took minutes with the thousands of parts of an official model. It now looks whenever it has doubled in size since it last looked.
 
+### History 24: 2.5-inch SSDs and hard disks (2026-11-18)
+
+The maintainer asked for a bracket that holds a 2.5-inch SSD, or a hard disk of the same size, beside the boards. It is the first device here that is not a board, and it fits the board definitions as they are: `boards/Drive25.json`, with no code changes. It is named after the form factor, not a product.
+
+- **Sources.** The SNIA specifications SFF-8201 Rev 3.4 (2.5" Form Factor Drive Dimensions, 2018-01-19) for the outline, the mounting holes and the screw depth, and SFF-8223 Rev 2.7 (2.5" Drive Form Factor with Serial Connector) for where the SATA connector is (section 7). Only dimensions are taken from them; no part of either is in this repository. A4, A28 and so on are the labels in their tables, and the definition's `notes` give the label of every dimension.
+- **Outline.** 100.45 x 69.85 mm: the largest length (A6, a requirement since revision 2.0; 100.20 nominal) and the nominal width (A4, +/- 0.25 mm by A5). The plate is that outline, so it does not stick out beyond the drive (section 2). `l` runs from the connector end and `s` across the drive. The simplified drive is the largest one, 70.10 mm wide (A4 + A5), measured from the side at `s` = S that the holes are measured from.
+- **Holes.** The four M3 threaded holes in the underside (A32): 14.00 and 90.60 mm from the connector end (A50, A51), 4.07 mm from one side (A28) and 61.72 mm apart across the drive (A29), so 76.6 x 61.72 mm apart. 3 mm through holes in the version without standoffs (section 2), a tight fit for M3 as on the other M3 boards. The side holes are not used: they would need walls along the drive's sides, standing up from the plate.
+- **Screw depth.** SFF-8201 gives a maximum fastener penetration of 2.5 mm for the bottom holes (A41), which the drive shall accept, and nothing deeper. M3 x 8 screws go in from under the plate: 3 mm of plate, 3 mm of standoff, then 2.0 mm into the drive. The 0.5 mm left covers the length tolerance of an 8 mm screw (+/- 0.29 mm, js15) and more. In the flat orientations an M3 x 8 flat head screw, which is measured with its head, reaches the same 2.0 mm with the head flush in its countersink (history 21). With the version without standoffs the README asks for 3 mm spacers, so the same screws fit.
+- **7 mm drives.** SFF-8201 makes the bottom holes optional on drives 7 mm thick or less (the note under its figures 3-1 to 3-3), so a thin drive may have only the side holes. The README says to look under the drive first. A drive that has the bottom holes fits whatever its thickness, since only its height changes and that goes away from the plate. The definition has a 9.5 mm drive (9.70 mm with A2). A 15.2 mm box (A1 15.00) was also checked, once and not kept in the definition: it touches none of the 24 brackets.
+- **Standoffs.** 3 mm tall and 6 mm across, inside the 8 mm target areas round the bottom holes (A37) that the specification sets for the underside, so the drive touches the bracket only there. Their holes are 3.4 mm, for the screws to pass through, as on `N2Plus` and `M1` (`through`: the viewer shows a screw).
+- **Connector end.** `frame_edge` is `s=0` and the connector end is `l = 0`, the end that never faces the frame: at the bottom in upright portrait and flat portrait, forward in upright landscape and shelf portrait, and at the far end along the rail, away from the grip, in flat landscape and shelf landscape. The connector (SFF-8223, located from the bottom holes) is 42.73 mm wide (A2), centred 4.80 mm off the drive's centre line (A11), 4.00 mm tall (A5) round 3.50 mm above the underside (A7), and runs from 9.40 mm before the first holes (A8) to 0.30 mm past the end (A18). A box past the connector end for the plugs and their cables, 30 mm long, 56 mm across and 10 mm high, touches none of the 24 brackets (checked once, not kept in the definition). There is no `microsd_edge`.
+- **Plugging in.** A plug pushes along the plate, which is stiff that way, not across it like a cable plugged into a board. In upright landscape and shelf portrait it pushes the bracket towards the frame, and in the portrait orientations upwards, which the key or the roots of the DIN leaf springs take. In flat landscape and shelf landscape it pushes along the rail, where only friction holds a bracket, so the README says to plug in before the bracket goes on or to hold the bracket.
+- `--check`: no overlap with the frame or the drive and no unsupported area in all 24 models, every one held, and the DIN leaf springs bend freely in all 8 DIN models. There is no official 3D model: drives from many makers share the specification.
+- **Beam estimates** (table in history 8). 1 N (about 100 g) at the drive's centre bends a shelf at most 0.44 mm, at 1.0 MPa (shelf portrait). The 10 N push at the far edge used for the boards gives up to 17.3 mm and 33.3 MPa in flat landscape, 95% of the 35 MPa across the layers; without the windows it would be 8.5 mm and 10.1 MPa. The windows stay: a plug does not push that way, the drive's metal case, screwed on at four corners, stiffens the plate far more than a board does (ignored here, as for every board), and the plate without windows would be 7.5 to 9.5 cm3 more per bracket, over 40%.
+- **The drive's weight on DIN rail.** On a horizontal rail the weight tips the bracket about the lower lip, and the barb behind the upper lip holds it. The longest lever is in upright landscape and shelf portrait, where the drive's centre is 57.2 mm in front of the rail: 1 N there and the bracket's own weight (about 24 g) make about 66 N mm, about 2 N on the upper barb, 34 mm from the lower lip. The barb's catch face is square to that pull, so the pull does not lift it. It bends the leaf spring and the band in front of it (0.8 x 5.6 mm, 11.5 mm from the root to the barb) the stiff way, by about 5.5 MPa, 16% of the strength across the layers (a hand estimate; it grows with the weight). Pushing the bracket on bends the springs as before (history 4).
+- 432 models and one cradle, 25 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -529,6 +547,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 | NVIDIA Jetson Orin Nano Developer Kit / Super (`OrinNano`) | Official [carrier board specification SP-11324-001 v1.3](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_specification_sp.pdf) (PDF, figure 4-1), [3D model](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_3d_step_model.zip/) `P3766-P3768SKU4-P3767ENVELOPE.stp` (STEP, the developer kit on its base) and [carrier board reference design files A04](https://developer.nvidia.com/downloads/assets/embedded/secure/jetson/orin_nano/docs/jetson_orin_nano_devkit_carrier_board_reference_design_files_a04_20230320.zip/) (outline and drill layers), from the [Jetson Download Center](https://developer.nvidia.com/embedded/downloads); Super from the [user guide](https://docs.nvidia.com/jetson/orin-nano-devkit/user-guide/latest/index.html). 100 x 79 mm, 2.75 mm holes 86 x 58 mm apart, 4 mm from the `l` = 0 end and 4 mm from the `s` = S edge (history 16) | High. Interference checked against the official 3D model, with the base, its screws and the antennas left out. No SSD in the 2280 slot in the model |
 | Sipeed NanoKVM-Desk (NanoKVM Pro) (`NanoKVMDesk`) | Official 3D models of the Desk unit from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/KVM_Pro/1_3D): [`3D_KVM_PRO_DESK_plastic_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_plastic_20260508.step) (current units, plastic front shell) and [`3D_KVM_PRO_DESK_print_20260508.step`](https://cn.dl.sipeed.com/KVM/KVM_Pro/1_3D/3D_KVM_PRO_DESK_print_20260508.step) (earlier units, 3D-printed front shell); which bottom screws may be used for mounting, and their sizes, from the [NanoKVM-Desk quick start guide](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM_Pro/desk_start.html) (rack mounting). Case 67.1 x 65.4 x 27.0 mm, rear screw holes (M2) 13.57 mm from the back and 22.55 and 42.38 mm from the side away from the thumbwheel (history 17) | High. Interference checked against both official 3D models. The thickness of the rubber feet is not published |
 | Sipeed NanoKVM Lite (`NanoKVMLite`) | The official [3D model of the Lite](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_NanoKVM_Lite.zip) (`NanoKVM Lite.step`) from Sipeed's [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file), linked from the [NanoKVM wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html), and the LicheeRV Nano's dimension drawing `LicheeRV_Nano_70405_Dimension` (`LICHEE/LicheeRV_Nano` on the download site). Board 35.6 x 22.9 mm, held in a printed cradle (history 20) | High. Interference checked against the official 3D model of the Lite. The heatsink is not in it and its size is not published |
+| 2.5" SSD / HDD (`Drive25`) | SNIA [SFF-8201 Rev 3.4](https://members.snia.org/document/dl/25851) (2.5" Form Factor Drive Dimensions, 2018-01-19): outline, bottom mounting holes and the largest screw depth (A6, A4, A28, A29, A32, A41, A50, A51); [SFF-8223 Rev 2.7](https://members.snia.org/document/dl/25855) (2.5" Drive Form Factor with Serial Connector): where the SATA connector is. 100.45 x 69.85 mm, M3 holes 76.6 x 61.72 mm apart, screws at most 2.5 mm into the drive (history 24) | High for the outline, holes and connector (an industry specification every 2.5-inch drive is made to). Bottom holes are optional on drives 7 mm thick or less |
 | Sipeed NanoKVM Full (not added) | The official [3D model of its boards](https://cn.dl.sipeed.com/KVM/nanoKVM/HDK/04_3D_file/3D_RV_Nano_KVM_V1.rar), with no case, from the same [download site](https://dl.sipeed.com/shareURL/KVM/nanoKVM/HDK/04_3D_file) (history 17) | No 3D model or drawing of the case is published |
 | DIN rail TS35 | Vendor specifications (35 wide, 7.5 deep, 1 mm sheet). The 27 mm outer width of the hat's base is from two vendors' drawings (table below), as are the 1.5 mm side walls and 7.3 mm depth of the aluminium rails | High for width, depth, sheet thickness and the 27 mm base width. The tolerance of the base width has not been confirmed |
 
@@ -581,6 +600,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print `OrinNano` and try it with a Jetson Orin Nano Developer Kit off its base: M2.5 screws in the 2.2 mm pilot holes and in the 3 mm holes of the version without standoffs, an M.2 2280 SSD under the board (not in the official model), and where to put the Wi-Fi antennas (history 16)
 - [ ] Print `NanoKVMDesk` and try it with a NanoKVM-Desk, the current case and, if one is at hand, the earlier one: M2 x 12 screws through the 2.4 mm holes into the case's rear holes, whether the case sits flat on the 3 mm rests with the front rubber feet on (their thickness is not published), and 3 mm M2 standoffs with the version without standoffs (history 17)
 - [ ] Print `NanoKVMLite` and its cradle and try them with a NanoKVM Lite: how hard the board snaps in and comes out, whether the lips hold it upside down and in the flat orientations, whether Sipeed's heatsink fits under the board, and right-angle plugs at the end that faces the frame in upright landscape and shelf portrait (history 20)
+- [ ] Print `Drive25` and try it with a 2.5-inch drive: M3 x 8 screws through the 3.4 mm holes of the standoffs and the 3 mm holes of the version without standoffs, whether the drive sits flat on the four 6 mm standoffs, and plugging in a SATA cable in flat landscape and shelf landscape, where the plug pushes along the rail (history 24)
 - [ ] Sipeed NanoKVM Full: add it if Sipeed publishes a 3D model or drawing of its case (history 17)
 - [x] LattePanda Mu Mini Carrier (DFR1293): the module and cooler hang about 29 mm under the carrier. Tall standoffs or an opening for the cooler? → not made for now, the maintainer's decision (2026-11-17, history 12)
 - [ ] Print `N2Plus` and `M1` and try them on the heatsinks: the 5 mm tops of the standoffs between the side wall and the fin (0.4 mm to spare), the M3 x 16 screws through the 3.4 mm holes into the 3 mm base, and round spacers no more than 5 mm across with the version without standoffs (history 13)
@@ -610,7 +630,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 6. To publish the files, push the next version tag on `main` once the pull request is merged (one minor version up from the latest release, which `gh release view` shows: `git tag v0.<n>.0 && git push origin v0.<n>.0`); the workflow builds every model, packs them into one zip per board and attaches the zips to that release. Then check that every file the README links to is in the release.
 7. Update sections 8 and 9 and the "last updated" date of these notes.
 
-### Reference volumes (as of 2026-11-17, cm3)
+### Reference volumes (as of 2026-11-18, cm3)
 
 Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version. The parts that are not brackets, such as the NanoKVM Lite's cradle, are in the last table by their whole model names.
 
@@ -635,6 +655,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 21.137 | 21.687 | 21.780 | 22.330 | 21.229 | 21.780 |
 | NanoKVMDesk | 16.555 | 16.844 | 17.198 | 17.487 | 16.648 | 16.937 |
 | NanoKVMLite | 6.201 | 6.834 | 6.731 | 7.364 | 6.237 | 6.870 |
+| Drive25 | 17.628 | 17.839 | 18.271 | 18.482 | 17.721 | 17.932 |
 
 **Upright landscape (`_upright-landscape`)**
 
@@ -657,6 +678,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 20.212 | 20.762 | 20.855 | 21.405 | 20.304 | 20.855 |
 | NanoKVMDesk | 16.480 | 16.769 | 17.123 | 17.412 | 16.573 | 16.862 |
 | NanoKVMLite | 5.919 | 6.552 | 7.040 | 7.672 | 6.448 | 7.080 |
+| Drive25 | 16.280 | 16.491 | 16.923 | 17.134 | 16.373 | 16.584 |
 
 **Flat portrait (`_flat-portrait`)**
 
@@ -679,6 +701,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 22.600 | 22.763 | 22.315 |
 | NanoKVMDesk | 16.183 | 16.346 | 15.898 |
 | NanoKVMLite | 6.044 | 6.207 | 6.203 |
+| Drive25 | 19.079 | 19.242 | 18.794 |
 
 **Flat landscape (`_flat-landscape`)**
 
@@ -701,6 +724,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 20.734 | 20.897 | 20.970 |
 | NanoKVMDesk | 16.096 | 16.259 | 15.811 |
 | NanoKVMLite | 4.529 | 5.650 | 5.058 |
+| Drive25 | 16.950 | 17.113 | 16.665 |
 
 **Shelf portrait (`_shelf-portrait`)**
 
@@ -723,6 +747,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 21.849 | 22.970 | 22.641 |
 | NanoKVMDesk | 16.481 | 17.602 | 17.273 |
 | NanoKVMLite | 6.616 | 7.736 | 7.407 |
+| Drive25 | 17.998 | 19.118 | 18.790 |
 
 **Shelf landscape (`_shelf-landscape`)**
 
@@ -745,6 +770,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 | OrinNano | 21.790 | 22.910 | 22.581 |
 | NanoKVMDesk | 16.540 | 17.660 | 17.332 |
 | NanoKVMLite | 6.219 | 7.339 | 7.011 |
+| Drive25 | 18.502 | 19.622 | 19.294 |
 
 **Other parts**
 

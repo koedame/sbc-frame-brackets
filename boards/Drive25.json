@@ -1,0 +1,23 @@
+{
+  "title": "2.5\" SSD / HDD (SFF-8201)",
+  "notes": [
+    "A 2.5-inch drive, SSD or hard disk, screwed on by its four bottom mounting holes. Dimensions are from the SNIA specifications SFF-8201 Rev 3.4 (2.5\" Form Factor Drive Dimensions, 2018-01-19) and SFF-8223 Rev 2.7 (2.5\" Drive Form Factor with Serial Connector); A4, A28 and so on are the labels in their tables.",
+    "Outline 100.45 x 69.85 mm: the largest length (A6, 100.20 nominal) and the nominal width (A4, +/- 0.25 mm by A5). The plate is that outline.",
+    "l runs along the drive from the end with the SATA connector, s across it. The bottom holes are 14.00 and 90.60 mm from the connector end (A50, A51), 4.07 mm from the side at s = S (A28) and 61.72 mm apart across the drive (A29).",
+    "The bottom holes are M3 (A32) and the specification only promises that they take a screw 2.5 mm deep (A41, maximum fastener penetration). M3 x 8 screws = 3 mm plate + 3 mm standoff + 2.0 mm into the drive, 0.5 mm short of the limit, more than the length tolerance of an 8 mm screw (+/- 0.29 mm). Do not use longer ones. M3 screws pass through the 3 mm holes of the version without standoffs (tight).",
+    "Bottom holes are optional on drives 7 mm thick or less (the note under figures 3-1 to 3-3 of SFF-8201): a 7 mm drive with only side holes cannot be screwed to this bracket. The side holes are not used.",
+    "Standoffs 3 mm tall and 6 mm across, inside the 8 mm target areas round the bottom holes (A37), so the drive touches the bracket only there. Their holes are clearance holes (3.4 mm): the screws go through them into the drive's threads.",
+    "The connector end is l = 0, the end that never faces the frame: at the bottom in upright portrait and flat portrait, away from the frame in upright landscape and shelf portrait, and at the far end along the rail in flat landscape and shelf landscape. The plug and its cable go past the end of the plate, clear of the bracket, and pushing a plug in pushes along the plate.",
+    "Parts: the drive as one box, 9.70 mm tall (9.50 mm, + 0.20 mm by A2; a 7 mm drive is 7.20 mm at most) and up to 70.10 mm wide (A4 + A5), measured from the side at s = S that the holes are measured from. The SATA connector, from SFF-8223 with the connector located from the bottom mounting holes: 42.73 mm wide (A2), its centre 4.80 mm towards s = S from the drive's centre line (A11), 4.00 mm tall (A5) round 3.50 mm above the underside (A7), from 9.40 mm before the first holes (A8) to 0.30 mm past the end (A18)."
+  ],
+  "size": [100.45, 69.85],
+  "frame_edge": "s=0",
+  "holes": [[14.0, 4.06], [90.6, 4.06], [14.0, 65.78], [90.6, 65.78]],
+  "hole_d": 3.0,
+  "standoffs": {"h": 3.0, "d": 6.0, "pilot": 3.4, "screw": "M3 × 8", "through": "drive"},
+  "windows": {"rows": [[11.1, 31.9], [37.9, 58.7]], "per_row": 3},
+  "parts": [
+    {"name": "drive, 9.5 mm, largest outline", "box": [0, 100.45, -0.25, 69.85, 0, 9.7]},
+    {"name": "SATA connector", "box": [-0.3, 4.6, 18.36, 61.09, 1.5, 5.5]}
+  ]
+}

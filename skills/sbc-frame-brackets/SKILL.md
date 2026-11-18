@@ -1,6 +1,6 @@
 ---
 name: sbc-frame-brackets
-description: Get or make a screwless, support-free 3D-printed bracket that clips a single-board computer (Raspberry Pi, Radxa, Khadas, Hardkernel ODROID, Orange Pi, NVIDIA Jetson Orin Nano, BeagleBone, LattePanda, Sipeed NanoKVM-Desk and NanoKVM Lite, and others) onto 20x20 or 40x40 aluminium extrusion or a TS35 DIN rail, as 3MF, STL and STEP. Use when someone wants to mount a board on an extrusion frame or a DIN rail, asks for a bracket, holder or mount for a single-board computer, or wants a board added to sbc-frame-brackets.
+description: Get or make a screwless, support-free 3D-printed bracket that clips a single-board computer (Raspberry Pi, Radxa, Khadas, Hardkernel ODROID, Orange Pi, NVIDIA Jetson Orin Nano, BeagleBone, LattePanda, Sipeed NanoKVM-Desk and NanoKVM Lite, and others), or a 2.5-inch SSD or hard disk, onto 20x20 or 40x40 aluminium extrusion or a TS35 DIN rail, as 3MF, STL and STEP. Use when someone wants to mount a board or a 2.5-inch drive on an extrusion frame or a DIN rail, asks for a bracket, holder or mount for a single-board computer or a 2.5-inch SSD, or wants a board added to sbc-frame-brackets.
 license: MIT
 ---
 
