@@ -9,7 +9,7 @@
   <img alt="Brackets side by side on a 20x20 aluminium extrusion, for (left to right) LattePanda Mu Lite Carrier, LattePanda 3 Delta, Hardkernel ODROID-M1, Hardkernel ODROID-N2+, Hardkernel ODROID-M2, NVIDIA Jetson Orin Nano Developer Kit, Orange Pi 5 Plus, Radxa ROCK 5B, a 2.5-inch drive, Orange Pi 5, Orange Pi 5 Pro, Khadas VIM1S, BeagleBoard.org BeagleBone Black, Raspberry Pi 4, Sipeed NanoKVM-Desk, Raspberry Pi 3 A+, Raspberry Pi Zero and Sipeed NanoKVM Lite in its cradle" src="docs/images/hero-light.png">
 </picture>
 
-![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-3776AB?logo=python&logoColor=white)
+![Python 3.12–3.14](https://img.shields.io/badge/python-3.12%E2%80%933.14-3776AB?logo=python&logoColor=white)
 ![build123d 0.13](https://img.shields.io/badge/CAD-build123d%200.13-0f7b6c)
 ![432 models](https://img.shields.io/badge/models-432-0f7b6c)
 ![6 orientations](https://img.shields.io/badge/orientations-6-0f7b6c)
@@ -148,6 +148,8 @@ The links below always point to the latest release.
 | `NanoKVMDesk` | Sipeed NanoKVM-Desk (by its case) | [NanoKVMDesk.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/NanoKVMDesk.zip) |
 | `NanoKVMLite` | Sipeed NanoKVM Lite (in a printed cradle) | [NanoKVMLite.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/NanoKVMLite.zip) |
 | `Drive25` | 2.5" SSD or hard disk (SFF-8201, holes in its underside) | [Drive25.zip](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/Drive25.zip) |
+
+**Checking a download.** Each release lists the SHA-256 of every file in `SHA256SUMS`, and the files have a build provenance attestation made by the workflow that built them. Put the files you downloaded next to `SHA256SUMS` and run `sha256sum -c SHA256SUMS --ignore-missing` (on macOS: `shasum -a 256 -c SHA256SUMS --ignore-missing`). With the [GitHub CLI](https://cli.github.com/), `gh attestation verify PiB.zip --repo koedame/sbc-frame-brackets` checks that a file was built from this repository by its workflow. `v0.10.0` has `SHA256SUMS` only, no attestation.
 
 Each zip unpacks to a folder named after the bracket with 72 files: the 3MF, STL and STEP files of eight models on each of the three mounts (`2020`, `4040` and `DIN35`).
 `NanoKVMLite.zip` also has the cradle the board snaps into, `NanoKVMLite_cradle` (75 files).
@@ -309,7 +311,7 @@ Mounted upside down, top and bottom swap.
 
 You only need this to change a shape or add a board. For the existing models, download the files from the [latest release](https://github.com/koedame/sbc-frame-brackets/releases/latest).
 
-Requires Python 3.11–3.14.
+Requires Python 3.12–3.14 (not 3.14.1, which networkx does not support).
 
 ```sh
 git clone https://github.com/koedame/sbc-frame-brackets.git
@@ -326,7 +328,7 @@ Without any of `--board`, `--mount`, `--orient` and `--format`, it builds all 43
 > [!NOTE]
 > On minimal Linux installs (containers, servers), OpenCascade needs libGL. If you see `ImportError: libGL.so.1`, install it, for example with `sudo apt install libgl1` on Debian and Ubuntu.
 
-Tested on Linux ARM64 (Python 3.11, 3.13 and 3.14) and Linux x86-64 (Python 3.11 and 3.13).
+Tested on Linux x86-64 (Python 3.12, 3.13 and 3.14).
 
 | Option | What it does |
 |---|---|
@@ -453,12 +455,7 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 
 ## Contributing
 
-Issues and pull requests are welcome, for example a board that is missing or a dimension that is wrong.
-
-- Take dimensions from the manufacturer's published drawings or 3D models, and write the source in the `notes` of the board's definition and in section 7 of [`DESIGN_NOTES.md`](DESIGN_NOTES.md). Do not add the manufacturer's CAD files, or shapes converted from them, to the repository: most of them are not licensed for redistribution.
-- Run `python build_all.py --board <board> --check` for the brackets you changed. The pull request runs the same check for every model.
-- Your contribution is licensed under the same terms as the files it changes: MIT for the scripts and documentation, CC BY 4.0 for the models and images (see [License](#license)).
-- Report security problems privately as described in [`SECURITY.md`](SECURITY.md), not in an issue.
+Issues and pull requests are welcome, for example a board that is missing or a dimension that is wrong. What is accepted and how your contribution is licensed is in [`CONTRIBUTING.md`](CONTRIBUTING.md). Report security problems privately as described in [`SECURITY.md`](SECURITY.md), not in an issue.
 
 ## Disclaimer
 
