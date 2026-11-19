@@ -21,14 +21,14 @@ Ask only for what the user has not said:
 
   | `--orient` | File name suffix | Where the board sits |
   |---|---|---|
-  | `upright-portrait` | none | Stands out from the frame at right angles to the rail, long side vertical. Takes the least rail |
+  | `upright-portrait` | `_upright-portrait` | Stands out from the frame at right angles to the rail, long side vertical. Takes the least rail |
   | `upright-landscape` | `_upright-landscape` | Stands out at right angles to the rail, long side pointing away from the frame |
   | `flat-portrait` | `_flat-portrait` | Parallel to the front of the frame, beside the grip, long side vertical. Closest to the frame |
   | `flat-landscape` | `_flat-landscape` | Parallel to the front of the frame, beside the grip, long side along the rail |
   | `shelf-portrait` | `_shelf-portrait` | Lies on a shelf level with the top of the grip, long side pointing away from the frame |
   | `shelf-landscape` | `_shelf-landscape` | Lies on a shelf level with the top of the grip, long side along the rail |
 
-- **Standoffs**: only the two upright orientations come in a version with integrated standoffs (`_spacer`). Flat and shelf have no `_spacer` version, because standoffs growing sideways out of a standing plate cannot print without support; the user brings their own standoffs. In the flat orientations the back of the plate lies on the frame, so the holes are countersunk on the back and take flat head screws, put in from the back before the bracket goes on.
+- **Standoffs**: only the two upright orientations come in a version with integrated standoffs (`_standoffs`). Flat and shelf have no `_standoffs` version, because standoffs growing sideways out of a standing plate cannot print without support; the user brings their own standoffs. In the flat orientations the back of the plate lies on the frame, so the holes are countersunk on the back and take flat head screws, put in from the back before the bracket goes on.
 - **Format**: 3MF for a slicer (in print orientation on the build plate), STL, or STEP for CAD.
 
 ## 2. Is the board supported? Then hand over the download link
@@ -40,7 +40,7 @@ If the board is listed, **do not build anything**. Give the link to the zip of t
 https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<bracket>.zip
 ```
 
-The zip holds every mount, orientation and format of that bracket in a folder named after it, so also tell the user which file in it to use. The `NanoKVMLite` zip also has `NanoKVMLite_cradle`, the cradle the board snaps into, which has to be printed too (one fits every bracket of that board). File names are `<bracket>_<2020|4040|DIN35>[_<orientation suffix>][_spacer].<3mf|stl|step>`, for example `PiB_2020.3mf`, `PiB_2020_upright-landscape_spacer.3mf` or `PiB_DIN35_flat-portrait.step`.
+The zip holds every mount, orientation and format of that bracket, in folders by mount and then format, so also tell the user which file in it to use: `<bracket>/<2020|4040|DIN35>/<3mf|stl|step>/<bracket>_<2020|4040|DIN35>_<orientation>[_standoffs].<3mf|stl|step>`, for example `PiB/2020/3mf/PiB_2020_upright-portrait.3mf`, `PiB/2020/3mf/PiB_2020_upright-landscape_standoffs.3mf` or `PiB/DIN35/step/PiB_DIN35_flat-portrait.step`. A `README.txt` in the zip says the same. The `NanoKVMLite` zip also has `cradle/NanoKVMLite_cradle`, the cradle the board snaps into, which has to be printed too (one fits every bracket of that board). Releases up to v0.10.1 had all the files in one folder, upright portrait without an orientation in the name and `_spacer` for `_standoffs`.
 Point the user to "Printing" (PETG, no supports) and "Mounting" in the README, and to "Where the edges of the board end up" if they care which connector ends up where.
 
 A board that is not listed may still share its outline, mounting holes and microSD position with a listed bracket; many boards copy the Raspberry Pi B layout. Only say so after comparing with the official drawing (step 3), and say which drawing you compared.
