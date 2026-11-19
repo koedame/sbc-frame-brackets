@@ -623,7 +623,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 ## 10. Steps to resume work
 
 1. Read these notes and the README, and `boards/README.md` for the board definitions.
-2. Set up the environment as in the README's "Building from source" (Python 3.11–3.14, `pip install -r requirements.txt`).
+2. Set up the environment as in the README's "Building from source" (Python 3.12–3.14, `pip install -r requirements.txt`).
 3. Run `python build_all.py --check` (or only the boards, mounts and orientations you work on, with `--board`, `--mount` and `--orient`) and confirm that it exits with status 0, and that the volumes match the tables below.
 4. Of the open items in section 9, check the ones that need the maintainer's decision.
 5. After changes, open a pull request. The workflow checks every model again.
