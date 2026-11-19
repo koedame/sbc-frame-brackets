@@ -3,7 +3,7 @@
 Notes for picking this project up and carrying on. The README says *what* is here; these notes say *why* it is the way it is and *what to do next*.
 Read these notes before you resume work.
 
-Last updated: 2026-11-18
+Last updated: 2026-11-20
 
 ---
 
@@ -36,7 +36,7 @@ Last updated: 2026-11-18
 | In the flat orientations every board hole is countersunk on the back, 90 degrees, for flat head screws | Maintainer's decision (2026-11-17, history 21) |
 | `FIT` 0.05 mm and `HOOK` 1.0 mm are final, without test prints of the coupons | Maintainer's decision (2026-11-17): the maintainer uses the `PiB` bracket with a Raspberry Pi 4 without trouble (section 8) |
 | Width along the rail is 16 mm (the print height) | Reduced from 30 mm after the maintainer pointed it out |
-| Generated files are attached to GitHub releases and not committed, in one zip per board. The README links to `releases/latest/download/<board>.zip` | Maintainer's decisions (release files 2026-11-15, history 8; one zip per board 2026-11-16, history 17) |
+| Generated files are attached to GitHub releases and not committed, in one zip per board with folders by mount and format. The README links to `releases/latest/download/<board>.zip` | Maintainer's decisions (release files 2026-11-15, history 8; one zip per board 2026-11-16, history 17; folders and file names 2026-11-20, history 25) |
 | A release is published after every merged change to the models, the README's download links or the viewer, without asking each time | Maintainer's decision (2026-11-16; until then a release was published only when the maintainer asked for it) |
 | Scripts and documentation are MIT. Models (3MF, STL, STEP, the models in `viewer.html`) and images are CC BY 4.0. Credit is all that is asked; commercial use is allowed | Maintainer's decision (2026-11-16). CC BY rather than CC BY-NC because these are small mounting parts, and "non-commercial" is hard for users to judge |
 
@@ -44,10 +44,14 @@ Last updated: 2026-11-18
 
 - **One model per file.** Output 3MF, STL and STEP.
 - 3MF and STL files are in print orientation, centred on a 256 mm square build plate: upright brackets with the board plate down, flat and shelf brackets on their side with the board plate standing up. The grip is always on the build plate.
-- File names are `<board>_<2020|4040|DIN35>[_<orientation>][_spacer]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano`, `NanoKVMDesk`, `NanoKVMLite` or `Drive25`. `<orientation>` is `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`; upright portrait has no suffix, so the original file names did not change. `_spacer` (integrated standoffs) exists for the upright orientations only. A board held in a cradle also has `<board>_cradle`, the same for every bracket of that board (history 20).
-- **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons, put each board's 3MF, STL and STEP files into `<board>.zip` (in a folder named after the board), and attach the zips, `viewer.html` and the coupons to that release. It stops if a file in `models/` would not be in the release. It uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. The job uploads only the files the release is still missing and tries up to four times 10 minutes apart (GitHub's secondary rate limit stopped uploads of several hundred files part way before the zips), and a re-run of the job picks up where it stopped. Push the next `v0.x.0` tag on `main` after each merged change to the models, the README's download links or the viewer (section 2).
-- The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<board>.zip`, which follows the latest release. Keep board names and file names stable: renaming a board breaks its link, and people look for a file in the zip by its name.
-- A release holds at most 1000 files. With one zip per board there are 25 (18 zips, `viewer.html` and 6 coupons) for 432 models and one cradle in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
+- File names are `<board>_<2020|4040|DIN35>_<orientation>[_standoffs]`. `<board>` is the name of the board's definition in `boards/` (`PiB.json` -> `PiB`): `PiB`, `PiA`, `PiZero`, `VIM1S`, `ROCK5B`, `BBB`, `M2`, `LP3Delta`, `MuLite`, `N2Plus`, `M1`, `OPi5Pro`, `OPi5`, `OPi5Plus`, `OrinNano`, `NanoKVMDesk`, `NanoKVMLite` or `Drive25`. `<orientation>` is `upright-portrait`, `upright-landscape`, `flat-portrait`, `flat-landscape`, `shelf-portrait` or `shelf-landscape`, always written out. `_standoffs` (integrated standoffs) exists for the upright orientations only. A board held in a cradle also has `<board>_cradle`, the same for every bracket of that board (history 20). Until v0.10.1 upright portrait had no orientation in the name and `_standoffs` was `_spacer` (history 25).
+- **Generated files are not committed** (`/models/` is in `.gitignore`). Pushing a `v*` tag makes `.github/workflows/build.yml` build every model with `--check` and the coupons and run `pack_release.py`, and attach what it writes to that release. `pack_release.py` stops if a file in `models/` would not be in the release, or a model is missing. The workflow uploads to a draft first and publishes it once every file is up, so `releases/latest` never points at a release with only some of the files. The job uploads only the files the release is still missing and tries up to four times 10 minutes apart (GitHub's secondary rate limit stopped uploads of several hundred files part way before the zips), and a re-run of the job picks up where it stopped. Push the next `v0.x.0` tag on `main` after each merged change to the models, the README's download links or the viewer (section 2).
+- **What a release holds** (`pack_release.py`, history 25). The folders follow what a person downloading already knows, in the order they know it, so that only the real choice is left at the bottom:
+  - `<board>.zip`, one per board: the board picks the bracket. In it, `<board>/<2020|4040|DIN35>/<3mf|stl|step>/` (the mount they have, then the format their program reads) holds the eight models of that mount in that format (six orientations, the two upright ones also with standoffs). `<board>/cradle/` holds the cradle of a board that has one. `<board>/README.txt` says how to pick a file and `<board>/LICENSE.txt` is the CC BY 4.0 text, so a zip passed on by itself still says what it is and how it is licensed.
+  - `fit-test-coupons.zip`: the six coupons with a `README.txt` and `LICENSE.txt`. They are for trying a clearance, not for mounting a board, so they are not in the board zips.
+  - `viewer.html` and `SHA256SUMS`.
+- The README links to `https://github.com/koedame/sbc-frame-brackets/releases/latest/download/<board>.zip`, which follows the latest release. Keep board names, zip names and file names stable: renaming a board breaks its link, and people look for a file in the zip by its name.
+- A release holds at most 1000 files. With one zip per board there are 21 (18 zips, the coupons' zip, `viewer.html` and `SHA256SUMS`) for 432 models and one cradle in 3 formats, and each new board adds one. The workflow still stops before uploading if there are more than 1000.
 - `build_all.py` builds only what is asked for (`--board`, `--mount`, `--orient`, `--format`), so a change to one board does not need a full build.
 - `viewer.html` embeds three.js and opens without a network connection.
 - `viewer.html` includes the full three.js MIT license (`vendor/LICENSE-three.txt`) as an HTML comment, so the notice is not lost when `viewer.html` is copied on its own.
@@ -264,7 +268,7 @@ Left out in history 7 because the product page gives the hole spacing but not th
 - **`STEPS` centre.** The PCB spans x 0–84 in the file, so the centre given in `STEPS` is x = 41.5, the centre of the 85 mm outline with the holes 3.5 mm from the microSD end (0.5 mm from the PCB's own centre). The docstring of `official()` says so.
 - **microSD.** The socket is under the board in the middle of the microSD end (the card's centre is 27.7 mm from the GPIO edge), as on the Raspberry Pi, and the card sticks out 2.3 mm past that edge, inside the `PiB` microSD notch. The IR receiver, on top at the same end, sticks out 1.3 mm.
 - **Under the board.** The deepest parts are the Ethernet jack (2.85 mm below the board), the USB ports (2.14 mm) and the headers and microSD socket (1.80 mm), all within the 5 mm between the board and the plate. Many parts are surfaces rather than solids in the model; none of them reaches below the board.
-- `--check` with the official 3D model: no overlap with the frame or the board and no unsupported area in all 24 `PiB` models. With the model placed 3 mm lower, the same check finds 4.08 mm3 of overlap in `PiB_2020`, so the model is close enough to the plate to be seen. The bracket shape is unchanged (volumes as in the tables below).
+- `--check` with the official 3D model: no overlap with the frame or the board and no unsupported area in all 24 `PiB` models. With the model placed 3 mm lower, the same check finds 4.08 mm3 of overlap in `PiB_2020_upright-portrait`, so the model is close enough to the plate to be seen. The bracket shape is unchanged (volumes as in the tables below).
 - **Terms.** The site's terms let you use it "to evaluate, buy, and build with Libre Computer platforms" and say the site's text and images are Libre Computer's. Nothing allows redistributing the model, so, as for the other manufacturers, it is used only for the interference check (section 7).
 - Still 168 models, 511 release files.
 
@@ -448,14 +452,14 @@ Every overlap `--check` measures (bracket and frame or rail, bracket and board, 
   - Each face has its own copy of the nodes on its edges, and in these files two faces may place them up to 0.15 mm apart (the edges' tolerance), so the copies are joined by which edge and vertex they lie on, not by position.
   - BRepMesh leaves some faces unmeshed (620 cylinders of no height on the `PiZero` Zero 3W model) and some boundary nodes of small faces out of its triangles (a hole of 0.44 mm on the `NanoKVMDesk` case). The holes this leaves are closed with fans.
   - A mesh is used only if its volume matches the solid's within what the chords and the solid's own tolerance can move; otherwise the shape counts as not meshed.
-- **It catches a miss.** With OpenCascade's intersection made to return nothing and the simplified `PiB` board 1 mm lower (97.40 mm3 into the standoffs of `PiB_2020_spacer`), the previous check printed `board overlap 0.00 mm3`; now the model fails with `board: OCC 0.00 mm3, mesh 97.24 mm3`. With the same miss on the frame, the previous check reported the bracket `not held`; now it fails with both volumes for each direction.
+- **It catches a miss.** With OpenCascade's intersection made to return nothing and the simplified `PiB` board 1 mm lower (97.40 mm3 into the standoffs of `PiB_2020_upright-portrait_standoffs`), the previous check printed `board overlap 0.00 mm3`; now the model fails with `board: OCC 0.00 mm3, mesh 97.24 mm3`. With the same miss on the frame, the previous check reported the bracket `not held`; now it fails with both volumes for each direction.
 - **Results unchanged.** `--check` prints the same line as before for all 408 models and the cradle, and finds no disagreement, both with the simplified boards and with the official 3D models (`--board-step`).
 - **Time and memory.** On `PiB` (24 models, 180 overlaps) `common_volume()` takes 27 s of CPU time, OpenCascade's intersections included, out of 170 to 200 s in all. A mesh is kept only while its shape exists, so the memory does not grow with the number of models (`PiB` and `VIM1S` in one run: 583 MB at the peak, 682 MB when every mesh was kept). Meshing an official model once takes up to 140 s (`LP3Delta`, 1.4 million triangles), once per run: the mesh is kept for every model of the board.
 - **Not covered.** Parts of an official 3D model that are only surfaces (an area, not a volume) were still measured by OpenCascade alone, until history 23.
 
 ### History 23: surfaces measured twice too (2026-11-18)
 
-History 22 left one overlap measured by OpenCascade alone: the parts of an official 3D model that are only surfaces (in 11 of the 18 files, among them the PCB of the ROCK 5B+ model), whose interference is the area of surface strictly inside the bracket. That intersection can miss in the same way. With OpenCascade's intersection of a solid and a surface made to return nothing, and the surfaces of the ROCK 5B+ model 1 mm lower (96.89 mm2 into the standoffs of `ROCK5B_2020_spacer`), the previous check printed `+ 0.00 mm2 of surface` and passed.
+History 22 left one overlap measured by OpenCascade alone: the parts of an official 3D model that are only surfaces (in 11 of the 18 files, among them the PCB of the ROCK 5B+ model), whose interference is the area of surface strictly inside the bracket. That intersection can miss in the same way. With OpenCascade's intersection of a solid and a surface made to return nothing, and the surfaces of the ROCK 5B+ model 1 mm lower (96.89 mm2 into the standoffs of `ROCK5B_2020_upright-portrait_standoffs`), the previous check printed `+ 0.00 mm2 of surface` and passed.
 
 - **Measured twice.** `checks_overlap.surface_area()` takes OpenCascade's area and checks it against one from meshes. Each face of a surface is meshed and made into a thin solid: the mesh is moved a little to each side and closed round the face's edges (`_sheets()`). The thin solids are intersected with the bracket's mesh (manifold3d), and each of their two sides has a share of its area inside the bracket. Where a face passes through the bracket, the two shares are the same; where it lies on the bracket's surface (the board on the standoffs), one side is inside and the other is not. The smaller share of the face's area is counted, so a face lying on the bracket counts nothing, as it does for OpenCascade. Beyond the allowance below, the model fails with `OCC ... mm2, mesh ... mm2 of surface`.
 - **How thick.** 0.001 mm to each side of a flat face, whose mesh lies on it. A curved face's mesh, and the bracket's, lie up to the chord error (0.02 mm) off the true surfaces, so a curved face is thickened 0.021 mm to each side, and one side stays clear of a curved face of the bracket that it lies on. Where a face curves tighter than that, the thin solid's triangles turn over, and 0.001 mm is used.
@@ -463,7 +467,7 @@ History 22 left one overlap measured by OpenCascade alone: the parts of an offic
 - **Allowance.** The two areas may differ by how far the chords and the thickening move the line where the bracket's surface crosses a face: 0.02 mm for the bracket's chords and up to 0.021 mm for the side of the thin solid, so 0.041 mm times the length of that line, measured on the mesh, plus 0.001 mm2 and 0.01%. Only that line counts, not the faces' own edges: a miss over many small faces would fit within an allowance that counts their edges. A face that crosses the bracket's surface at a small angle can differ by more (a flat face tilted 1 degree into a block: 8.00 mm2 by OpenCascade, 7.77 mm2 by mesh). Such a face has area inside the bracket, so the model fails either way.
 - **Faces that cannot be measured.** BRepMesh does not mesh some faces of the vendors' files at all, with either algorithm and at chord errors down to 0.001 mm: 192 cylinders of 0.01 mm radius (0.73 mm2) and 8 small spheres of the ROCK 5B+ model. The meshes of some others fold over, also when meshed again on their own with Watson: they have triangles whose normals point against the face's, and these turn over even 0.001 mm off the face (140 small spheres and 3 cylinders of the ROCK 5B+ model, 0.07 mm2; 5 B-spline faces and 4 tori of the Orange Pi 5 Plus model, 1.0 mm2). Such a face fails the model with `faces of surface not checked by mesh` only if its box reaches into the bracket's mesh. These 352 faces are 1.8 mm2 of the more than 50,000 faces and 110,000 mm2 of surface in the 11 files; every face of the other 9 files is measured.
 - **In batches.** The thin solids of faces that touch would be merged by the intersection, and the area of each could not be told apart. They are intersected in batches whose boxes do not touch, found with an R-tree (`rtree`), and the instances of a part used more than once in a model go to different batches.
-- **It catches the miss.** With the same miss and the surfaces lowered, `ROCK5B_2020_spacer` now fails with `OCC 0.00 mm2, mesh 96.80 mm2 of surface`. `ROCK5B_2020` has no standoffs for the board to sink into, and passes either way.
+- **It catches the miss.** With the same miss and the surfaces lowered, `ROCK5B_2020_upright-portrait_standoffs` now fails with `OCC 0.00 mm2, mesh 96.80 mm2 of surface`. `ROCK5B_2020_upright-portrait` has no standoffs for the board to sink into, and passes either way.
 - **Results unchanged.** `--check` prints the same line as before for all 408 models and the cradle against the official 3D models (`--board-step`), and finds no disagreement. The simplified boards have no surfaces.
 - **Time and memory.** Making the thin solids of the 35,220 faces of the ROCK 5B+ model takes 122 s, once per run: they are kept for every model of the board, like the meshes. The two upright portrait models of `ROCK5B` (20x20) with that model take 282 s and 2.76 GB at the peak, against 320 s and 1.28 GB before. The memory is the thin solids. The time saved is in the cache of meshes: it looked for meshes to drop before adding each new one, going through every mesh it kept, which took minutes with the thousands of parts of an official model. It now looks whenever it has doubled in size since it last looked.
 
@@ -483,6 +487,20 @@ The maintainer asked for a bracket that holds a 2.5-inch SSD, or a hard disk of 
 - **Beam estimates** (table in history 8). 1 N (about 100 g) at the drive's centre bends a shelf at most 0.44 mm, at 1.0 MPa (shelf portrait). The 10 N push at the far edge used for the boards gives up to 17.3 mm and 33.3 MPa in flat landscape, 95% of the 35 MPa across the layers; without the windows it would be 8.5 mm and 10.1 MPa. The windows stay: a plug does not push that way, the drive's metal case, screwed on at four corners, stiffens the plate far more than a board does (ignored here, as for every board), and the plate without windows would be 7.5 to 9.5 cm3 more per bracket, over 40%.
 - **The drive's weight on DIN rail.** On a horizontal rail the weight tips the bracket about the lower lip, and the barb behind the upper lip holds it. The longest lever is in upright landscape and shelf portrait, where the drive's centre is 57.2 mm in front of the rail: 1 N there and the bracket's own weight (about 24 g) make about 66 N mm, about 2 N on the upper barb, 34 mm from the lower lip. The barb's catch face is square to that pull, so the pull does not lift it. It bends the leaf spring and the band in front of it (0.8 x 5.6 mm, 11.5 mm from the root to the barb) the stiff way, by about 5.5 MPa, 16% of the strength across the layers (a hand estimate; it grows with the weight). Pushing the bracket on bends the springs as before (history 4).
 - 432 models and one cradle, 25 release files.
+
+### History 25: folders in the zips, and file names that say everything (2026-11-20)
+
+The maintainer asked for the release files to be reorganised: which files go into which zip, and the folders in them. Until v0.10.1 a board's zip was one folder of 72 files whose only order was their names, and the names left things out.
+
+- **What was wrong.** The mount, the format, the orientation and the standoffs were all in the file name and nowhere else, so finding one file meant reading 72 names. Upright portrait was the one orientation with nothing in its name (`PiB_2020`), which reads as "the" bracket rather than one of six. The README calls them standoffs and the files said `_spacer`. A zip had no word on what it was or on its license. The six coupons lay loose among the zips.
+- **The unit stays one zip per board** (history 17), with the same names, so the README's links and links from elsewhere keep working. A zip per board and mount (18 x 3 = 54 zips) would save a folder but give the download table three links a row, for a few megabytes.
+- **Folders by mount, then format.** A person arrives knowing their board, what they mount it on and what their slicer or CAD program reads, and has to choose the orientation and the standoffs. So the folders are the known things in that order, and the eight files left in a folder are the choice. Mount comes before format because it is the physical fact; the three formats of one model are the same shape.
+- **Names.** `<board>_<mount>_<orientation>[_standoffs]`, with every orientation written out, and `_standoffs` as in the README. The mount stays in the name although the folder says it, so a file moved out of its folder still says what it is.
+- **`README.txt` and `LICENSE.txt` in every zip**, written by `pack_release.py` from the board's definition and the orientation list. CC BY 4.0 asks for the license to travel with the files.
+- **The coupons in one zip**, `fit-test-coupons.zip`.
+- **`pack_release.py`** replaces the shell in the workflow. `layout()` lists, from the same board definitions and `model_id()` that `build_all.py` uses, where every file goes; it stops if `models/` has a file that goes nowhere or lacks a model. The pull request check runs it too.
+- The shapes did not change: the STL files are byte for byte those of v0.10.1 under their new names.
+- 432 models and one cradle, 21 release files.
 
 ## 5. Current dimensions (main ones)
 
@@ -616,6 +634,7 @@ The material used for the prints and which direction was loose (front-back, up-d
 - [ ] Print a flat bracket and try flat head screws in its countersinks: whether the heads sit flush with the back, and the 45-degree roofs of the countersinks (history 21)
 - [ ] Integrated standoffs for the flat and shelf orientations? Printed sideways they either lose their seat or hit parts under the board (history 8). Separately printed standoffs would avoid both
 - [x] A release holds at most 1000 files (943 for 13 boards, 72 per board), and the next board would pass it → one zip per board, the maintainer's choice (history 17): 21 files for 14 boards
+- [x] The zips were one folder of 72 files → folders by mount and format, a README.txt and the license in each, the coupons in one zip, and file names with every orientation written out (history 25)
 - [x] Sipeed NanoKVM Lite: no mounting holes → a printed cradle that holds the LicheeRV Nano and the HDMI board by their edges, the maintainer's choice (history 20)
 - [x] Decide the license → MIT for the scripts and documentation, CC BY 4.0 for the models and images (section 2, README "License")
 - [ ] Devices to add later: mini PC, network router, power strip, display (the maintainer's idea is to make larger devices wider for strength)
@@ -627,16 +646,16 @@ The material used for the prints and which direction was loose (front-back, up-d
 3. Run `python build_all.py --check` (or only the boards, mounts and orientations you work on, with `--board`, `--mount` and `--orient`) and confirm that it exits with status 0, and that the volumes match the tables below.
 4. Of the open items in section 9, check the ones that need the maintainer's decision.
 5. After changes, open a pull request. The workflow checks every model again.
-6. To publish the files, push the next version tag on `main` once the pull request is merged (one minor version up from the latest release, which `gh release view` shows: `git tag v0.<n>.0 && git push origin v0.<n>.0`); the workflow builds every model, packs them into one zip per board and attaches the zips to that release. Then check that every file the README links to is in the release.
+6. To publish the files, push the next version tag on `main` once the pull request is merged (one minor version up from the latest release, which `gh release view` shows: `git tag v0.<n>.0 && git push origin v0.<n>.0`); the workflow builds every model, packs them with `pack_release.py` (section 3) and attaches the files to that release. Then check that every file the README links to is in the release.
 7. Update sections 8 and 9 and the "last updated" date of these notes.
 
 ### Reference volumes (as of 2026-11-18, cm3)
 
-Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` version. The parts that are not brackets, such as the NanoKVM Lite's cradle, are in the last table by their whole model names.
+Without the `_standoffs` suffix and with it. Flat and shelf have no `_standoffs` version. The parts that are not brackets, such as the NanoKVM Lite's cradle, are in the last table by their whole model names.
 
-**Upright portrait (no suffix)**
+**Upright portrait (`_upright-portrait`)**
 
-| Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer | DIN35 | DIN35 spacer |
+| Model | 20x20 | 20x20 standoffs | 40x40 | 40x40 standoffs | DIN35 | DIN35 standoffs |
 |---|---|---|---|---|---|---|
 | PiB | 12.656 | 13.189 | 13.299 | 13.832 | 12.749 | 13.282 |
 | PiA | 10.525 | 11.058 | 11.168 | 11.701 | 10.618 | 11.151 |
@@ -659,7 +678,7 @@ Without the `_spacer` suffix and with it. Flat and shelf have no `_spacer` versi
 
 **Upright landscape (`_upright-landscape`)**
 
-| Model | 20x20 | 20x20 spacer | 40x40 | 40x40 spacer | DIN35 | DIN35 spacer |
+| Model | 20x20 | 20x20 standoffs | 40x40 | 40x40 standoffs | DIN35 | DIN35 standoffs |
 |---|---|---|---|---|---|---|
 | PiB | 12.299 | 12.833 | 12.902 | 13.435 | 12.382 | 12.915 |
 | PiA | 11.891 | 12.425 | 12.494 | 13.027 | 11.974 | 12.507 |

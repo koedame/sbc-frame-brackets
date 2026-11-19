@@ -30,7 +30,7 @@ Ready-made files for every model are attached to the [latest release](https://gi
 - **Six orientations.** Stand the board out from the frame, lay it flat against the frame or put it on a shelf above the frame, each in portrait or landscape.
 - **Either way up.** The grip is identical at the top and bottom, so every bracket can be mounted upside down.
 - **No supports.** Every model prints with the grip on the plate. The 3MF and STL files are already oriented and centred on the plate.
-- **Ready to download.** 3MF, STL and STEP files for all 432 models and the NanoKVM Lite's cradle are attached to the latest release, in one zip per bracket. There is nothing to build unless you want to change a shape.
+- **Ready to download.** 3MF, STL and STEP files for all 432 models and the NanoKVM Lite's cradle are attached to the latest release, in one zip per bracket, sorted into folders by mount and format. There is nothing to build unless you want to change a shape.
 - **The whole Raspberry Pi range.** One bracket per board size: Raspberry Pi 5, 4, 3, 2 and 1 B+ share one, the A+ boards share one, and the Zero family shares one.
 - **Other popular boards.** The Radxa ROCK 3C, Pine64 ROCK64, Hardkernel ODROID-C4 and Libre Computer Le Potato fit the `PiB` bracket made for the Raspberry Pi Model B size, the Radxa ZERO 3W / 3E fit the `PiZero` bracket, the Khadas VIM3 / VIM4 fit the `VIM1S` bracket, and the Radxa ROCK 5B / 5B+ have their own, as do the NVIDIA Jetson Orin Nano Developer Kit, the Orange Pi 5, 5 Plus and 5 Pro, BeagleBoard.org BeagleBone Black, the Hardkernel ODROID-M2, the LattePanda 3 Delta and the LattePanda Mu on its Lite Carrier. The Hardkernel ODROID-N2+ and ODROID-M1 are held by the heatsink that comes under the board, and the Sipeed NanoKVM-Desk by its case, with two of the case's own screws.
 - **2.5-inch drives too.** `Drive25` holds a 2.5-inch SSD or hard disk by the mounting holes in its underside, from the SFF-8201 specification every such drive is made to.
@@ -108,7 +108,7 @@ The upright orientations also come with integrated standoffs; the flat and shelf
 
 | Orientation | File name suffix | Where the board sits | Rail length used (`PiB`) | Reaches out from the frame (`PiB`) |
 |---|---|---|---|---|
-| Upright, portrait | none (`PiB_2020`) | Stands out from the frame at right angles to the rail, long side vertical | 16 mm | 63 mm |
+| Upright, portrait | `_upright-portrait` | Stands out from the frame at right angles to the rail, long side vertical | 16 mm | 63 mm |
 | Upright, landscape | `_upright-landscape` | Stands out at right angles to the rail, long side pointing away from the frame | 16 mm | 105 mm |
 | Flat, portrait | `_flat-portrait` | Parallel to the front of the frame, beside the grip, long side vertical | 72 mm | 3 mm plate, then the standoffs and the board |
 | Flat, landscape | `_flat-landscape` | Parallel to the front of the frame, beside the grip, long side along the rail | 101 mm | 3 mm plate, then the standoffs and the board |
@@ -125,7 +125,7 @@ The flat orientations keep the board closest to the frame. The shelf orientation
   <img alt="A grid of brackets for Raspberry Pi B size, A+ size and Zero size boards, Khadas VIM1S, Radxa ROCK 5B, BeagleBoard.org BeagleBone Black, Hardkernel ODROID-M2, LattePanda 3 Delta, LattePanda Mu Lite Carrier, Hardkernel ODROID-N2+, Hardkernel ODROID-M1, Orange Pi 5 Pro, Orange Pi 5, Orange Pi 5 Plus, NVIDIA Jetson Orin Nano Developer Kit, Sipeed NanoKVM-Desk, Sipeed NanoKVM Lite and a 2.5-inch drive, each on a 20x20 extrusion, a 40x40 extrusion and a TS35 DIN rail" src="docs/images/gallery-light.png">
 </picture>
 
-Every model is attached to the [latest release](https://github.com/koedame/sbc-frame-brackets/releases/latest): one zip per bracket with the 3MF, STL and STEP files of all its models, 432 models in all and the NanoKVM Lite's cradle, and next to them the [offline viewer](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/viewer.html) and the fit test coupons.
+Every model is attached to the [latest release](https://github.com/koedame/sbc-frame-brackets/releases/latest): one zip per bracket with the 3MF, STL and STEP files of all its models, 432 models in all and the NanoKVM Lite's cradle, and next to them the [offline viewer](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/viewer.html) and the [fit test coupons](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/fit-test-coupons.zip).
 The links below always point to the latest release.
 
 | Bracket | Boards | Download |
@@ -151,22 +151,43 @@ The links below always point to the latest release.
 
 **Checking a download.** Each release lists the SHA-256 of every file in `SHA256SUMS`, and the files have a build provenance attestation made by the workflow that built them. Put the files you downloaded next to `SHA256SUMS` and run `sha256sum -c SHA256SUMS --ignore-missing` (on macOS: `shasum -a 256 -c SHA256SUMS --ignore-missing`). With the [GitHub CLI](https://cli.github.com/), `gh attestation verify PiB.zip --repo koedame/sbc-frame-brackets` checks that a file was built from this repository by its workflow (it does not vouch for the Python packages the build installed). `v0.10.0` has `SHA256SUMS` only, no attestation.
 
-Each zip unpacks to a folder named after the bracket with 72 files: the 3MF, STL and STEP files of eight models on each of the three mounts (`2020`, `4040` and `DIN35`).
-`NanoKVMLite.zip` also has the cradle the board snaps into, `NanoKVMLite_cradle` (75 files).
-File names are `<bracket>_<mount>[_<orientation>][_spacer]`; upright portrait has no orientation suffix. For `PiB` on a 20x20 extrusion:
+Each zip unpacks to a folder named after the bracket. Open the folder for your mount, then the folder for the format you want; what is left is the eight models to choose from:
+
+```text
+PiB/
+├── README.txt        what is in the zip and how to pick a file
+├── LICENSE.txt       CC BY 4.0
+├── 2020/             20x20 extrusion
+│   ├── 3mf/          for slicers, already oriented and centred on the plate
+│   │   ├── PiB_2020_flat-landscape.3mf
+│   │   ├── PiB_2020_flat-portrait.3mf
+│   │   ├── PiB_2020_shelf-landscape.3mf
+│   │   ├── PiB_2020_shelf-portrait.3mf
+│   │   ├── PiB_2020_upright-landscape.3mf
+│   │   ├── PiB_2020_upright-landscape_standoffs.3mf
+│   │   ├── PiB_2020_upright-portrait.3mf
+│   │   └── PiB_2020_upright-portrait_standoffs.3mf
+│   ├── stl/          the same eight, for slicers that do not read 3MF
+│   └── step/         the same eight, for CAD programs
+├── 4040/             40x40 extrusion, same folders
+└── DIN35/            TS35 DIN rail, same folders
+```
+
+`NanoKVMLite.zip` also has a `cradle/` folder with the cradle the board snaps into, `NanoKVMLite_cradle`, which fits all its brackets.
+File names are `<bracket>_<mount>_<orientation>[_standoffs]`. For `PiB` on a 20x20 extrusion:
 
 | Orientation | Without standoffs | With standoffs |
 |---|---|---|
-| Upright, portrait | `PiB_2020` | `PiB_2020_spacer` |
-| Upright, landscape | `PiB_2020_upright-landscape` | `PiB_2020_upright-landscape_spacer` |
+| Upright, portrait | `PiB_2020_upright-portrait` | `PiB_2020_upright-portrait_standoffs` |
+| Upright, landscape | `PiB_2020_upright-landscape` | `PiB_2020_upright-landscape_standoffs` |
 | Flat, portrait | `PiB_2020_flat-portrait` | none |
 | Flat, landscape | `PiB_2020_flat-landscape` | none |
 | Shelf, portrait | `PiB_2020_shelf-portrait` | none |
 | Shelf, landscape | `PiB_2020_shelf-landscape` | none |
 
 - **Without standoffs**: the board plate has 3 mm through holes (2.4 mm on `VIM1S` and `NanoKVMDesk`, for M2). Bring your own standoffs and screws. In the flat orientations the holes are countersunk on the back for flat head screws (see below).
-- **With standoffs** (`_spacer`, upright orientations only): standoffs are printed as part of the board plate. Screw through the board straight into them (on `N2Plus` and `M1`, from under the plate into the heatsink, on `NanoKVMDesk` into the case, on `Drive25` into the drive, and on `NanoKVMLite` through the cradle; see below).
-- **Fit test coupons**, attached on their own: `fit_test_2020_1.stl` to `_3.stl` and `fit_test_4040_1.stl` to `_3.stl` (clearance 0.00 / 0.05 / 0.10 mm, told apart by the number of notches).
+- **With standoffs** (`_standoffs`, upright orientations only): standoffs are printed as part of the board plate. Screw through the board straight into them (on `N2Plus` and `M1`, from under the plate into the heatsink, on `NanoKVMDesk` into the case, on `Drive25` into the drive, and on `NanoKVMLite` through the cradle; see below).
+- **Fit test coupons**, in [`fit-test-coupons.zip`](https://github.com/koedame/sbc-frame-brackets/releases/latest/download/fit-test-coupons.zip): `fit_test_2020_1.stl` to `_3.stl` and `fit_test_4040_1.stl` to `_3.stl` (clearance 0.00 / 0.05 / 0.10 mm, told apart by the number of notches).
 
 | Bracket | Standoff height | Outer diameter | Pilot hole | Screws |
 |---|---|---|---|---|
@@ -419,12 +440,13 @@ With Claude Code, the [`sbc-frame-brackets` skill](skills/sbc-frame-brackets/SKI
 | `boards/` | One definition per board (JSON): outline, mounting holes, standoffs, openings and the simplified board. Fields: [`boards/README.md`](boards/README.md) |
 | `sbc_brackets.py` | Shapes every bracket shares (grip, plates, orientations), built from the definitions in `boards/` |
 | `build_all.py` | Writes the 3MF, STL, STEP and `viewer.html` files |
+| `pack_release.py` | Arranges those files into what a release holds: one zip per bracket with folders by mount and format, and the coupons in one zip |
 | `viewer.tpl.html` | Template for the viewer |
 | `checks_print.py` | Support check. Slices the part layer by layer and checks each layer stays within 45 degrees of the one below |
 | `checks_time.py` | Print time estimate |
 | `checks_overlap.py` | Overlaps for the interference, retention and leaf spring checks, measured both by OpenCascade and from triangle meshes: the volume shared by two solids, and the area of surface inside the bracket for the parts of an official 3D model that are only surfaces |
 | [`skills/sbc-frame-brackets/`](skills/sbc-frame-brackets/SKILL.md) | Claude skill: hands over the download links for a supported board, or adds a new board and builds only the files needed |
-| `.github/workflows/build.yml` | Builds and checks every model on pull requests that change the generator, and attaches one zip per board, the viewer and the fit test coupons to the release when a version tag is pushed |
+| `.github/workflows/build.yml` | Builds and checks every model on pull requests that change the generator, and attaches one zip per bracket, the fit test coupons and the viewer to the release when a version tag is pushed |
 | `vendor/` | three.js r128 (MIT license, `vendor/LICENSE-three.txt`) |
 | `models/` | Default output directory. Not committed: the generated files are attached to the releases instead |
 | `docs/images/` | Images for this README |

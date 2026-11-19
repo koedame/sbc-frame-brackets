@@ -15,7 +15,9 @@ Usage:
   python build_all.py --coupons                # also write fit test coupons (clearance 0.00 / 0.05 / 0.10 mm)
   python build_all.py                          # everything (every model in 3MF, STL and STEP, and viewer.html) to models/
 
-Requirements: Python 3.11 or later, build123d (plus trimesh, shapely, networkx, rtree and manifold3d for --check)
+pack_release.py arranges what a full build with --coupons wrote into the files of a release (one zip per bracket).
+
+Requirements: Python 3.12 to 3.14, build123d (plus trimesh, shapely, networkx, rtree and manifold3d for --check)
 """
 import argparse, json, os, sys
 from build123d import Pos, Compound, Mesher, export_step, export_stl
@@ -29,9 +31,9 @@ RETAIN = {"forward": (0, RETAIN_D, 0), "up": (RETAIN_D, 0, 0), "down": (-RETAIN_
 
 
 def model_id(B, series, spacer, orient=sb.UPRIGHT):
-    """PiB_2020, PiB_2020_spacer, PiB_2020_upright-landscape_spacer, PiB_2020_flat-portrait, ... (upright portrait has no suffix)"""
-    return (f"{B.name}_{sb.mount_tag(series)}" + ("" if orient == sb.UPRIGHT else f"_{orient}")
-            + ("_spacer" if spacer else ""))
+    """PiB_2020_upright-portrait, PiB_2020_upright-portrait_standoffs, PiB_2020_flat-portrait, ...: every part of the name is
+    always there, so the files of one mount sort and read as a list of orientations"""
+    return f"{B.name}_{sb.mount_tag(series)}_{orient}" + ("_standoffs" if spacer else "")
 
 
 def on_plate(shape):
@@ -186,7 +188,7 @@ def main():
         models.append(m)
     if a.coupons:
         for series in [x for x in a.mount if x != "DIN"]:
-            for i, fit in enumerate((0.0, 0.05, 0.10)):
+            for i, fit in enumerate(sb.COUPON_FITS):
                 export_stl(sb.coupon(series, fit, i + 1), os.path.join(a.out, f"fit_test_{series}{series}_{i + 1}.stl"))
         print("Coupons: fit_test_*_1 = clearance 0.00 mm, _2 = 0.05 mm (same as the brackets), _3 = 0.10 mm. Told apart by the number of notches")
     if viewer:

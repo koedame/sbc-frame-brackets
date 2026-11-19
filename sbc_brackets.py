@@ -208,6 +208,9 @@ def din_spring_hit(s, doubts):
     return hit
 
 
+COUPON_FITS = (0.0, 0.05, 0.10)   # clearances of the fit test coupons; the i-th has i + 1 notches
+
+
 def coupon(series, fit, mark):
     """Fit test coupon (6 mm tall). Told apart by the number of notches (mark)"""
     hw = series / 2; xe = hw + fit + ARM_T + TAB + 1.0; h = 6.0

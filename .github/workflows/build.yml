@@ -1,6 +1,6 @@
 # Builds and checks every model. On a pull request that touches the generator it only checks;
-# on a version tag (v*) it also publishes a release with one zip per board (all its 3MF, STL and STEP files),
-# the viewer and the fit test coupons attached, which the README links to through releases/latest/download/<file name>.
+# on a version tag (v*) it also publishes a release with one zip per bracket (all its 3MF, STL and STEP files),
+# the fit test coupons in one zip and the viewer attached (pack_release.py), which the README links to through releases/latest/download/<file name>.
 # Every file of a release is listed in SHA256SUMS and has a build provenance attestation (gh attestation verify).
 name: Build
 
@@ -36,6 +36,7 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq libgl1
       - run: pip install -r requirements.txt
       - run: python build_all.py --check --coupons --out models
+      - run: python pack_release.py --models models --out dist
 
   # Builds with a read-only token. The job that can publish and attest never runs the build or pip.
   pack:
@@ -56,21 +57,12 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python build_all.py --check --coupons --out models
       - name: Pack the release files
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
-          # One zip per board, with its files in a folder named after it. A release holds at most 1000 files,
-          # and 24 models in 3 formats per board would reach that at 14 boards.
-          mkdir pack dist
-          for f in boards/*.json; do
-            b=$(basename "$f" .json)
-            mkdir "pack/$b"
-            cp "models/${b}_"* "pack/$b/"
-            python -c 'import shutil, sys; shutil.make_archive(sys.argv[1], "zip", "pack", sys.argv[2])' "dist/$b" "$b"
-          done
-          cp models/viewer.html models/fit_test_*.stl dist/
-          # Every file in models/ must be in the release, once.
-          total=$(ls models | wc -l)
-          packed=$(( $(find pack -type f | wc -l) + $(ls dist | grep -vc '[.]zip$') ))
-          if [ "$packed" -ne "$total" ]; then echo "::error::$packed of the $total files in models/ are in the release"; exit 1; fi
+          # One zip per bracket, the coupons in one zip and viewer.html (the layout is in pack_release.py, which stops if
+          # a file in models/ would be left out). A release holds at most 1000 files.
+          python pack_release.py --models models --out dist --version "$TAG"
           (cd dist && find . -type f ! -name SHA256SUMS -printf '%P\n' | sort | xargs sha256sum > SHA256SUMS)
           n=$(ls dist | wc -l)
           if [ "$n" -gt 1000 ]; then echo "::error::$n files, but a release holds at most 1000"; exit 1; fi
