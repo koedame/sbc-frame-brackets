@@ -73,7 +73,7 @@ python3 -m venv .venv
 pip install -r requirements.txt
 ```
 
-Python 3.11 to 3.14. On a minimal Linux install, `ImportError: libGL.so.1` means libGL is missing (`sudo apt install libgl1` on Debian and Ubuntu).
+Python 3.12 to 3.14. On a minimal Linux install, `ImportError: libGL.so.1` means libGL is missing (`sudo apt install libgl1` on Debian and Ubuntu).
 
 ## 5. Write the definition
 
