@@ -502,6 +502,17 @@ The maintainer asked for the release files to be reorganised: which files go int
 - The shapes did not change: the STL files are byte for byte those of v0.10.1 under their new names.
 - 432 models and one cradle, 21 release files.
 
+### History 26: the cradle's second lip back in the middle of its wall (2026-11-20)
+
+From history 20 to v0.11.0, the lip on the cradle's s1 wall (the one away from `frame_edge`) ran from l = 16.55 to 22.55 mm instead of 22.55 to 28.55 mm: 6 mm towards the Ethernet end, and no longer opposite the lip on the s0 wall.
+
+- **Why.** `cradle()` extruded the lip's profile without `dir=`. build123d then extrudes along the face's normal, and a `Polygon`'s normal follows the way its points go round. The profile is mirrored by `sg` for the two walls, so on the s1 wall the points go round the other way, the normal points to -l, and the lip grew from `lip.l[0]` backwards.
+- **What it did.** The lip still reached 0.6 mm over the plastic of the 10-pin header (which runs from l = 7.80 to 35.75), so the board was held. But the wall bends between the end stops with the lip 11.95 mm from one and 23.95 mm from the other, which is stiffer than at the middle: by the same beam as in history 20, 3.0 N per wall with free ends and 13.7 N with fixed ends (2.4 and 9.5 N in the middle), and up to 0.38 to 1.13% strain (0.34 to 0.67%), still under PETG's 1.8%. The cradle was not symmetric either, as history 20 says it is. The volume (1.664 cm3) and the outline did not change, so the volume table and `--check` did not show it.
+- **Fixed** with `dir=(1, 0, 0)` on the lip. Every other `extrude()` now names its direction too (`frame()` and `rrect()`, whose faces already pointed the right way), and `--check` stops first if one does not (section 6).
+- **Only the cradle changed.** Built before and after the fix, the STEP files of all 432 models are identical apart from the time in the header, and the coupons' STL files byte for byte. Only `NanoKVMLite_cradle` differs, by the lip that moved (3.33 mm3 outside the wall, out of l 16.55 to 22.55 and into l 22.55 to 28.55). Its volume and bounding box are the same, its centre of mass is now at the middle of the board (l = 25.55), and turned 180 degrees about the vertical it is the same shape (it differed by 6.66 mm3). The simplified frame is the same shape (no difference in volume either way).
+- `--check` passes for the cradle and all 24 `NanoKVMLite` models against the official 3D model (`--board-step`), as in history 20.
+- 432 models and one cradle, 21 release files.
+
 ## 5. Current dimensions (main ones)
 
 See the constants in `sbc_brackets.py` for the details, and each board's definition in `boards/` for its own dimensions.
@@ -534,6 +545,7 @@ See the constants in `sbc_brackets.py` for the details, and each board's definit
 - **Print time**: `checks_time.py` is a home-made estimate, not a slicer measurement. Use it only to compare shapes. No slicer measurements have been taken yet.
 - **One solid**: `--check` also fails a model that comes out as more than one solid (a loose piece would print as a separate part).
 - **Flat head screws (flat orientations)**: `--check` puts the head of an ISO 7046 flat head screw flush with the back of the plate in every hole and measures its overlap with the bracket. It must be 0; otherwise the head would stand out behind the plate, which lies on the frame (history 21).
+- **Extrusion direction**: before it builds anything, `--check` stops if an `extrude()` in the scripts has neither `dir=` nor `both=True`. Without them build123d extrudes along the face's normal, which for a `Polygon` follows the way its points go round, so a profile mirrored by a sign extrudes backwards (history 26).
 - **Exit status**: `build_all.py --check` exits with status 1 if any model fails any of the checks above. The workflow runs `--check` on every pull request that changes the generator, and again before attaching files to a release.
 - **Regression check**: after changing the script, confirm the models you did not mean to change still have the same volume (the tables at the end of these notes).
 

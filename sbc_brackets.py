@@ -51,7 +51,7 @@ def frame(series, L=120.0):
     for cx in SLOT_X[series]:
         for cy in SLOT_X[series]:
             sk -= Pos(cx, cy) * Circle(2.1)
-    return Pos(0, -S / 2, -L / 2) * extrude(sk, L)
+    return Pos(0, -S / 2, -L / 2) * extrude(sk, L, dir=(0, 0, 1))
 
 
 # ---- DIN rail TS35 x 7.5 (EN 60715) ----
@@ -222,7 +222,7 @@ def coupon(series, fit, mark):
 
 def rrect(x0, x1, y0, y1, rad=WIN_R):
     """Rounded-rectangle cutter through the front plate"""
-    return Pos((x0 + x1) / 2, (y0 + y1) / 2, Z0 - 1) * extrude(RectangleRounded(x1 - x0, y1 - y0, rad), T + 2)
+    return Pos((x0 + x1) / 2, (y0 + y1) / 2, Z0 - 1) * extrude(RectangleRounded(x1 - x0, y1 - y0, rad), T + 2, dir=(0, 0, 1))
 
 
 def _l_body(series, H, depth, Hb=None):
@@ -351,7 +351,9 @@ def cradle(c, L, S, holes, hole_d):
               + box(l1 + CRADLE_FIT - CRADLE_LEDGE, l1 + CRADLE_FIT, *ld, 0, h0))
         wall = e - sg * CRADLE_FIT
         profile = Polygon((wall - sg * 0.01, z_lip), (wall + sg * reach, z_lip + reach), (wall - sg * 0.01, top), align=None)
-        s += extrude(Plane.YZ.offset(lip["l"][0]) * profile, lip["l"][1] - lip["l"][0])   # (s, h) profile, along l
+        # (s, h) profile, along +l. dir is needed: without it the extrusion follows the face's normal, which flips with sg
+        # (the points go round the other way)
+        s += extrude(Plane.YZ.offset(lip["l"][0]) * profile, lip["l"][1] - lip["l"][0], dir=(1, 0, 0))
     for l, w in holes:
         s -= Pos(l, w, CRADLE_PLATE / 2) * Cylinder(hole_d / 2, CRADLE_PLATE + 2)
     return s

@@ -7,7 +7,8 @@ Usage:
                                                # only what you need: here the PiB bracket (Raspberry Pi B size) for 20x20, flat portrait, as 3MF
   python build_all.py --board PiB --check      # also check interference with the frame and board, unsupported areas, print time,
                                                # that the bracket is held (moved 0.3 mm forward, up or down, it hits the frame) and that flat head
-                                               # screws stay below the back of the flat plates; for DIN rail
+                                               # screws stay below the back of the flat plates, and that every extrude() in the
+                                               # scripts names its direction; for DIN rail
                                                # against steel and aluminium rails, and whether the leaf springs can bend far enough to push on
                                                # (exit 1 if a check fails)
   python build_all.py --check --board-step vim1s-pcba-3d-v11.stp --board-step ROCK5B_v1.42_3D.step
@@ -19,7 +20,7 @@ pack_release.py arranges what a full build with --coupons wrote into the files o
 
 Requirements: Python 3.12 to 3.14, build123d (plus trimesh, shapely, networkx, rtree and manifold3d for --check)
 """
-import argparse, json, os, sys
+import argparse, ast, glob, json, os, sys
 from build123d import Pos, Compound, Mesher, export_step, export_stl
 import sbc_brackets as sb
 
@@ -79,6 +80,20 @@ def overlap(s, parts, doubts, what):
     return vol, (surface_area(s, shells, doubts, what) if shells else 0.0)
 
 
+def undirected_extrudes():
+    """The extrude() calls in the scripts that neither name the direction (dir=) nor go both ways (both=True). Without dir,
+    build123d extrudes along the face's normal, and a Polygon's normal depends on which way its points go round: a profile
+    mirrored by a sign turns the other way and extrudes backwards"""
+    found = []
+    for f in sorted(glob.glob(os.path.join(HERE, "*.py"))):
+        for n in ast.walk(ast.parse(open(f, encoding="utf-8").read())):
+            if (isinstance(n, ast.Call) and getattr(n.func, "id", getattr(n.func, "attr", None)) == "extrude"
+                    and not any(k.arg == "dir" or (k.arg == "both" and getattr(k.value, "value", None) is True)
+                                for k in n.keywords)):
+                found.append(f"{os.path.basename(f)}:{n.lineno}")
+    return found
+
+
 def disagree(doubts):
     """The overlaps that OCC and the meshes measured differently (checks_overlap), for the end of a model's line"""
     return "" if not doubts else "  OCC and mesh disagree (check fails): " + "; ".join(doubts)
@@ -103,6 +118,8 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     boards = [B for B in sb.BOARDS if B.name in a.board]
     if a.check:
+        if bad := undirected_extrudes():
+            sys.exit("extrude() without dir= or both=True, so its direction follows the face's normal: " + ", ".join(bad))
         import checks_print as cp, checks_time as ct, checks_overlap as co
     boards_chk = {B.name: [("board", [B.ghost()])] for B in boards}   # what the board overlap is measured against (board frame)
     official = {}
