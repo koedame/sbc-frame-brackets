@@ -13,7 +13,7 @@ Structure
 """
 import glob, json, math, os, sys
 from build123d import (Polygon, Circle, Rectangle, Box, Cylinder, Cone, Pos, Rot, Plane, RectangleRounded, Align,
-                       extrude, fillet, chamfer, Axis, import_step, Solid, Compound)
+                       extrude, fillet, chamfer, Axis, import_step, Shape, Solid, Compound)
 from OCP.StlAPI import StlAPI_Reader
 from OCP.TopoDS import TopoDS, TopoDS_Shape
 from OCP.BRepBuilderAPI import BRepBuilderAPI_Sewing, BRepBuilderAPI_MakeSolid
@@ -29,6 +29,12 @@ def prism(pts, L):
 
 def mirror_x(pts):
     return [(-x, y) for x, y in reversed(pts)]
+
+
+def moved(loc, shape):
+    """loc * shape without the copy. build123d's Location * Shape deep-copies the shape, then returns shape.wrapped.Moved() in
+    place of the copy's OCC shape, so the copy (slow for an official 3D model of hundreds of solids) is thrown away"""
+    return Shape.cast(shape.wrapped.Moved(loc.wrapped))
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -314,7 +320,7 @@ def official(step_path):
                 if missing:
                     raise SystemExit(f"{name}: no top-level part named {', '.join(sorted(missing))} to exclude")
                 part = Compound(children=[c for c in part.children if c.label not in m["exclude"]])
-            model = loc * part
+            model = moved(loc, part)
             solids = model.solids()
             in_solid = {sh for so in solids for sh in so.shells()}
             return B, [c for c in solids if c.volume > 0.5] + [sh for sh in model.shells() if sh not in in_solid]
