@@ -175,7 +175,7 @@ def main():
                           if round(co.common_volume(Pos(*v) * s, fr, doubts, f"moved {d} on the {lab}"), 2) <= 0]
             hits = []; bad = any(round(v, 2) > 0 for v in hit_frame) or len(s.solids()) != 1 or bool(loose)
             for lab, gs in boards_chk[B.name]:
-                v, ar = overlap(s, [M * g for g in gs], doubts, lab)
+                v, ar = overlap(s, [sb.moved(M, g) for g in gs], doubts, lab)
                 hits.append(f"{lab} overlap {v:.2f} mm3" + ("" if all(g.solids() for g in gs) else f" + {ar:.2f} mm2 of surface"))
                 bad |= round(v, 2) > 0 or round(ar, 2) > 0
             if orient.startswith("flat"):              # the plate lies on the frame: the screw heads have to sink into it
